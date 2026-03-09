@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Número Master - Aprende Jugando</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            margin-top: 5px;
+        }
+
+        .question-area {
+            margin: 30px 0;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .question {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .instruction {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            padding: 20px;
+            font-size: 1.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .option-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .option-btn:active {
+            transform: translateY(0);
+        }
+
+        .input-answer {
+            padding: 15px;
+            font-size: 1.5em;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            text-align: center;
+            width: 200px;
+            margin: 20px auto;
+        }
+
+        .submit-btn {
+            padding: 15px 40px;
+            font-size: 1.3em;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .speaker-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50%;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            margin: 10px;
+        }
+
+        .speaker-btn:hover {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .speaker-btn:active {
+            transform: scale(0.9);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+            animation: slideIn 0.5s;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .level-up {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .level-up.show {
+            animation: popup 0.6s forwards;
+        }
+
+        @keyframes popup {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .visual-numbers {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .number-circle {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎮 Número Master</h1>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">Nivel</span>
+                <span class="stat-value" id="level">1</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Puntos</span>
+                <span class="stat-value" id="score">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Racha</span>
+                <span class="stat-value" id="streak">0</span>
+            </div>
+            <div class="stat-item">
+                <button id="volumeBtn" style="background: rgba(255,255,255,0.3); border: 2px solid white; border-radius: 10px; padding: 10px 15px; cursor: pointer; font-size: 1.5em;" title="Control de volumen">🔊</button>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress">0/3</div>
+        </div>
+
+        <div class="question-area" id="questionArea">
+            <div class="instruction" id="instruction"></div>
+            <div class="question" id="question"></div>
+            <div id="interactionArea"></div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div class="level-up" id="levelUp">
+        ¡Nivel Completado! 🎉
+    </div>
+
+    <script>
+        let currentLevel = 1;
+        let score = 0;
+        let streak = 0;
+        let correctInLevel = 0;
+        let currentAnswer = 0;
+
+        // Sintetizador de voz
+        const synth = window.speechSynthesis;
+        let voiceLoaded = false;
+        let spanishVoice = null;
+        let soundEnabled = true;
+        
+        // Cargar voces disponibles
+        function loadVoices() {
+            const voices = synth.getVoices();
+            spanishVoice = voices.find(voice => voice.lang.startsWith('es')) || voices[0];
+            voiceLoaded = true;
+        }
+        
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+        
+        function speak(text, rate = 0.9, pitch = 1.1) {
+            if (!soundEnabled) return;
+            
+            return new Promise((resolve) => {
+                synth.cancel();
+                
+                setTimeout(() => {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'es-ES';
+                    utterance.rate = rate;
+                    utterance.pitch = pitch;
+                    utterance.volume = 1.0;
+                    
+                    if (spanishVoice) {
+                        utterance.voice = spanishVoice;
+                    }
+                    
+                    utterance.onend = () => resolve();
+                    utterance.onerror = () => resolve();
+                    
+                    synth.speak(utterance);
+                }, 100);
+            });
+        }
+
+        function speakNumber(number) {
+            speak(number.toString(), 0.8, 1.2);
+        }
+
+        const levels = [
+            // Nivel 1: Contar objetos (1-5)
+            {
+                name: "Contar Objetos",
+                type: "visual-count",
+                range: [1, 5],
+                instruction: "¿Cuántos círculos ves?"
+            },
+            // Nivel 2: Identificar números (1-10)
+            {
+                name: "Reconocer Números",
+                type: "identify",
+                range: [1, 10],
+                instruction: "¿Qué número es este?"
+            },
+            // Nivel 3: Comparar números (1-10)
+            {
+                name: "Comparar Números",
+                type: "compare",
+                range: [1, 10],
+                instruction: "¿Cuál número es mayor?"
+            },
+            // Nivel 4: Sumas simples (1-5)
+            {
+                name: "Sumas Fáciles",
+                type: "addition",
+                range: [1, 5],
+                instruction: "¿Cuánto es?"
+            },
+            // Nivel 5: Contar hasta 20
+            {
+                name: "Contar hasta 20",
+                type: "visual-count",
+                range: [10, 20],
+                instruction: "¿Cuántos círculos ves?"
+            },
+            // Nivel 6: Restas simples
+            {
+                name: "Restas Fáciles",
+                type: "subtraction",
+                range: [1, 10],
+                instruction: "¿Cuánto es?"
+            },
+            // Nivel 7: Secuencias
+            {
+                name: "Completar Secuencia",
+                type: "sequence",
+                range: [1, 20],
+                instruction: "¿Qué número falta?"
+            },
+            // Nivel 8: Sumas mayores
+            {
+                name: "Sumas Avanzadas",
+                type: "addition",
+                range: [5, 15],
+                instruction: "¿Cuánto es?"
+            },
+            // Nivel 9: Multiplicaciones simples
+            {
+                name: "Tablas de Multiplicar",
+                type: "multiplication",
+                range: [1, 5],
+                instruction: "¿Cuánto es?"
+            },
+            // Nivel 10: Desafío final
+            {
+                name: "Desafío Final",
+                type: "mixed",
+                range: [1, 20],
+                instruction: "¡Resuelve esto!"
+            }
+        ];
+
+        function generateQuestion() {
+            const level = levels[currentLevel - 1];
+            const interactionArea = document.getElementById('interactionArea');
+            document.getElementById('instruction').textContent = level.instruction;
+            
+            switch(level.type) {
+                case 'visual-count':
+                    generateVisualCount(level.range);
+                    break;
+                case 'identify':
+                    generateIdentify(level.range);
+                    break;
+                case 'compare':
+                    generateCompare(level.range);
+                    break;
+                case 'addition':
+                    generateAddition(level.range);
+                    break;
+                case 'subtraction':
+                    generateSubtraction(level.range);
+                    break;
+                case 'sequence':
+                    generateSequence(level.range);
+                    break;
+                case 'multiplication':
+                    generateMultiplication(level.range);
+                    break;
+                case 'mixed':
+                    generateMixed(level.range);
+                    break;
+            }
+        }
+
+        function generateVisualCount(range) {
+            const count = Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+            currentAnswer = count;
+            
+            const visualDiv = document.createElement('div');
+            visualDiv.className = 'visual-numbers';
+            
+            for(let i = 0; i < count; i++) {
+                const circle = document.createElement('div');
+                circle.className = 'number-circle';
+                circle.textContent = '●';
+                visualDiv.appendChild(circle);
+            }
+            
+            document.getElementById('question').textContent = '';
+            document.getElementById('interactionArea').innerHTML = '';
+            document.getElementById('interactionArea').appendChild(visualDiv);
+            
+            // Hablar la pregunta
+            setTimeout(() => speak(`¿Cuántos círculos ves?`, 0.9), 300);
+            
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'input-answer';
+            input.id = 'answerInput';
+            input.placeholder = '?';
+            
+            const btn = document.createElement('button');
+            btn.className = 'submit-btn';
+            btn.textContent = 'Comprobar';
+            btn.onclick = () => checkAnswer(parseInt(input.value));
+            
+            document.getElementById('interactionArea').appendChild(input);
+            document.getElementById('interactionArea').appendChild(btn);
+            
+            input.focus();
+            input.addEventListener('keypress', (e) => {
+                if(e.key === 'Enter') btn.click();
+            });
+        }
+
+        function generateIdentify(range) {
+            const number = Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+            currentAnswer = number;
+            
+            document.getElementById('question').textContent = number;
+            
+            // Agregar botón de audio
+            const speaker = document.createElement('button');
+            speaker.className = 'speaker-btn';
+            speaker.textContent = '🔊';
+            speaker.style.marginBottom = '20px';
+            speaker.onclick = () => speakNumber(number);
+            document.getElementById('interactionArea').innerHTML = '';
+            document.getElementById('interactionArea').appendChild(speaker);
+            
+            // Pronunciar el número automáticamente
+            setTimeout(() => speakNumber(number), 500);
+            
+            const options = [number];
+            while(options.length < 4) {
+                const opt = Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+                if(!options.includes(opt)) options.push(opt);
+            }
+            
+            shuffle(options);
+            createOptions(options);
+        }
+
+        function generateCompare(range) {
+            const num1 = Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+            let num2 = Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+            while(num2 === num1) {
+                num2 = Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+            }
+            
+            currentAnswer = Math.max(num1, num2);
+            document.getElementById('question').textContent = `${num1} vs ${num2}`;
+            
+            // Pronunciar la pregunta
+            setTimeout(() => speak(`¿Cuál número es mayor? ¿${num1} o ${num2}?`, 0.9), 300);
+            
+            createOptions([num1, num2]);
+        }
+
+        function generateAddition(range) {
+            const num1 = Math.floor(Math.random() * range[1]) + 1;
+            const num2 = Math.floor(Math.random() * range[1]) + 1;
+            currentAnswer = num1 + num2;
+            
+            document.getElementById('question').textContent = `${num1} + ${num2} = ?`;
+            
+            // Pronunciar la operación
+            setTimeout(() => speak(`¿Cuánto es ${num1} más ${num2}?`, 0.9), 300);
+            
+            const options = [currentAnswer];
+            while(options.length < 4) {
+                const opt = currentAnswer + Math.floor(Math.random() * 6) - 3;
+                if(opt > 0 && !options.includes(opt)) options.push(opt);
+            }
+            
+            shuffle(options);
+            createOptions(options);
+        }
+
+        function generateSubtraction(range) {
+            const num1 = Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
+            const num2 = Math.floor(Math.random() * num1) + 1;
+            currentAnswer = num1 - num2;
+            
+            document.getElementById('question').textContent = `${num1} - ${num2} = ?`;
+            
+            // Pronunciar la operación
+            setTimeout(() => speak(`¿Cuánto es ${num1} menos ${num2}?`, 0.9), 300);
+            
+            const options = [currentAnswer];
+            while(options.length < 4) {
+                const opt = currentAnswer + Math.floor(Math.random() * 6) - 3;
+                if(opt >= 0 && !options.includes(opt)) options.push(opt);
+            }
+            
+            shuffle(options);
+            createOptions(options);
+        }
+
+        function generateSequence(range) {
+            const start = Math.floor(Math.random() * (range[1] - 5)) + range[0];
+            const missing = Math.floor(Math.random() * 3) + 1;
+            
+            const sequence = [];
+            for(let i = 0; i < 5; i++) {
+                if(i === missing) {
+                    sequence.push('?');
+                } else {
+                    sequence.push(start + i);
+                }
+            }
+            
+            currentAnswer = start + missing;
+            document.getElementById('question').textContent = sequence.join(' - ');
+            
+            // Pronunciar la secuencia
+            setTimeout(() => {
+                const seqText = sequence.map(n => n === '?' ? 'interrogación' : n).join(', ');
+                speak(`¿Qué número falta en la secuencia?`, 0.9);
+            }, 300);
+            
+            const options = [currentAnswer];
+            while(options.length < 4) {
+                const opt = currentAnswer + Math.floor(Math.random() * 6) - 3;
+                if(opt > 0 && !options.includes(opt)) options.push(opt);
+            }
+            
+            shuffle(options);
+            createOptions(options);
+        }
+
+        function generateMultiplication(range) {
+            const num1 = Math.floor(Math.random() * range[1]) + 1;
+            const num2 = Math.floor(Math.random() * range[1]) + 1;
+            currentAnswer = num1 * num2;
+            
+            document.getElementById('question').textContent = `${num1} × ${num2} = ?`;
+            
+            // Pronunciar la multiplicación
+            setTimeout(() => speak(`¿Cuánto es ${num1} por ${num2}?`, 0.9), 300);
+            
+            const options = [currentAnswer];
+            while(options.length < 4) {
+                const opt = currentAnswer + Math.floor(Math.random() * 10) - 5;
+                if(opt > 0 && !options.includes(opt)) options.push(opt);
+            }
+            
+            shuffle(options);
+            createOptions(options);
+        }
+
+        function generateMixed(range) {
+            const types = ['addition', 'subtraction', 'multiplication'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            if(type === 'addition') generateAddition(range);
+            else if(type === 'subtraction') generateSubtraction(range);
+            else generateMultiplication([1, 5]);
+        }
+
+        function createOptions(options) {
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(opt);
+                optionsDiv.appendChild(btn);
+            });
+            
+            document.getElementById('interactionArea').innerHTML = '';
+            document.getElementById('interactionArea').appendChild(optionsDiv);
+        }
+
+        function checkAnswer(answer) {
+            const feedback = document.getElementById('feedback');
+            
+            if(answer === currentAnswer) {
+                feedback.className = 'feedback correct';
+                feedback.textContent = '¡Correcto! 🎉 +10 puntos';
+                speak('¡Correcto! ¡Muy bien! ¡Excelente!', 0.9, 1.2);
+                score += 10;
+                streak++;
+                correctInLevel++;
+                
+                updateStats();
+                
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                    
+                    if(correctInLevel >= 3) {
+                        levelUp();
+                    } else {
+                        generateQuestion();
+                    }
+                }, 1500);
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = `Incorrecto 😢 La respuesta era ${currentAnswer}`;
+                speak(`Incorrecto. La respuesta correcta es ${currentAnswer}`, 0.85, 1.1);
+                streak = 0;
+                updateStats();
+                
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                    generateQuestion();
+                }, 2500);
+            }
+        }
+
+        function levelUp() {
+            const levelUpDiv = document.getElementById('levelUp');
+            levelUpDiv.className = 'level-up show';
+            
+            speak('¡Nivel completado! ¡Felicidades! ¡Muy bien!', 0.9, 1.2);
+            
+            setTimeout(() => {
+                levelUpDiv.className = 'level-up';
+                currentLevel++;
+                correctInLevel = 0;
+                
+                if(currentLevel > levels.length) {
+                    speak('¡Felicidades! ¡Has completado todos los niveles! ¡Eres un maestro de los números!', 0.9, 1.1);
+                    setTimeout(() => {
+                        alert('¡Felicidades! ¡Has completado todos los niveles! 🏆');
+                        currentLevel = 1;
+                        score = 0;
+                    }, 3000);
+                }
+                
+                updateStats();
+                generateQuestion();
+            }, 2000);
+        }
+
+        function updateStats() {
+            document.getElementById('level').textContent = currentLevel;
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = streak;
+            
+            const progress = document.getElementById('progress');
+            progress.style.width = `${(correctInLevel / 3) * 100}%`;
+            progress.textContent = `${correctInLevel}/3`;
+        }
+
+        function shuffle(array) {
+            for(let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Iniciar el juego
+        setTimeout(() => {
+            // Configurar botón de volumen
+            const volumeBtn = document.getElementById('volumeBtn');
+            
+            volumeBtn.onclick = () => {
+                soundEnabled = !soundEnabled;
+                volumeBtn.textContent = soundEnabled ? '🔊' : '🔇';
+                if(soundEnabled) {
+                    speak('Sonido activado', 0.9, 1.1);
+                } else {
+                    synth.cancel();
+                }
+            };
+            
+            speak('¡Bienvenido a Número Master! ¡Vamos a aprender matemáticas!', 0.9, 1.1);
+            generateQuestion();
+        }, 500);
+    </script>
+</body>
+</html>

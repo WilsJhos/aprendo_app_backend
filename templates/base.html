@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mundo de Aprendizaje{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    {% load static %}
+    <style>
+        :root {
+            /* Light Theme */
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(255, 255, 255, 0.5);
+            --accent-color: #6366f1;
+            --secondary-color: #94a3b8;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --header-bg: rgba(255, 255, 255, 0.8);
+            
+            --c1: #ff6b6b; --c2: #4facfe; --c3: #fa709a;
+            --c4: #66bb6a; --c5: #9b59b6; --c6: #f39c12;
+            --c7: #16a085;
+            
+            --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --accent-color: #818cf8;
+            --secondary-color: #64748b;
+            --glass-bg: rgba(15, 23, 42, 0.6);
+            --header-bg: rgba(15, 23, 42, 0.8);
+            --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .main-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, var(--accent-color), #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 0.5rem 1.2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .user-info {
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0.7;
+            display: none;
+        }
+
+        @media (min-width: 640px) {
+            .user-info { display: block; }
+        }
+
+        /* --- BACKGROUND ANIMATION --- */
+        .bg-magic {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .bubble, .particle {
+            position: absolute;
+            bottom: -100px;
+            background: linear-gradient(135deg, var(--accent-color), #ec4899);
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: rise 15s infinite ease-in;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .particle {
+            background: none;
+            font-size: 1.5rem;
+            opacity: 0.2;
+        }
+
+        [data-theme="dark"] .bubble, [data-theme="dark"] .particle {
+            opacity: 0.1;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body id="app-body">
+    <div class="bg-magic" id="bg-magic"></div>
+    <header class="main-header">
+        <a href="/" class="logo">
+            <span>🌈</span>
+            <span>Aprendo</span>
+        </a>
+        <div class="header-actions">
+            {% if user.is_authenticated %}
+            <span class="user-info">Hola, {{ user.username }} 👋</span>
+            <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-logout">
+                    Salir 🚪
+                </button>
+            </form>
+            {% endif %}
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+                🌙
+            </button>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <script>
+        // Global utilities safe check
+        const synth = window.speechSynthesis || null;
+        let spanishVoice = null;
+
+        function loadVoices() {
+            const voices = synth.getVoices();
+            if (voices.length === 0) return;
+
+            // Debug: See what voices the browser actually has
+            console.log("--- VOCES DETECTADAS ---");
+            const esVoices = voices.filter(v => v.lang.toLowerCase().startsWith('es'));
+            esVoices.forEach(v => console.log(`Voz: ${v.name} | Lang: ${v.lang}`));
+
+            if (esVoices.length > 0) {
+                // Prioridad absoluta a voces latinas/mexicanas de Windows o Google
+                spanishVoice = esVoices.find(v => v.lang.toLowerCase() === 'es-mx') || 
+                              esVoices.find(v => v.name.toLowerCase().includes('mexico')) ||
+                              esVoices.find(v => v.name.toLowerCase().includes('sabina')) ||
+                              esVoices.find(v => v.name.toLowerCase().includes('helena')) ||
+                              esVoices.find(v => v.lang.toLowerCase() === 'es-us') || 
+                              esVoices.find(v => v.lang.toLowerCase().includes('es-')) ||
+                              esVoices[0];
+            } else {
+                spanishVoice = null;
+                // DEBUG: Si no hay español, muéstrame QUÉ HAY en el sistema
+                console.log("AVISO: No hay voces en español. Lista completa del sistema:");
+                voices.forEach(v => console.log(`- ${v.name} (${v.lang})`));
+            }
+            
+            if (spanishVoice) {
+                console.log("Voz seleccionada:", spanishVoice.name);
+            } else {
+                console.warn("No se encontró ninguna voz en español. Usando tag genérico 'es'.");
+            }
+        }
+
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+        
+        loadVoices();
+        let retryVoices = 0;
+        const voiceTimer = setInterval(() => {
+            loadVoices();
+            if (spanishVoice || retryVoices > 15) clearInterval(voiceTimer);
+            retryVoices++;
+        }, 200);
+
+        // Make speak function global and more robust
+        window.speak = function(text, rate = 1.0, pitch = 1.6) {
+            return new Promise((resolve) => {
+                // 1. Prioridad: Intentar hablar a través de Flutter (Bridge Nativo)
+                if (window.FlutterSpeak && window.FlutterSpeak.postMessage) {
+                    try {
+                        window.FlutterSpeak.postMessage(JSON.stringify({
+                            text: text,
+                            rate: rate,
+                            pitch: pitch
+                        }));
+                        console.log("Flutter Bridge (Voz):", text);
+                        return resolve();
+                    } catch (e) {
+                        console.error("Error en Flutter Bridge:", e);
+                    }
+                }
+
+                // 2. Fallback: Usar Web Speech API estándar (Navegador)
+                if (!synth) {
+                    console.warn("SpeechSynthesis no disponible.");
+                    return resolve();
+                }
+
+                setTimeout(() => {
+                    try {
+                        synth.cancel();
+                        if (!spanishVoice) loadVoices();
+                        
+                        const utterance = new SpeechSynthesisUtterance(text);
+                        utterance.lang = spanishVoice ? spanishVoice.lang : 'es-MX';
+                        if (spanishVoice) utterance.voice = spanishVoice;
+                        utterance.rate = rate;
+                        utterance.pitch = pitch;
+                        
+                        utterance.onend = () => resolve();
+                        utterance.onerror = (e) => {
+                            console.error("Error de voz:", e);
+                            resolve();
+                        };
+                        
+                        synth.speak(utterance);
+                        console.log("Hablando:", text);
+                    } catch (e) {
+                        console.error("Error en speak:", e);
+                        resolve();
+                    }
+                }, 50);
+            });
+        };
+
+        // Theme Toggle Logic
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('theme-btn');
+            btn.innerHTML = theme === 'light' ? '🌙' : '☀️';
+        }
+
+        // Initialize Theme from Storage
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            window.createMagicParticles = function(items = null, count = 15) {
+                const bg = document.getElementById('bg-magic');
+                if (!bg) return;
+                bg.innerHTML = ''; // Clear existing
+                
+                for (let i = 0; i < count; i++) {
+                    const b = document.createElement('div');
+                    if (items && items.length > 0) {
+                        b.className = 'particle';
+                        b.innerText = items[Math.floor(Math.random() * items.length)];
+                        b.style.fontSize = (Math.random() * 2 + 1) + 'rem';
+                    } else {
+                        b.className = 'bubble';
+                        const size = Math.random() * 100 + 50;
+                        b.style.width = size + 'px';
+                        b.style.height = size + 'px';
+                    }
+                    
+                    b.style.left = Math.random() * 100 + '%';
+                    b.style.animationDelay = Math.random() * 15 + 's';
+                    b.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                    bg.appendChild(b);
+                }
+            };
+
+            // Default bubbles for landing
+            if (window.location.pathname === '/' || window.location.pathname.endsWith('index.html')) {
+                window.createMagicParticles();
+            }
+        })();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

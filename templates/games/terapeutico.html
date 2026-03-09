@@ -1,0 +1,545 @@
+{% extends "game_base.html" %}
+
+{% block game_title %}🌈 Mundo de Aprendizaje Clínico{% endblock %}
+
+{% block game_css %}
+<style>
+    /* Override base styles to match user's colorful design */
+    body {
+        background: linear-gradient(45deg, #ff1744, #ffea00, #00e5ff, #76ff03) !important;
+        background-size: 600% 600% !important;
+        animation: fondo_anim 12s ease infinite !important;
+    }
+    @keyframes fondo_anim {
+        0% { background-position: 0% 50% }
+        50% { background-position: 100% 50% }
+        100% { background-position: 0% 50% }
+    }
+
+    .game-container {
+        font-family: "Comic Sans MS", "Chalkboard SE", cursive, Arial, sans-serif;
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(10px);
+        border: 4px solid white !important;
+        max-width: 1000px !important;
+    }
+
+    .pantalla {
+        background: white;
+        margin: 10px;
+        padding: 20px;
+        border-radius: 30px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    .menu {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .botonMenu {
+        width: 160px;
+        height: 160px;
+        font-size: 20px;
+        border: none;
+        border-radius: 30px;
+        background: #ffcc80;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+
+    .botonMenu:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .botonJuego {
+        width: 120px;
+        height: 120px;
+        font-size: 50px;
+        margin: 10px;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: transform 0.1s;
+    }
+
+    .botonJuego:active { transform: scale(0.9); }
+
+    .drop {
+        width: 180px;
+        height: 180px;
+        font-size: 50px;
+        border: 4px dashed #4caf50;
+        border-radius: 30px;
+        margin: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background: rgba(76, 175, 80, 0.1);
+    }
+
+    .instruccion {
+        font-size: 28px;
+        font-weight: bold;
+        color: #2e7d32;
+        margin: 20px 0;
+    }
+
+    .refuerzo {
+        font-size: 24px;
+        margin-top: 20px;
+        font-weight: bold;
+        min-height: 40px;
+    }
+
+    .hidden { display: none !important; }
+
+    .timer-clinic {
+        font-size: 24px;
+        color: #d32f2f;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .botonSalir {
+        background: #ef5350;
+        color: white;
+        font-size: 20px;
+        border: none;
+        border-radius: 15px;
+        padding: 12px 25px;
+        margin-top: 20px;
+        cursor: pointer;
+    }
+
+    .textoMomento { font-size: 18px; margin-top: 5px; font-weight: bold; }
+
+    .finModulo {
+        font-size: 26px;
+        margin-top: 20px;
+        background: #e8f5e9;
+        padding: 30px;
+        border-radius: 25px;
+        border: 3px solid #4caf50;
+    }
+
+    .finModulo button {
+        font-size: 20px;
+        padding: 12px 30px;
+        border-radius: 15px;
+        border: none;
+        background: #4caf50;
+        color: white;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+
+    canvas {
+        background: #fafafa;
+        border-radius: 20px;
+        border: 2px solid #ddd;
+    }
+
+    /* Input styling */
+    .clinic-input {
+        width: 100%;
+        padding: 12px;
+        font-size: 18px;
+        border-radius: 15px;
+        border: 2px solid #ffcc80;
+        box-sizing: border-box;
+        margin-top: 5px;
+    }
+
+    /* Hide standard game_base components if they interfere */
+    .stats, .progress-bar { display: none; }
+</style>
+{% endblock %}
+
+{% block game_area %}
+<!-- PERFIL -->
+<div class="pantalla" id="perfil" style="max-width: 500px; margin: 20px auto;">
+    <h2 style="font-size: 30px; margin-bottom: 25px;">👧 Perfil del niño</h2>
+    
+    <div style="text-align: left; margin: 0 auto; max-width: 380px;">
+        <div style="margin-bottom: 20px;">
+            <label style="font-size: 20px; font-weight: bold;">Nombre</label>
+            <input id="nombre" class="clinic-input" placeholder="Escribe tu nombre">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="font-size: 20px; font-weight: bold;">Edad</label>
+            <input id="edad" type="number" class="clinic-input" placeholder="Tu edad">
+        </div>
+        
+        <div style="margin-bottom: 30px;">
+            <label style="font-size: 20px; font-weight: bold;">Diagnóstico</label>
+            <select id="diag" class="clinic-input" style="background-color: white;">
+                <option value="TEA">TEA</option>
+                <option value="Síndrome de Down">Síndrome de Down</option>
+                <option value="Dislexia">Dislexia</option>
+                <option value="Hiperactividad">Hiperactividad</option>
+                <option value="Intelectual">Intelectual</option>
+            </select>
+        </div>
+    </div>
+    
+    <button class="botonMenu" onclick="crearPerfil()" style="width: 220px; height: 100px; margin: 0 auto;">🎮 Entrar</button>
+</div>
+
+<!-- INICIO -->
+<div class="pantalla hidden" id="inicio">
+    <h2 id="saludo" style="font-size: 32px; margin-bottom: 30px;"></h2>
+    <div class="menu">
+        <button class="botonMenu" onmouseenter="vozGuia('Juguemos con atención')" onclick="modulo='colores';iniciar()">
+            <span style="font-size: 3rem;">🎨</span> Atención
+        </button>
+        
+        <button class="botonMenu" onmouseenter="vozGuia('Juguemos con emociones')" onclick="modulo='emociones';iniciar()">
+            <span style="font-size: 3rem;">🎭</span> Emociones
+        </button>
+        
+        <button class="botonMenu" onmouseenter="vozGuia('Juguemos con rutinas')" onclick="modulo='rutina';iniciar()">
+            <span style="font-size: 3rem;">🏠</span> Rutinas
+        </button>
+        
+        <button class="botonMenu" onmouseenter="vozGuia('Juguemos con matemáticas')" onclick="modulo='mate';iniciar()">
+            <span style="font-size: 3rem;">🔢</span> Matemática
+        </button>
+        
+        <button class="botonMenu" onmouseenter="vozGuia('Juguemos con motricidad')" onclick="modulo='motricidad';iniciar()">
+            <span style="font-size: 3rem;">🖐️</span> Motricidad
+        </button>
+        
+        <button class="botonMenu" onmouseenter="vozGuia('Juguemos con memoria visual')" onclick="modulo='memoria';iniciar()">
+            <span style="font-size: 3rem;">🧠</span> Memoria Visual
+        </button>
+    </div>
+    <div style="margin-top: 40px;">
+        <button class="botonSalir" style="background: #4caf50;" onclick="verPanel()">📊 Informe Clínico</button>
+    </div>
+</div>
+
+<!-- JUEGO -->
+<div class="pantalla hidden" id="juego">
+    <div class="timer-clinic" id="timer-clinic">⏱️ 0 s</div>
+    <div class="instruccion" id="instruccion"></div>
+    <div id="zona" style="min-height: 200px; display: flex; justify-content: center; align-items: center; flex-wrap: wrap;"></div>
+    <div class="refuerzo" id="refuerzo"></div>
+    <button class="botonSalir" onclick="salirJuego()">🚪 Salir</button>
+</div>
+
+<!-- PANEL TERAPEUTA -->
+<div class="pantalla hidden" id="panel">
+    <h2 style="font-size: 28px; margin-bottom: 20px;">📊 Informe de Evolución</h2>
+    <canvas id="graf" width="500" height="300"></canvas><br>
+    <button class="botonSalir" style="background: #6366f1;" onclick="volver()">⬅ Volver</button>
+</div>
+{% endblock %}
+
+{% block game_js %}
+<script>
+// ===== SISTEMA DE SONIDOS =====
+const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+
+function sonidoAcierto() {
+    try {
+        const osc = ctxAudio.createOscillator();
+        const g = ctxAudio.createGain();
+        osc.connect(g); g.connect(ctxAudio.destination);
+        osc.frequency.value = 600; osc.type = 'sine';
+        g.gain.setValueAtTime(0.3, ctxAudio.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + 0.5);
+        osc.start(); osc.stop(ctxAudio.currentTime + 0.5);
+    } catch(e) {}
+}
+
+function sonidoError() {
+    try {
+        const osc = ctxAudio.createOscillator();
+        const g = ctxAudio.createGain();
+        osc.connect(g); g.connect(ctxAudio.destination);
+        osc.frequency.value = 300; osc.type = 'sawtooth';
+        g.gain.setValueAtTime(0.2, ctxAudio.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + 0.3);
+        osc.start(); osc.stop(ctxAudio.currentTime + 0.3);
+    } catch(e) {}
+}
+
+function sonidoClick() {
+    try {
+        const osc = ctxAudio.createOscillator();
+        const g = ctxAudio.createGain();
+        osc.connect(g); g.connect(ctxAudio.destination);
+        osc.frequency.value = 400; osc.type = 'sine';
+        g.gain.setValueAtTime(0.1, ctxAudio.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + 0.1);
+        osc.start(); osc.stop(ctxAudio.currentTime + 0.1);
+    } catch(e) {}
+}
+
+// VOZ GUÍA
+let ultimaVoz = null;
+let vocesDisponibles = [];
+let vozCompletada = false;
+
+function cargarVoces() {
+    vocesDisponibles = window.speechSynthesis.getVoices();
+}
+
+if (window.speechSynthesis) {
+    speechSynthesis.onvoiceschanged = cargarVoces;
+    cargarVoces();
+}
+
+function vozGuia(texto, esFinalizacion = false){
+    if(!window.speechSynthesis) return;
+    if(esFinalizacion && vozCompletada) return;
+    if(ultimaVoz) window.speechSynthesis.cancel();
+
+    setTimeout(() => {
+        const v = new SpeechSynthesisUtterance(texto);
+        v.lang = "es-ES"; v.rate = 0.9;
+        if (vocesDisponibles.length > 0) {
+            const preferida = vocesDisponibles.find(v => v.lang === "es-ES" && !v.name.includes("Google"));
+            if (preferida) v.voice = preferida;
+        }
+        ultimaVoz = v;
+        window.speechSynthesis.speak(v);
+        if (esFinalizacion) vozCompletada = true;
+        v.onend = () => {
+            setTimeout(() => { 
+                ultimaVoz = null;
+                if (esFinalizacion) setTimeout(() => { vozCompletada = false; }, 1000);
+            }, 300);
+        };
+    }, 100);
+}
+
+const buenos = ["🌟 ¡Excelente!", "👏 ¡Muy bien!", "😊 ¡Lo lograste!", "💪 ¡Sigue así!"];
+const suavesMsg = ["🤍 Intenta otra vez", "🌈 No pasa nada", "💭 Casi lo logras"];
+const areas = ["colores", "emociones", "rutina", "mate", "motricidad", "memoria"];
+let perfilActual = { progreso: { colores: 0, emociones: 0, rutina: 0, mate: 0, motricidad: 0, memoria: 0 } };
+
+let modulo = "", acciones = 0, tiempo = 0, reloj = null;
+const TOTAL = 8;
+
+function crearPerfil(){
+    if(!document.getElementById('nombre').value) {
+        vozGuia("Por favor, escribe tu nombre.");
+        return;
+    }
+    document.getElementById('saludo').innerText = "👋 Hola " + document.getElementById('nombre').value;
+    document.getElementById('perfil').classList.add("hidden");
+    document.getElementById('inicio').classList.remove("hidden");
+    vozGuia("Hola, vamos a jugar.");
+}
+
+function iniciar(){
+    acciones = 0; tiempo = 0;
+    vozCompletada = false;
+    document.getElementById('inicio').classList.add("hidden");
+    document.getElementById('juego').classList.remove("hidden");
+    reloj = setInterval(() => { 
+        tiempo++; 
+        document.getElementById('timer-clinic').innerText = "⏱️ " + tiempo + " s"; 
+    }, 1000);
+    cargar();
+}
+
+function porcentaje() { return Math.min(Math.round((acciones / TOTAL) * 100), 100); }
+
+function cargar(){
+    const zona = document.getElementById('zona');
+    const refuerzo = document.getElementById('refuerzo');
+    zona.innerHTML = "";
+    refuerzo.innerText = "";
+    if(modulo === "colores") simple(["🔴", "🟢", "🔵"]);
+    if(modulo === "emociones") simple(["😊", "😢", "😡"]);
+    if(modulo === "rutina") rutinaAvanzada();
+    if(modulo === "mate") matematica();
+    if(modulo === "motricidad") motricidadMejorada();
+    if(modulo === "memoria") memoriaVisual();
+}
+
+function simple(lista){
+    if(porcentaje() === 100){
+        let msg = modulo === "colores" ? "Atención completada" : "Emociones completadas";
+        vozGuia("¡Excelente! Has terminado el nivel", true);
+        document.getElementById('zona').innerHTML = `
+            <div class="finModulo">
+                🌟 ¡Excelente trabajo!<br>${msg}<br><br>
+                <button onclick="acciones=0; cargar()">🔁 Jugar de nuevo</button>
+            </div>`;
+        document.getElementById('instruccion').innerText = "";
+        return;
+    }
+    let obj = lista[Math.floor(Math.random() * lista.length)];
+    document.getElementById('instruccion').innerText = "👉 Toca " + obj + " (" + porcentaje() + "%)";
+    lista.forEach(x => {
+        let b = document.createElement("button");
+        b.className = "botonJuego"; b.innerText = x;
+        b.onclick = () => {
+            sonidoClick();
+            if(x === obj){
+                sonidoAcierto(); acciones++;
+                document.getElementById('refuerzo').innerText = buenos[Math.floor(Math.random() * buenos.length)];
+                setTimeout(cargar, 2000);
+            } else {
+                sonidoError();
+                document.getElementById('refuerzo').innerText = suavesMsg[Math.floor(Math.random() * suavesMsg.length)];
+            }
+        }
+        document.getElementById('zona').appendChild(b);
+    });
+}
+
+function motricidadMejorada(){
+    if(porcentaje() === 100){
+        vozGuia("¡Fantástico! Nivel de motricidad completado", true);
+        document.getElementById('zona').innerHTML = `<div class="finModulo">🖐️ Motricidad completada<br><button onclick="acciones=0; cargar()">🔁 Jugar</button></div>`;
+        return;
+    }
+    const figuras = ["🔴", "⭐", "🟦", "🔺"];
+    let f = figuras[Math.floor(Math.random() * figuras.length)];
+    document.getElementById('instruccion').innerText = "👉 Arrastra " + f + " al recuadro (" + porcentaje() + "%)";
+    
+    let d = document.createElement("div");
+    d.className = "botonJuego"; d.innerText = f; d.draggable = true;
+    d.ondragstart = () => sonidoClick();
+
+    let drop = document.createElement("div");
+    drop.className = "drop";
+    drop.innerHTML = `<div style="font-size: 60px;">${f}</div>`;
+    drop.ondragover = e => e.preventDefault();
+    drop.ondrop = () => {
+        sonidoAcierto(); acciones++;
+        document.getElementById('refuerzo').innerText = "🌟 ¡Muy bien!";
+        setTimeout(cargar, 2000);
+    };
+    document.getElementById('zona').appendChild(d);
+    document.getElementById('zona').appendChild(drop);
+}
+
+const rutinas_data = [
+    {obj:"🪥", mom:"🌅", txt:"Mañana"}, {obj:"🚿", mom:"🌅", txt:"Mañana"},
+    {obj:"🍽️", mom:"☀️", txt:"Mediodía"}, {obj:"🛏️", mom:"🌙", txt:"Noche"}
+];
+
+function rutinaAvanzada(){
+    if(porcentaje() === 100){
+        vozGuia("¡Felicidades! Rutina completada", true);
+        document.getElementById('zona').innerHTML = `<div class="finModulo">🏠 Rutina completada<br><button onclick="acciones=0; cargar()">🔁 Jugar</button></div>`;
+        return;
+    }
+    let r = rutinas_data[Math.floor(Math.random() * rutinas_data.length)];
+    document.getElementById('instruccion').innerText = "👉 ¿Cuándo hacemos esto? (" + porcentaje() + "%)";
+    let d = document.createElement("div");
+    d.className = "botonJuego"; d.innerText = r.obj; d.draggable = true;
+    let drop = document.createElement("div");
+    drop.className = "drop"; drop.innerHTML = r.mom + "<div class='textoMomento'>" + r.txt + "</div>";
+    drop.ondragover = e => e.preventDefault();
+    drop.ondrop = () => {
+        sonidoAcierto(); acciones++;
+        setTimeout(cargar, 2000);
+    };
+    document.getElementById('zona').appendChild(d);
+    document.getElementById('zona').appendChild(drop);
+}
+
+function matematica(){
+    if(porcentaje() === 100){
+        vozGuia("¡Muy bien! Nivel de matemáticas completado", true);
+        document.getElementById('zona').innerHTML = `<div class="finModulo">🔢 Matemática completada<br><button onclick="acciones=0; cargar()">🔁 Jugar</button></div>`;
+        return;
+    }
+    let n = Math.floor(Math.random() * 3) + 1;
+    document.getElementById('instruccion').innerText = "¿Cuántas manzanas hay?";
+    let tray = document.createElement("div");
+    tray.style.fontSize = "50px";
+    for(let i=0; i<n; i++) tray.innerHTML += "🍎";
+    document.getElementById('zona').appendChild(tray);
+    [1,2,3].forEach(x => {
+        let b = document.createElement("button");
+        b.className = "botonJuego"; b.innerText = x;
+        b.onclick = () => {
+            if(x === n) { sonidoAcierto(); acciones++; setTimeout(cargar, 1500); }
+            else sonidoError();
+        }
+        document.getElementById('zona').appendChild(b);
+    });
+}
+
+function memoriaVisual(){
+    if(porcentaje() === 100){
+        vozGuia("¡Excelente memoria!", true);
+        document.getElementById('zona').innerHTML = `<div class="finModulo">🧠 Memoria completada<br><button onclick="acciones=0; cargar()">🔁 Jugar</button></div>`;
+        return;
+    }
+    const fig = ["🐶", "🐱", "🐭", "🐰"];
+    let obj = fig[Math.floor(Math.random() * fig.length)];
+    document.getElementById('instruccion').innerText = "👉 Busca al " + obj;
+    fig.sort(() => Math.random() - 0.5).forEach(f => {
+        let b = document.createElement("button");
+        b.className = "botonJuego"; b.innerText = f;
+        b.onclick = () => {
+            if(f === obj) { sonidoAcierto(); acciones++; setTimeout(cargar, 1500); }
+            else sonidoError();
+        }
+        document.getElementById('zona').appendChild(b);
+    });
+}
+
+function verPanel(){
+    document.getElementById('inicio').classList.add("hidden");
+    document.getElementById('panel').classList.remove("hidden");
+    renderChart();
+}
+
+function renderChart(){
+    const canvas = document.getElementById('graf');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,500,300);
+    const keys = areas;
+    keys.forEach((k, i) => {
+        let p = perfilActual.progreso[k] || 0;
+        let h = (p / 100) * 200;
+        let x = 60 + i * 70;
+        let grad = ctx.createLinearGradient(x, 250-h, x, 250);
+        grad.addColorStop(0, "#4caf50"); grad.addColorStop(1, "#2e7d32");
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, 250-h, 40, h);
+        ctx.fillStyle = "#333";
+        ctx.font = "bold 12px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(k.substring(0,4), x + 20, 270);
+        ctx.fillText(p + "%", x + 20, 240-h);
+    });
+}
+
+function salirJuego(){
+    clearInterval(reloj);
+    perfilActual.progreso[modulo] = porcentaje();
+    document.getElementById('juego').classList.add("hidden");
+    document.getElementById('inicio').classList.remove("hidden");
+}
+
+    function volver(){
+        document.getElementById('panel').classList.add("hidden");
+        document.getElementById('inicio').classList.remove("hidden");
+    }
+
+    window.onload = () => {
+        createMagicParticles(['🏥', '💊', '😊', '🛡️', '☀️', '🌈', '💖', '⭐', '🎈']);
+    };
+</script>
+{% endblock %}

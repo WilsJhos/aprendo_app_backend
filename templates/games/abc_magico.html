@@ -1,0 +1,156 @@
+{% extends "game_base.html" %}
+
+{% block game_title %}🎨 ABC Mágico{% endblock %}
+
+{% block container_extra_class %}force-dark-game{% endblock %}
+
+{% block game_css %}
+<style>
+    :root {
+        --abc-accent: #f472b6;
+        --abc-bg: #1e1b4b;
+    }
+
+    /* Game specific colors and tokens */
+
+    .letter-display {
+        font-size: clamp(4rem, 20vw, 10rem); /* Adjusted font size */
+        font-weight: 900;
+        color: white;
+        text-shadow: 0 0 30px var(--abc-accent), 0 0 60px var(--abc-accent);
+        cursor: pointer;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        user-select: none;
+        margin: 1rem 0; /* Adjusted margin */
+    }
+
+    .letter-display:hover { transform: scale(1.1) rotate(5deg); }
+
+    .options-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: clamp(8px, 2vw, 15px); /* Adjusted gap */
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto; /* Added margin auto for centering */
+    }
+
+    .abc-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px; /* Adjusted border-radius */
+        padding: clamp(0.75rem, 5vw, 2rem); /* Adjusted padding */
+        font-size: clamp(1.5rem, 8vw, 3.5rem); /* Adjusted font size */
+        font-weight: 800;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+        backdrop-filter: blur(10px);
+    }
+
+    .abc-btn:hover {
+        background: var(--abc-accent);
+        border-color: white;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(244, 114, 182, 0.4);
+    }
+
+    .instruction {
+        font-size: clamp(1rem, 3.5vw, 1.5rem); /* Adjusted font size */
+        font-weight: 600;
+        opacity: 0.8;
+        margin-bottom: 20px;
+    }
+
+    @keyframes celebrate {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3) rotate(10deg); color: #4ade80; }
+        100% { transform: scale(1); }
+    }
+    .celebrate { animation: celebrate 0.6s ease; }
+
+</style>
+{% endblock %}
+
+{% block game_area %}
+    <div class="instruction" id="instruction">¿Qué letra es esta?</div>
+    <div class="letter-display" id="letterDisplay" onclick="repeatLetter()">A</div>
+    <div class="options-grid" id="letterOptions"></div>
+{% endblock %}
+
+{% block game_js %}
+    <script>
+        const alphabet = 'abcdefghijklmnñopqrstuvwxyz'.split('');
+        let currentAnswer = '';
+
+        function nextQuestion() {
+            const letter = alphabet[Math.floor(Math.random() * alphabet.length)];
+            currentAnswer = letter;
+            const display = document.getElementById('letterDisplay');
+            if (display) {
+                display.textContent = letter.toUpperCase();
+                display.classList.remove('celebrate');
+            }
+            
+            generateOptions(letter);
+            
+            // Speak AFTER UI is updated and options are ready
+            if (window.speak) {
+                window.speak(letter, 0.8, 1.2); // Slower and deeper for clearer letters
+            }
+        }
+
+        function generateOptions(correct) {
+            const optsDiv = document.getElementById('letterOptions');
+            if (!optsDiv) return;
+            optsDiv.innerHTML = '';
+            let options = [correct];
+            while(options.length < 4) {
+                let r = alphabet[Math.floor(Math.random() * alphabet.length)];
+                if(!options.includes(r)) options.push(r);
+            }
+            options.sort(() => Math.random() - 0.5);
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'abc-btn';
+                btn.textContent = opt.toUpperCase();
+                btn.onclick = () => checkAnswer(opt);
+                optsDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected) {
+            if(selected === currentAnswer) {
+                const display = document.getElementById('letterDisplay');
+                if (display) display.classList.add('celebrate');
+                
+                showFeedback('¡Genial! 🌟', true);
+                updateStats(10, true);
+                
+                if (window.speak) {
+                    window.speak("¡Muy bien! Esa es la letra " + currentAnswer);
+                }
+                setTimeout(nextQuestion, 2000);
+            } else {
+                showFeedback('Inténtalo de nuevo 🍎', false);
+                updateStats(0, false);
+                if (window.speak) {
+                    window.speak("Esa no es, prueba otra vez.");
+                }
+            }
+        }
+
+        function repeatLetter() { 
+            if (window.speak) window.speak(currentAnswer); 
+        }
+
+        window.onload = () => {
+            if (typeof createMagicParticles === 'function') {
+                createMagicParticles(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']);
+            }
+            // Small delay to ensure bridge is ready
+            setTimeout(nextQuestion, 500);
+        };
+    </script>
+{% endblock %}

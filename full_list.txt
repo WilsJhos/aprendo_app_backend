@@ -1,0 +1,7 @@
+abc
+numeros
+rutinas
+serpiente
+simon
+terapeutico
+respirador

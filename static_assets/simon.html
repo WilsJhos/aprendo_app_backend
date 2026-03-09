@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simón Musical Inclusivo</title>
+    <style>
+        :root {
+            --verde: #4CAF50;
+            --rojo: #F44336;
+            --amarillo: #FFEB3B;
+            --azul: #2196F3;
+            --negro: #2c3e50;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Verdana', sans-serif;
+            background-color: #222;
+            overflow: hidden; /* Evita scroll */
+            user-select: none;
+            touch-action: manipulation; /* Mejora respuesta táctil */
+        }
+
+        /* --- PANTALLA DE INICIO --- */
+        #welcome-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 100;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+
+        .config-area {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn-start {
+            font-size: 2rem;
+            padding: 20px 60px;
+            border-radius: 50px;
+            background: var(--verde);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 10px 0 #2E7D32;
+            transition: transform 0.1s;
+        }
+        .btn-start:active { transform: translateY(10px); box-shadow: none; }
+
+        /* --- TABLERO DE JUEGO (GRID 2x2) --- */
+        #game-board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            height: 100vh;
+            width: 100vw;
+            display: none; /* Se activa con JS */
+        }
+
+        .pad {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            transition: opacity 0.2s, filter 0.2s;
+            opacity: 0.6; /* Apagado por defecto */
+            border: 2px solid rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        /* Colores */
+        #pad-green  { background-color: var(--verde); border-bottom-right-radius: 0; }
+        #pad-red    { background-color: var(--rojo); }
+        #pad-yellow { background-color: var(--amarillo); }
+        #pad-blue   { background-color: var(--azul); }
+
+        /* Estado ACTIVO (Iluminado) */
+        .pad.active {
+            opacity: 1;
+            filter: brightness(1.5);
+            box-shadow: inset 0 0 50px rgba(255,255,255,0.8);
+            z-index: 10;
+        }
+
+        /* Estado CORRECTO (Feedback visual rápido) */
+        .pad.success-tap {
+            transform: scale(0.95);
+        }
+
+        /* --- CONTROLES CENTRALES --- */
+        #center-hub {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px; height: 200px;
+            background: white;
+            border-radius: 50%;
+            border: 10px solid #333;
+            display: none; /* Se activa con JS */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        #score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #message-display {
+            font-size: 1rem;
+            color: #666;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .btn-mini {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* Overlay para bloquear clicks cuando la PC juega */
+        #block-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 200; display: none;
+        }
+
+        /* OPCIONES DE VELOCIDAD (Radio Buttons grandes) */
+        .speed-opt {
+            display: inline-block;
+            margin: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        input[type="radio"] { transform: scale(1.5); margin-right: 10px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="welcome-screen">
+        <h1>🎶 Simón Musical</h1>
+        
+        <div class="config-area">
+            <p style="font-size: 1.5rem; margin-bottom: 15px;">Velocidad del juego:</p>
+            <label class="speed-opt">
+                <input type="radio" name="speed" value="1000" checked> Lento (Fácil)
+            </label>
+            <label class="speed-opt">
+                <input type="radio" name="speed" value="600"> Rápido (Normal)
+            </label>
+        </div>
+
+        <button class="btn-start" onclick="iniciarJuego()">▶ JUGAR</button>
+    </div>
+
+    <div id="game-board">
+        <div id="pad-green" class="pad" data-color="green" onclick="handleInput('green')"></div>
+        <div id="pad-red" class="pad" data-color="red" onclick="handleInput('red')"></div>
+        <div id="pad-yellow" class="pad" data-color="yellow" onclick="handleInput('yellow')"></div>
+        <div id="pad-blue" class="pad" data-color="blue" onclick="handleInput('blue')"></div>
+    </div>
+
+    <div id="center-hub">
+        <div style="font-size:0.8rem; text-transform: uppercase; color:#999;">Nivel</div>
+        <div id="score-display">1</div>
+        <div id="message-display">¡Atento!</div>
+        <button class="btn-mini" onclick="reiniciarJuego()">Reiniciar</button>
+    </div>
+
+    <div id="block-layer"></div>
+
+    <script>
+        // --- CONFIGURACIÓN DE AUDIO (Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Frecuencias musicales armoniosas (Escala de Mi mayor aproximada)
+        const sounds = {
+            green: 329.63,  // Mi (E4)
+            red: 261.63,    // Do# (C#4) - Usamos Do para mayor contraste o La
+            yellow: 220.00, // La (A3)
+            blue: 164.81,   // Mi grave (E3)
+            error: 100      // Sonido grave error
+        };
+
+        function playTone(color) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = 'triangle'; // Sonido suave tipo flauta/gameboy
+            
+            if (color === 'error') {
+                osc.type = 'sawtooth'; // Sonido áspero para error
+                osc.frequency.value = sounds.error;
+            } else {
+                osc.frequency.value = sounds[color];
+            }
+
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            // Envolvente de sonido (Fade in - Fade out rápido)
+            const now = audioCtx.currentTime;
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(0.3, now + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+            osc.start(now);
+            osc.stop(now + 0.5);
+        }
+
+        // --- LÓGICA DEL JUEGO ---
+        const colors = ['green', 'red', 'yellow', 'blue'];
+        let gameSequence = [];
+        let playerSequence = [];
+        let level = 1;
+        let speed = 1000; // ms entre luces
+        let isGameActive = false;
+
+        function iniciarJuego() {
+            // Leer velocidad seleccionada
+            const radios = document.getElementsByName('speed');
+            for (let r of radios) { if (r.checked) speed = parseInt(r.value); }
+
+            // Cambiar pantallas
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('game-board').style.display = 'grid';
+            document.getElementById('center-hub').style.display = 'flex';
+
+            resetVariables();
+            playRound();
+        }
+
+        function resetVariables() {
+            gameSequence = [];
+            playerSequence = [];
+            level = 1;
+            actualizarHUD("¡Atento!", 1);
+        }
+
+        function reiniciarJuego() {
+            resetVariables();
+            playRound();
+        }
+
+        function playRound() {
+            bloquearInput(true);
+            playerSequence = [];
+            actualizarHUD("Observa...", level);
+
+            // Agregar nuevo color a la secuencia
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            gameSequence.push(randomColor);
+
+            // Reproducir secuencia con Delay
+            let i = 0;
+            const interval = setInterval(() => {
+                activarPad(gameSequence[i]);
+                i++;
+                if (i >= gameSequence.length) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        bloquearInput(false);
+                        actualizarHUD("¡Tu turno!", level);
+                    }, speed); // Esperar un poco antes de dar el turno
+                }
+            }, speed);
+        }
+
+        // Ilumina el botón y suena
+        function activarPad(color) {
+            const pad = document.getElementById(`pad-${color}`);
+            pad.classList.add('active');
+            playTone(color);
+            
+            // Apagar después de medio segundo (o menos si es rápido)
+            setTimeout(() => {
+                pad.classList.remove('active');
+            }, speed / 2); 
+        }
+
+        // --- INTERACCIÓN DEL JUGADOR ---
+        function handleInput(color) {
+            if (!isGameActive) return;
+
+            // Feedback visual de toque
+            const pad = document.getElementById(`pad-${color}`);
+            pad.classList.add('active'); // Iluminar
+            playTone(color); // Sonar
+            setTimeout(() => pad.classList.remove('active'), 200);
+
+            // Lógica
+            playerSequence.push(color);
+            const index = playerSequence.length - 1;
+
+            // 1. Verificar si el último toque es correcto
+            if (playerSequence[index] !== gameSequence[index]) {
+                gameOver();
+                return;
+            }
+
+            // 2. Verificar si completó la secuencia
+            if (playerSequence.length === gameSequence.length) {
+                bloquearInput(true);
+                actualizarHUD("¡Muy bien! 👍", level);
+                level++;
+                setTimeout(playRound, 1500); // Pausa antes del siguiente nivel
+            }
+        }
+
+        function gameOver() {
+            bloquearInput(true);
+            playTone('error');
+            actualizarHUD("¡Oh no! 😔", level);
+            document.body.style.backgroundColor = "#500"; // Flash rojo de fondo
+            
+            setTimeout(() => {
+                document.body.style.backgroundColor = "#222";
+                alert(`Juego terminado. Llegaste al Nivel ${level}`);
+                reiniciarJuego();
+            }, 500);
+        }
+
+        // Bloquea la pantalla transparente para que no toquen mientras suena la máquina
+        function bloquearInput(bloquear) {
+            const layer = document.getElementById('block-layer');
+            if (bloquear) {
+                layer.style.display = 'block';
+                isGameActive = false;
+            } else {
+                layer.style.display = 'none';
+                isGameActive = true;
+            }
+        }
+
+        function actualizarHUD(texto, nivel) {
+            document.getElementById('message-display').innerText = texto;
+            document.getElementById('score-display').innerText = nivel;
+        }
+
+    </script>
+</body>
+</html>

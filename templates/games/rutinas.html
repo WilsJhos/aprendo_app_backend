@@ -1,0 +1,495 @@
+{% extends "game_base.html" %}
+
+{% block game_title %}📋 Rutinas Diarias Inclusivas{% endblock %}
+
+{% block container_extra_class %}rutinas-container{% endblock %}
+
+{% block game_css %}
+<style>
+    :root {
+        --base-accent: #6bcf9c;
+    }
+    /* Ensure rutinas takes full space but stays clean */
+    .rutinas-container {
+        padding: clamp(0.5rem, 2vw, 1.5rem) !important;
+        min-height: auto !important;
+    }
+    .screen { 
+        display: none; 
+        padding: 5px; 
+        animation: fadeIn 0.5s ease;
+        width: 100%;
+    }
+    .screen.active { display: block; }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Modern Form Styling */
+    .form-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--card-border);
+        padding: clamp(1rem, 5vw, 2rem);
+        border-radius: 20px;
+        max-width: 400px;
+        margin: 0 auto;
+        box-shadow: var(--shadow);
+    }
+
+    .input-group {
+        text-align: left;
+        margin-bottom: 1rem;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+        opacity: 0.8;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--card-border);
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: 0.3s;
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: var(--base-accent);
+        box-shadow: 0 0 0 3px rgba(107, 207, 156, 0.2);
+    }
+
+    /* Dynamic Color Chips */
+    .color-palette {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+        max-width: 100%;
+    }
+
+    .color-chip {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .color-chip:hover { transform: scale(1.2); }
+    .color-chip.selected {
+        border-color: white;
+        box-shadow: 0 0 0 2px var(--text-color);
+        transform: scale(1.1);
+    }
+
+    /* Routine Steps */
+    .opciones-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 15px;
+        margin-top: 1.5rem;
+    }
+
+    .routine-choice {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 15px;
+        font-size: clamp(2.5rem, 10vw, 4rem);
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: var(--shadow);
+    }
+
+    .routine-choice:hover {
+        transform: translateY(-5px) scale(1.05);
+        background: var(--base-accent);
+        color: white;
+    }
+
+    .emotion-choice {
+        font-size: clamp(3rem, 15vw, 5rem);
+        cursor: pointer;
+        transition: 0.3s;
+        display: inline-block;
+        margin: 10px;
+    }
+    .emotion-choice:hover { transform: scale(1.3); filter: drop-shadow(0 0 15px var(--base-accent)); }
+
+    .btn-main {
+        background: var(--base-accent);
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 100px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 10px 20px -5px rgba(107, 207, 156, 0.4);
+        margin-top: 10px;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .btn-main:hover { transform: translateY(-2px); box-shadow: 0 15px 25px -5px rgba(107, 207, 156, 0.5); }
+    .btn-main:active { transform: translateY(0); }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--card-border);
+        color: var(--text-color);
+        padding: 10px 24px;
+        border-radius: 100px;
+        cursor: pointer;
+        margin: 5px;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+    .btn-outline:hover { background: var(--card-bg); }
+
+    .error-msg {
+        color: #ff4757;
+        font-size: 0.85rem;
+        margin-top: 10px;
+        font-weight: 600;
+        min-height: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block game_area %}
+<div id="gameArea">
+    <!-- INICIO -->
+    <div id="inicio" class="screen active">
+        <div class="form-card">
+            <h2 style="margin-bottom: 25px;">Hola, ¿quién eres? ✨</h2>
+            
+            <div class="input-group">
+                <label>Tu nombre</label>
+                <input id="nombre" type="text" placeholder="Escribe tu nombre">
+            </div>
+
+            <div class="input-group">
+                <label>Tu edad</label>
+                <input id="edad" type="number" placeholder="¿Cuántos años tienes?">
+            </div>
+
+            <div class="input-group">
+                <label>Condición</label>
+                <select id="condicion">
+                    <option value="">Selecciona una opción</option>
+                    <option value="Autismo" selected>TEA (Espectro Autista)</option>
+                    <option value="TDAH">TDAH</option>
+                    <option value="Otros">Otro superpoder</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Tu color favorito</label>
+                <div class="color-palette" id="palette">
+                    <!-- Color Chips -->
+                    <div class="color-chip selected" style="background: #eef6ff;" onclick="selectColor('#eef6ff', this)"></div>
+                    <div class="color-chip" style="background: #fff5f5;" onclick="selectColor('#fff5f5', this)"></div>
+                    <div class="color-chip" style="background: #f0fff4;" onclick="selectColor('#f0fff4', this)"></div>
+                    <div class="color-chip" style="background: #fffaf0;" onclick="selectColor('#fffaf0', this)"></div>
+                    <div class="color-chip" style="background: #f5f3ff;" onclick="selectColor('#f5f3ff', this)"></div>
+                    <div class="color-chip" style="background: #fff0f6;" onclick="selectColor('#fff0f6', this)"></div>
+                    <div class="color-chip" style="background: #e6fffa;" onclick="selectColor('#e6fffa', this)"></div>
+                    <div class="color-chip" style="background: #feebc8;" onclick="selectColor('#feebc8', this)"></div>
+                    <div class="color-chip" style="background: #c6f6d5;" onclick="selectColor('#c6f6d5', this)"></div>
+                    
+                    <!-- Advanced Options -->
+                    <div class="color-chip" style="background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);" onclick="selectColor('rainbow', this)" title="Arcoíris"></div>
+                    
+                    <!-- Custom Picker -->
+                    <div class="color-chip" style="background: #fff; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;" onclick="document.getElementById('customColor').click()">
+                        🎨
+                    </div>
+                </div>
+                <input type="color" id="customColor" style="display: none;" onchange="selectColor(this.value, document.querySelector('.color-chip:last-child'))">
+            </div>
+
+            <div id="errorInicio" class="error-msg"></div>
+            <button class="btn-main" onclick="entrar()">Entrar al Juego 🚀</button>
+        </div>
+    </div>
+
+    <!-- MENU -->
+    <div id="menu" class="screen">
+        <h2 style="font-size: 2rem; margin-bottom: 30px;">¡Hola <span id="nombreUser" style="color: var(--accent-color);"></span>! 😊</h2>
+        <p style="margin-bottom: 25px; opacity: 0.8;">Escoge el momento del día:</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px; max-width: 300px; margin: 0 auto;">
+            <button class="btn-main" style="background: #f59e0b" onclick="iniciarRutina('manana')">🌞 Mañana</button>
+            <button class="btn-main" style="background: #6366f1" onclick="iniciarRutina('tarde')">🌤️ Tarde</button>
+            <button class="btn-main" style="background: #1e1b4b" onclick="iniciarRutina('noche')">🌙 Noche</button>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <button class="btn-outline" onclick="verRegistro()">📊 Mis Logros</button>
+            <button class="btn-outline" onclick="volverInicio()">🏠 Configurar</button>
+        </div>
+    </div>
+
+    <!-- RUTINA -->
+    <div id="rutina" class="screen" style="max-width: 800px; margin: 0 auto;">
+        <h2 id="tituloPaso" style="font-size: 2.5rem; margin-bottom: 10px;"></h2>
+        <p style="opacity: 0.7; margin-bottom: 20px;">Toca el dibujo correcto</p>
+        <div id="opciones" class="opciones-grid"></div>
+        <div style="margin-top: 50px;">
+            <button class="btn-outline" onclick="mostrar('menu')">⬅ Ver otros horarios</button>
+        </div>
+    </div>
+
+    <!-- EMOCIONES -->
+    <div id="emociones" class="screen">
+        <h2 style="font-size: 2.5rem; margin-bottom: 30px;">¡Fantástico! 🎉</h2>
+        <p style="margin-bottom: 20px;">¿Cómo te sentiste al terminar?</p>
+        <div class="emotion-choice" onclick="emocion('Feliz')">😊</div>
+        <div class="emotion-choice" onclick="emocion('Tranquilo')">😌</div>
+        <div class="emotion-choice" onclick="emocion('Cansado')">😴</div>
+    </div>
+
+    <!-- REGISTRO -->
+    <div id="registro" class="screen">
+        <div class="form-card" style="max-width: 500px;">
+            <h2>📊 Bitácora de Logros</h2>
+            <div id="datosRegistro" style="text-align: left; margin: 20px 0; max-height: 300px; overflow-y: auto;"></div>
+            <button class="btn-main" onclick="mostrar('menu')">Volver al Menú</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block game_js %}
+<script>
+    let nombreActual = "", rutinaTipo = "";
+    let paso = 0;
+    let registros = [];
+    let colorSeleccionado = "#eef6ff";
+
+    const rutinas = {
+        manana: [
+            {t: "¡Buenos días! Es hora de levantarse", c: "🛏️", o: ["🛏️", "🍞", "📺"]},
+            {t: "¡Muy bien! Ahora arregla tu cama", c: "🛏️", o: ["🛏️", "🎮", "📺"]},
+            {t: "Ve al baño", c: "🚽", o: ["🚽", "🍞", "📺"]},
+            {t: "Cepilla tus dientes muy bien", c: "🦷", o: ["🦷", "🍔", "📺"]},
+            {t: "Es momento de vestirse", c: "👕", o: ["👕", "🛌", "📺"]},
+            {t: "A desayunar algo rico", c: "🍞", o: ["🍞", "📺", "🧸"]},
+            {t: "Ponte tus zapatos favoritos", c: "👟", o: ["👟", "🍎", "📺"]},
+            {t: "Prepara tu mochila", c: "🎒", o: ["🎒", "📺", "🧸"]},
+            {t: "Peina tu cabello", c: "🪮", o: ["🪮", "📺", "🛌"]},
+            {t: "¡Listo para salir!", c: "🚪", o: ["🚪", "📺", "🛏️"]}
+        ],
+        tarde: [
+            {t: "Es hora de almorzar", c: "🍽️", o: ["🍽️", "📺", "🎮"]},
+            {t: "Lava tus manos con jabón", c: "👐", o: ["👐", "🍞", "📺"]},
+            {t: "Haz tus deberes con calma", c: "📘", o: ["📘", "📺", "🧸"]},
+            {t: "Lee un poco tu libro favorito", c: "📖", o: ["📖", "📺", "🎮"]},
+            {t: "Tiempo de jugar tranquilo", c: "🧩", o: ["🧩", "📺", "🛌"]},
+            {t: "Guarda tus juguetes en su lugar", c: "🧸", o: ["🧸", "📺", "🍞"]},
+            {t: "Toma un poco de agua", c: "🥤", o: ["🥤", "🍞", "📺"]},
+            {t: "Momento de descansar un rato", c: "😌", o: ["😌", "📺", "🎮"]},
+            {t: "¡Vamos a dibujar algo!", c: "🎨", o: ["🎨", "📺", "🛌"]},
+            {t: "Una merienda saludable", c: "🧁", o: ["🧁", "📺", "🍞"]}
+        ],
+        noche: [
+            {t: "Es momento de cenar", c: "🍽️", o: ["🍽️", "📺", "🎮"]},
+            {t: "Cepilla tus dientes antes de dormir", c: "🦷", o: ["🦷", "🍔", "📺"]},
+            {t: "Ponte tu pijama cómoda", c: "👚", o: ["👚", "🛏️", "📺"]},
+            {t: "Ordena tu cuarto para mañana", c: "🧹", o: ["🧹", "📺", "🛌"]},
+            {t: "Lee un cuento mágico", c: "📖", o: ["📖", "📺", "🎮"]},
+            {t: "Apaga las luces", c: "💡", o: ["💡", "📺", "🎮"]},
+            {t: "¡A la cama!", c: "🛏️", o: ["🛏️", "📺", "🎮"]},
+            {t: "Abraza a tu peluche", c: "🧸", o: ["🧸", "📺", "🍞"]},
+            {t: "Cierra tus ojitos", c: "😴", o: ["😴", "📺", "🎮"]},
+            {t: "¡Dulces sueños!", c: "🛌", o: ["🛌", "📺", "🎮"]}
+        ]
+    };
+
+    function selectColor(color, el) {
+        colorSeleccionado = color;
+        document.querySelectorAll('.color-chip').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        
+        // Update visual feedback for custom icon if it's a hex code
+        if (color.startsWith('#')) {
+            el.style.backgroundColor = color;
+        }
+        
+        if(color === 'rainbow') {
+            document.documentElement.style.setProperty('--bg-color', '#fff');
+            document.querySelector('.game-container').style.background = 'linear-gradient(135deg, #fff5f5, #f0fff4, #eef6ff)';
+        } else {
+            document.documentElement.style.setProperty('--bg-color', color);
+            document.querySelector('.game-container').style.background = 'none';
+        }
+    }
+
+    function mezclar(a) { return a.sort(() => Math.random() - 0.5); }
+
+    function mostrar(id) {
+        document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+    }
+
+    function entrar() {
+        const nombre = document.getElementById('nombre');
+        const edad = document.getElementById('edad');
+        const condicion = document.getElementById('condicion');
+        const errorInicio = document.getElementById('errorInicio');
+
+        // Check values with trim for robustness
+        const nombreVal = nombre.value.trim();
+        const edadVal = edad.value.trim();
+        const condicionVal = condicion.value;
+
+        if (!nombreVal || !edadVal || !condicionVal) {
+            errorInicio.textContent = "¡Ey! Necesito saber quién eres primero 😊";
+            if (window.speak) window.speak("Completa todos los datos");
+            return;
+        }
+        
+        errorInicio.textContent = "";
+        nombreActual = nombreVal;
+        document.getElementById('nombreUser').textContent = nombreActual;
+        
+        // Apply personalized styles safely
+        try {
+            if(colorSeleccionado === 'rainbow') {
+                document.body.style.background = 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%)';
+            } else {
+                document.body.style.backgroundColor = colorSeleccionado;
+            }
+        } catch(e) {}
+
+        // RE-ORDER: Show menu FIRST, then speak for better mobile UX
+        mostrar("menu");
+        if (window.speak) {
+            window.speak("Bienvenido " + nombreActual + ". ¿Por dónde empezamos hoy?");
+        }
+    }
+
+    function iniciarRutina(tipo) {
+        rutinaTipo = tipo;
+        paso = 0;
+        correctInLevel = 0;
+        updateStats(0, true);
+        mostrarPaso();
+    }
+
+    function mostrarPaso() {
+        const p = rutinas[rutinaTipo][paso];
+        const tituloPaso = document.getElementById('tituloPaso');
+        const opciones = document.getElementById('opciones');
+        
+        if (tituloPaso) tituloPaso.textContent = p.t;
+        if (opciones) {
+            opciones.innerHTML = "";
+            mezclar([...p.o]).forEach(op => {
+                const d = document.createElement("div");
+                d.className = "routine-choice";
+                d.textContent = op;
+                d.onclick = () => verificar(op);
+                opciones.appendChild(d);
+            });
+        }
+        
+        // Show screen FIRST for immediate mobile responsiveness
+        mostrar("rutina");
+
+        // Small delay for speak in WebViews
+        setTimeout(() => {
+            if (window.speak) {
+                window.speak(p.t);
+            }
+        }, 100);
+    }
+
+    function verificar(op) {
+        const p = rutinas[rutinaTipo][paso];
+        if (op === p.c) {
+            updateStats(10, true);
+            showFeedback("¡Excelente!", true);
+            if (window.speak) {
+                window.speak("¡Muy bien!", 1.2, 1.8);
+            }
+            paso++;
+            
+            if (paso < rutinas[rutinaTipo].length) {
+                setTimeout(mostrarPaso, 1000);
+            } else {
+                setTimeout(() => mostrar("emociones"), 1000);
+            }
+        } else {
+            showFeedback("Prueba otro dibujo", false);
+            if (window.speak) {
+                window.speak("Intenta con otro", 1.0, 1.4);
+            }
+        }
+    }
+
+    function emocion(sentimiento) {
+        registros.push({
+            nombre: nombreActual,
+            rutina: rutinaTipo,
+            emocion: sentimiento,
+            fecha: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        });
+        
+        // Show menu first
+        mostrar("menu");
+        
+        if (window.speak) {
+            window.speak("¡Lo lograste! Te sientes " + sentimiento + ". Qué buen trabajo.");
+        }
+    }
+
+    function verRegistro() {
+        const datosRegistro = document.getElementById('datosRegistro');
+        if (registros.length === 0) {
+            datosRegistro.innerHTML = "<p style='text-align:center; opacity:0.6'>Aún no hay rutinas completadas.</p>";
+        } else {
+            datosRegistro.innerHTML = registros.map(r => `
+                <div style="background:var(--card-bg); padding:15px; border-radius:15px; margin-bottom:10px; border-left: 5px solid var(--accent-color);">
+                    <strong>👤 ${r.nombre}</strong><br>
+                    <small style="opacity:0.7">📅 ${r.fecha}</small><br>
+                    <div style="margin-top:5px;">
+                        <span>🎮 Rutina de ${r.rutina}</span> | 
+                        <span>✨ Sintiéndose ${r.emocion}</span>
+                    </div>
+                </div>
+            `).join("");
+        }
+        mostrar("registro");
+    }
+
+    function volverInicio() {
+        mostrar("inicio");
+    }
+    
+    // Auto-focus name field and start particles
+    window.onload = () => {
+        createMagicParticles(['☀️', '🌙', '🪥', '🚿', '🥣', '🏫', '🛏️', '🧸', '🧩', '🎨']);
+        setTimeout(() => document.getElementById('nombre').focus(), 500);
+    };
+</script>
+{% endblock %}

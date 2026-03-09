@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABC Mágico - Aprende el Abecedario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            font-size: 2.8em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 1em;
+            opacity: 0.95;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            margin-top: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 3px solid #dee2e6;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .question-area {
+            margin: 30px 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .instruction {
+            font-size: 1.4em;
+            color: #2d3436;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .letter-display {
+            font-size: 8em;
+            color: #ff6b6b;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.3s;
+            user-select: none;
+        }
+
+        .letter-display:hover {
+            transform: scale(1.1);
+        }
+
+        .letter-display:active {
+            transform: scale(0.95);
+        }
+
+        .syllable-display {
+            font-size: 5em;
+            color: #4834df;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .syllable-display:hover {
+            transform: scale(1.1);
+        }
+
+        .word-display {
+            font-size: 3.5em;
+            color: #27ae60;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+        }
+
+        .image-word {
+            max-width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .option-btn {
+            padding: 25px;
+            font-size: 2em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .option-btn:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+        }
+
+        .option-btn:active {
+            transform: translateY(0);
+        }
+
+        .syllable-builder {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .letter-btn {
+            padding: 20px 30px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            min-width: 80px;
+        }
+
+        .letter-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .letter-btn:active {
+            transform: scale(0.95);
+        }
+
+        .speaker-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50%;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            margin: 10px;
+        }
+
+        .speaker-btn:hover {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .speaker-btn:active {
+            transform: scale(0.9);
+        }
+
+        .feedback {
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+            animation: slideIn 0.5s;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-15px); }
+            75% { transform: translateX(15px); }
+        }
+
+        .level-up {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 50px;
+            border-radius: 25px;
+            font-size: 2.5em;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.4);
+            text-align: center;
+        }
+
+        .level-up.show {
+            animation: popup 0.7s forwards;
+        }
+
+        @keyframes popup {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(-180deg);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2) rotate(10deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+        }
+
+        .alphabet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .alphabet-letter {
+            padding: 15px;
+            font-size: 1.8em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .alphabet-letter:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        
+        .emoji-container {
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .letter-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .letter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .current-word-build {
+            font-size: 3em;
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: inset 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .clear-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .clear-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 600px) {
+            .letter-display {
+                font-size: 5em;
+            }
+            
+            .syllable-display {
+                font-size: 3.5em;
+            }
+            
+            .word-display {
+                font-size: 2.5em;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎨 ABC Mágico</h1>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">Nivel</span>
+                <span class="stat-value" id="level">1</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Estrellas</span>
+                <span class="stat-value" id="score">0 ⭐</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Racha</span>
+                <span class="stat-value" id="streak">0 🔥</span>
+            </div>
+            <div class="stat-item">
+                <button id="volumeBtn" style="background: rgba(255,255,255,0.3); border: 2px solid white; border-radius: 10px; padding: 10px 15px; cursor: pointer; font-size: 1.5em;" title="Control de volumen">🔊</button>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress">0/3</div>
+        </div>
+
+        <div class="question-area" id="questionArea">
+            <div class="instruction" id="instruction"></div>
+            <div id="interactionArea"></div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div class="level-up" id="levelUp">
+        ¡Nivel Completado! 🎉<br>
+        <span id="levelName"></span>
+    </div>
+
+    <script>
+        let currentLevel = 1;
+        let score = 0;
+        let streak = 0;
+        let correctInLevel = 0;
+        let currentAnswer = '';
+        let currentWord = '';
+
+        const vowels = ['a', 'e', 'i', 'o', 'u'];
+        const consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'ñ', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'];
+        const alphabet = [...vowels, ...consonants];
+
+        const levels = [
+            {
+                name: "Vocales",
+                type: "learn-vowels",
+                instruction: "Haz clic en la letra para escucharla"
+            },
+            {
+                name: "Reconocer Vocales",
+                type: "identify-vowel",
+                instruction: "¿Qué vocal es?"
+            },
+            {
+                name: "Consonantes Básicas",
+                type: "learn-consonants",
+                instruction: "Aprende las consonantes"
+            },
+            {
+                name: "El Abecedario",
+                type: "alphabet",
+                instruction: "Explora el alfabeto completo"
+            },
+            {
+                name: "Sílabas Simples",
+                type: "syllables-ma",
+                instruction: "Forma la sílaba"
+            },
+            {
+                name: "Lee Sílabas",
+                type: "read-syllables",
+                instruction: "¿Qué dice aquí?"
+            },
+            {
+                name: "Palabras Simples",
+                type: "simple-words",
+                instruction: "¿Qué palabra es?"
+            },
+            {
+                name: "Forma Palabras",
+                type: "build-words",
+                instruction: "Escribe la palabra"
+            },
+            {
+                name: "Lee Palabras",
+                type: "read-words",
+                instruction: "¿Qué dice?"
+            },
+            {
+                name: "Maestro de Palabras",
+                type: "master-words",
+                instruction: "¡Desafío final!"
+            }
+        ];
+
+        const simpleWords = [
+            {word: 'casa', syllables: ['ca', 'sa'], emoji: '🏠', color: '#e74c3c'},
+            {word: 'mama', syllables: ['ma', 'ma'], emoji: '👩', color: '#e91e63'},
+            {word: 'papa', syllables: ['pa', 'pa'], emoji: '👨', color: '#3498db'},
+            {word: 'pato', syllables: ['pa', 'to'], emoji: '🦆', color: '#f39c12'},
+            {word: 'gato', syllables: ['ga', 'to'], emoji: '🐱', color: '#9b59b6'},
+            {word: 'pala', syllables: ['pa', 'la'], emoji: '🏖️', color: '#16a085'},
+            {word: 'luna', syllables: ['lu', 'na'], emoji: '🌙', color: '#34495e'},
+            {word: 'sol', syllables: ['sol'], emoji: '☀️', color: '#f1c40f'},
+            {word: 'mesa', syllables: ['me', 'sa'], emoji: '🪑', color: '#795548'},
+            {word: 'oso', syllables: ['o', 'so'], emoji: '🐻', color: '#8d6e63'},
+            {word: 'perro', syllables: ['pe', 'rro'], emoji: '🐕', color: '#ff5722'},
+            {word: 'pelo', syllables: ['pe', 'lo'], emoji: '💇', color: '#607d8b'},
+            {word: 'mano', syllables: ['ma', 'no'], emoji: '✋', color: '#ffa726'},
+            {word: 'dado', syllables: ['da', 'do'], emoji: '🎲', color: '#ec407a'},
+            {word: 'boca', syllables: ['bo', 'ca'], emoji: '👄', color: '#ef5350'},
+            {word: 'flor', syllables: ['flor'], emoji: '🌸', color: '#e91e63'},
+            {word: 'libro', syllables: ['li', 'bro'], emoji: '📚', color: '#5c6bc0'},
+            {word: 'sapo', syllables: ['sa', 'po'], emoji: '🐸', color: '#66bb6a'},
+            {word: 'toro', syllables: ['to', 'ro'], emoji: '🐂', color: '#8d6e63'},
+            {word: 'nube', syllables: ['nu', 'be'], emoji: '☁️', color: '#90caf9'},
+            {word: 'pera', syllables: ['pe', 'ra'], emoji: '🍐', color: '#9ccc65'},
+            {word: 'mono', syllables: ['mo', 'no'], emoji: '🐵', color: '#a1887f'},
+            {word: 'raton', syllables: ['ra', 'ton'], emoji: '🐭', color: '#78909c'},
+            {word: 'vaca', syllables: ['va', 'ca'], emoji: '🐄', color: '#8d6e63'},
+            {word: 'lobo', syllables: ['lo', 'bo'], emoji: '🐺', color: '#78909c'}
+        ];
+        
+        const letterImages = {
+            'a': {emoji: '🦅', word: 'Águila', color: '#8B4513'},
+            'e': {emoji: '🐘', word: 'Elefante', color: '#95a5a6'},
+            'i': {emoji: '🏝️', word: 'Isla', color: '#3498db'},
+            'o': {emoji: '🐙', word: 'Oso', color: '#8B4513'},
+            'u': {emoji: '🍇', word: 'Uvas', color: '#9b59b6'},
+            'b': {emoji: '🚢', word: 'Barco', color: '#3498db'},
+            'c': {emoji: '🏠', word: 'Casa', color: '#e67e22'},
+            'd': {emoji: '💎', word: 'Diamante', color: '#3498db'},
+            'f': {emoji: '🌸', word: 'Flor', color: '#e91e63'},
+            'g': {emoji: '🐱', word: 'Gato', color: '#f39c12'},
+            'h': {emoji: '🍦', word: 'Helado', color: '#87ceeb'},
+            'j': {emoji: '🦒', word: 'Jirafa', color: '#f39c12'},
+            'k': {emoji: '🥋', word: 'Karate', color: '#e74c3c'},
+            'l': {emoji: '🦁', word: 'León', color: '#f39c12'},
+            'm': {emoji: '🍎', word: 'Manzana', color: '#e74c3c'},
+            'n': {emoji: '🥜', word: 'Nuez', color: '#8B4513'},
+            'ñ': {emoji: '🪵', word: 'Ñandú', color: '#8d6e63'},
+            'p': {emoji: '🦆', word: 'Pato', color: '#f39c12'},
+            'q': {emoji: '🧀', word: 'Queso', color: '#f1c40f'},
+            'r': {emoji: '🐭', word: 'Ratón', color: '#95a5a6'},
+            's': {emoji: '☀️', word: 'Sol', color: '#f39c12'},
+            't': {emoji: '🎺', word: 'Trompeta', color: '#f39c12'},
+            'v': {emoji: '🐄', word: 'Vaca', color: '#8d6e63'},
+            'w': {emoji: '🍉', word: 'Sandía', color: '#e74c3c'},
+            'x': {emoji: '🎷', word: 'Xilófono', color: '#e67e22'},
+            'y': {emoji: '🪀', word: 'Yoyo', color: '#3498db'},
+            'z': {emoji: '👟', word: 'Zapato', color: '#34495e'}
+        };
+
+        // Sintetizador de voz mejorado
+        const synth = window.speechSynthesis;
+        let voiceLoaded = false;
+        let spanishVoice = null;
+        
+        // Cargar voces disponibles
+        function loadVoices() {
+            const voices = synth.getVoices();
+            // Buscar voz en español
+            spanishVoice = voices.find(voice => voice.lang.startsWith('es')) || voices[0];
+            voiceLoaded = true;
+        }
+        
+        // Cargar voces cuando estén disponibles
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+        
+        function speak(text, rate = 1.0, pitch = 1.0) {
+            return new Promise((resolve) => {
+                synth.cancel();
+                
+                // Esperar un momento antes de hablar
+                setTimeout(() => {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'es-ES';
+                    utterance.rate = rate;
+                    utterance.pitch = pitch;
+                    utterance.volume = 1.0;
+                    
+                    if (spanishVoice) {
+                        utterance.voice = spanishVoice;
+                    }
+                    
+                    utterance.onend = () => resolve();
+                    utterance.onerror = () => resolve();
+                    
+                    synth.speak(utterance);
+                }, 100);
+            });
+        }
+
+        function speakLetter(letter) {
+            speak(letter, 0.7, 1.3);
+        }
+
+        function speakSyllable(syllable) {
+            speak(syllable, 0.8, 1.2);
+        }
+
+        function speakWord(word) {
+            speak(word, 0.9, 1.1);
+        }
+
+        function generateQuestion() {
+            const level = levels[currentLevel - 1];
+            document.getElementById('instruction').textContent = level.instruction;
+            document.getElementById('feedback').style.display = 'none';
+            
+            switch(level.type) {
+                case 'learn-vowels':
+                    generateLearnVowels();
+                    break;
+                case 'identify-vowel':
+                    generateIdentifyVowel();
+                    break;
+                case 'learn-consonants':
+                    generateLearnConsonants();
+                    break;
+                case 'alphabet':
+                    generateAlphabet();
+                    break;
+                case 'syllables-ma':
+                    generateSyllables();
+                    break;
+                case 'read-syllables':
+                    generateReadSyllables();
+                    break;
+                case 'simple-words':
+                    generateSimpleWords();
+                    break;
+                case 'build-words':
+                    generateBuildWords();
+                    break;
+                case 'read-words':
+                    generateReadWords();
+                    break;
+                case 'master-words':
+                    generateMasterWords();
+                    break;
+            }
+        }
+
+        function generateLearnVowels() {
+            const area = document.getElementById('interactionArea');
+            area.innerHTML = '';
+            
+            const container = document.createElement('div');
+            container.className = 'syllable-builder';
+            
+            vowels.forEach(vowel => {
+                const btnContainer = document.createElement('div');
+                btnContainer.style.textAlign = 'center';
+                btnContainer.style.margin = '10px';
+                
+                const emoji = document.createElement('div');
+                emoji.style.fontSize = '4em';
+                emoji.style.marginBottom = '15px';
+                emoji.style.cursor = 'pointer';
+                emoji.textContent = letterImages[vowel].emoji;
+                emoji.onclick = async () => {
+                    await speakLetter(vowel);
+                    setTimeout(() => speak(letterImages[vowel].word, 0.9, 1.1), 300);
+                    emoji.style.transform = 'scale(1.3)';
+                    setTimeout(() => emoji.style.transform = 'scale(1)', 300);
+                };
+                
+                const btn = document.createElement('button');
+                btn.className = 'letter-btn';
+                btn.textContent = vowel.toUpperCase();
+                btn.style.background = `linear-gradient(135deg, ${letterImages[vowel].color} 0%, ${letterImages[vowel].color}dd 100%)`;
+                btn.onclick = async () => {
+                    await speakLetter(vowel);
+                    setTimeout(() => speak(letterImages[vowel].word, 0.9, 1.1), 300);
+                    btn.style.transform = 'scale(1.2)';
+                    setTimeout(() => btn.style.transform = 'scale(1)', 300);
+                };
+                
+                const label = document.createElement('div');
+                label.style.fontSize = '1.1em';
+                label.style.marginTop = '8px';
+                label.style.color = '#333';
+                label.style.fontWeight = 'bold';
+                label.textContent = letterImages[vowel].word;
+                
+                btnContainer.appendChild(emoji);
+                btnContainer.appendChild(btn);
+                btnContainer.appendChild(label);
+                container.appendChild(btnContainer);
+            });
+            
+            area.appendChild(container);
+            
+            // Mensaje de ayuda
+            const hint = document.createElement('div');
+            hint.style.marginTop = '20px';
+            hint.style.fontSize = '1.1em';
+            hint.style.color = '#666';
+            hint.textContent = '👆 Haz clic en las letras para escucharlas';
+            area.appendChild(hint);
+            
+            // Auto avanzar después de interactuar
+            setTimeout(() => {
+                correctInLevel = 3;
+                levelUp();
+            }, 18000);
+        }
+
+        function generateIdentifyVowel() {
+            const vowel = vowels[Math.floor(Math.random() * vowels.length)];
+            currentAnswer = vowel;
+            
+            const area = document.getElementById('interactionArea');
+            area.innerHTML = '';
+            
+            const emojiDisplay = document.createElement('div');
+            emojiDisplay.style.fontSize = '6em';
+            emojiDisplay.style.margin = '20px 0';
+            emojiDisplay.textContent = letterImages[vowel].emoji;
+            area.appendChild(emojiDisplay);
+            
+            const display = document.createElement('div');
+            display.className = 'letter-display';
+            display.textContent = vowel.toUpperCase();
+            display.style.color = letterImages[vowel].color;
+            display.onclick = () => speakLetter(vowel);
+            area.appendChild(display);
+            
+            const speaker = document.createElement('button');
+            speaker.className = 'speaker-btn';
+            speaker.textContent = '🔊';
+            speaker.onclick = () => speakLetter(vowel);
+            area.appendChild(speaker);
+            
+            setTimeout(() => speakLetter(vowel), 500);
+            
+            const options = [vowel];
+            const otherVowels = vowels.filter(v => v !== vowel);
+            while(options.length < 5) {
+                const opt = otherVowels[Math.floor(Math.random() * otherVowels.length)];
+                if(!options.includes(opt)) options.push(opt);
+            }
+            
+            shuffle(options);
+            createLetterOptions(options);
+        }
+
+        function generateLearnConsonants() {
+            const area = document.getElementById('interactionArea');
+            area.innerHTML = '';
+            
+            const consonantsToLearn = ['m', 'p', 's', 't', 'l', 'n', 'd', 'r', 'b', 'c', 'f', 'g'];
+            
+            const grid = document.createElement('div');
+            grid.className = 'alphabet-grid';
+            grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(90px, 1fr))';
+            
+            consonantsToLearn.forEach(consonant => {
+                const container = document.createElement('div');
+                container.style.textAlign = 'center';
+                container.style.padding = '10px';
+                
+                const emoji = document.createElement('div');
+                emoji.style.fontSize = '2.5em';
+                emoji.style.marginBottom = '8px';
+                emoji.style.cursor = 'pointer';
+                emoji.textContent = letterImages[consonant].emoji;
+                emoji.onclick = async () => {
+                    await speakLetter(consonant);
+                    setTimeout(() => speak(letterImages[consonant].word, 0.9, 1.1), 300);
+                    emoji.style.transform = 'scale(1.3) rotate(10deg)';
+                    setTimeout(() => emoji.style.transform = 'scale(1) rotate(0deg)', 300);
+                };
+                
+                const btn = document.createElement('button');
+                btn.className = 'alphabet-letter';
+                btn.textContent = consonant.toUpperCase();
+                btn.style.background = `linear-gradient(135deg, ${letterImages[consonant].color} 0%, ${letterImages[consonant].color}dd 100%)`;
+                btn.onclick = async () => {
+                    await speakLetter(consonant);
+                    setTimeout(() => speak(letterImages[consonant].word, 0.9, 1.1), 300);
+                    btn.style.transform = 'scale(1.15)';
+                    btn.style.boxShadow = '0 10px 30px rgba(0,0,0,0.4)';
+                    setTimeout(() => {
+                        btn.style.transform = 'scale(1)';
+                        btn.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
+                    }, 300);
+                };
+                
+                const label = document.createElement('div');
+                label.style.fontSize = '0.85em';
+                label.style.marginTop = '5px';
+                label.style.color = '#444';
+                label.style.fontWeight = '600';
+                label.textContent = letterImages[consonant].word;
+                
+                container.appendChild(emoji);
+                container.appendChild(btn);
+                container.appendChild(label);
+                grid.appendChild(container);
+            });
+            
+            area.appendChild(grid);
+            
+            // Mensaje de ayuda
+            const hint = document.createElement('div');
+            hint.style.marginTop = '20px';
+            hint.style.fontSize = '1.1em';
+            hint.style.color = '#666';
+            hint.textContent = '🎵 Toca cada letra para aprender';
+            area.appendChild(hint);
+            
+            setTimeout(() => {
+                correctInLevel = 3;
+                levelUp();
+            }, 25000);
+        }
+
+        function generateAlphabet() {
+            const area = document.getElementById('interactionArea');
+            area.innerHTML = '';
+            
+            const grid = document.createElement('div');
+            grid.className = 'alphabet-grid';
+            grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(75px, 1fr))';
+            
+            alphabet.forEach(letter => {
+                const container = document.createElement('div');
+                container.style.textAlign = 'center';
+                container.style.padding = '8px';
+                
+                const emoji = document.createElement('div');
+                emoji.style.fontSize = '2em';
+                emoji.style.marginBottom = '5px';
+                emoji.style.cursor = 'pointer';
+                emoji.textContent = letterImages[letter].emoji;
+                emoji.onclick = async () => {
+                    await speakLetter(letter);
+                    setTimeout(() => speak(letterImages[letter].word, 0.9, 1.1), 300);
+                    emoji.style.transform = 'scale(1.4) rotate(15deg)';
+                    setTimeout(() => emoji.style.transform = 'scale(1) rotate(0deg)', 400);
+                };
+                
+                const btn = document.createElement('button');
+                btn.className = 'alphabet-letter';
+                btn.textContent = letter.toUpperCase();
+                btn.style.background = `linear-gradient(135deg, ${letterImages[letter].color} 0%, ${letterImages[letter].color}dd 100%)`;
+                btn.style.fontSize = '1.5em';
+                btn.style.padding = '12px';
+                btn.onclick = async () => {
+                    await speakLetter(letter);
+                    setTimeout(() => speak(letterImages[letter].word, 0.9, 1.1), 300);
+                    btn.style.transform = 'scale(1.2)';
+                    btn.style.boxShadow = '0 12px 30px rgba(0,0,0,0.4)';
+                    setTimeout(() => {
+                        btn.style.transform = 'scale(1)';
+                        btn.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
+                    }, 400);
+                };
+                
+                container.appendChild(emoji);
+                container.appendChild(btn);
+                grid.appendChild(container);
+            });
+            
+            area.appendChild(grid);
+            
+            // Mensaje de ayuda
+            const hint = document.createElement('div');
+            hint.style.marginTop = '20px';
+            hint.style.fontSize = '1.2em';
+            hint.style.color = '#555';
+            hint.style.fontWeight = 'bold';
+            hint.textContent = '📖 ¡Explora todo el alfabeto!';
+            area.appendChild(hint);
+            
+            setTimeout(() => {
+                correctInLevel = 3;
+                levelUp();
+            }, 30000);
+        }
+
+        function generateSyllables() {
+            const consonantsSimple = ['m', 'p', 's', 't', 'l', 'n'];
+            const consonant = consonantsSimple[Math.floor(Math.random() * consonantsSimple.length)];
+            const vowel = vowels[Math.floor(Math.random() * vowels.length)];
+            const syllable = consonant + vowel;
+            currentAnswer = syllable;
+            
+            const area = document.getElementById('interactionArea');
+            area.innerHTML = '';
+            
+            const display = document.createElement('div');
+            display.className = 'syllable-display';
+            display.textContent = syllable.toUpperCase();
+            display.onclick = () => speakSyllable(syllable);
+            area.appendChild(display);
+            
+            const speaker = document.createElement('button');
+            speaker.className = 'speaker-btn';
+            speaker.textContent = '🔊';
+            speaker.onclick = () => speakSyllable(syllable);
+            area.appendChild(speaker);
+            
+            setTimeout(() => speakSyllable(syllable), 500);
+            
+            const options = [syllable];
+            while(options.length < 4) {
+                const c = consonantsSimple[Math.floor(Math.random() * consonantsSimple.length)];
+                const v = vowels[Math.floor(Math.random() * vowels.length)];
+                const opt = c + v;
+                if(!options.includes(opt)) options.push(opt);
+            }
+            
+            shuffle(options);
+            createSyllableOptions(options);
+        }
+
+        function generateReadSyllables() {
+            const syllables = ['ma', 'pa', 'sa', 'ta', 'la', 'me', 'pe', 'se', 'te', 'le', 
+                              'mi', 'pi', 'si', 'ti', 'li', 'mo', 'po', 'so', 'to', 'lo',
+                              'mu', 'pu', 'su', 'tu', 'lu', 'na', 'da', 'ra', 'ca', 'ga'];
+            
+            const syllable = syllables[Math.floor(Math.random() * syllables.length)];
+            currentAnswer = syllable;
+            
+            const area = document.getElementById('interactionArea');
+            area.innerHTML = '';
+            
+            const display = document.createElement('div');
+            display.className = 'syllable-display';
+            display.textContent = syllable.toUpperCase();
+            display.onclick = () => speakSyllable(syllable);
+            area.appendChild(display);
+            
+            const speaker = document.createElement('button');
+            speaker.className = 'speaker-btn';
+            speaker.textContent = '🔊 Escuchar';
+            speaker.onclick = () => speakSyllable(syllable);
+            area.appendChild(speaker);
+            
+            const options = [syllable];
+            while(options.length < 4) {
+                const opt = syllables[Math.floor(Math.random() * syllables.length)];
+                if(!options.includes(opt)) options.push(opt);
+            }
+            
+            shuffle(options);
+            createSyllableOptions(options);
+        }
+
+        function generateSimpleWords() {
+            const wordObj = simpleWords[Math.floor(Math.random() * simpleWords.length)];
+            currentAnswer = wordObj.word;
+            
+            const area = document.getElementById('interactionArea');
+            area.innerHTML = '';
+            
+            const emojiDisplay = document.createElement('div');
+            emojiDisplay.style.fontSize = '8em';
+            emojiDisplay.style.margin = '20px 0';
+            emojiDisplay.textContent = wordObj.emoji;
+            area.appendChild(emojiDisplay);
+            
+            const display = document.createElement('div');
+            display.className = 'word-display';
+            display.textContent = wordObj.word.toUpperCase();
+            display.style.color = wordObj.color;
+            display.onclick = () => speakWord(wordObj.word);
+            area.appendChild(display);
+            
+            const speaker = document.createElement('button');
+            speaker.className = 'speaker-btn';
+            speaker.textContent = '🔊 Escuchar';
+            speaker.onclick = () => speakWord(wordObj.word);
+            area.appendChild(speaker);
+            
+            setTimeout(() => speakWord(wordObj.word), 500);
+            
+            const options = [wordObj.word];
+            while(options.length < 3) {
+                const opt = simpleWords[Math.floor(Math.random() * simpleWords.length)].word;
+                if(!options.includes(opt)) options.push(opt);
+            }
+            
+            shuffle(options);
+            createWordOptions(options);
+        }
+
+        function generateBuildWords() {
+            const wordObj = simpleWords[Math.floor(Math.random() * simpleWords.length)];
+            currentAnswer = wordObj.word;
+            currentWord = '';
+            
+            const area = document.getElementById('interactionArea');
+            area.innerHTML = '';
+            
+            speak(`Escribe la palabra: ${wordObj.word}`, 0.7);
+            
+            const emojiDisplay = document.createElement('div');
+            emojiDisplay.style.fontSize = '7em';
+            emojiDisplay.style.margin = '20px 0';
+            emojiDisplay.textContent = wordObj.emoji;
+            area.appendChild(emojiDisplay);
+            
+            const currentDisplay = document.createElement('div');
+            currentDisplay.className = 'current-word-build';
+            currentDisplay.id = 'currentWordBuild';
+            currentDisplay.textContent = '___';
+            currentDisplay.style.color = wordObj.color;
+            area.appendChild(currentDisplay);
+            
+            const speaker = document.createElement('button');
+            speaker.className = 'speaker-btn';
+            speaker.textContent = '🔊 Repetir';
+            speaker.onclick = () => speakWord(wordObj.word);
+            area.appendChild(speaker);
+            
+            const letters = [...new Set(wordObj.word.split(''))];
+            const extraLetters = ['a', 'e', 'i', 'o', 'u', 'm', 'p', 's', 't', 'l', 'n'];
+            const allLetters = [...letters];
+            
+            while(allLetters.length < 8) {
+                const extra = extraLetters[Math.floor(Math.random() * extraLetters.length)];
+                if(!allLetters.includes(extra)) allLetters.push(extra);
+            }
+            
+            shuffle(allLetters);
+            
+            const letterGrid = document.createElement('div');
+            letterGrid.className = 'syllable-builder';
+            
+            allLetters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'letter-btn';
+                btn.textContent = letter.toUpperCase();
+                btn.onclick = () => {
+                    currentWord += letter;
+                    currentDisplay.textContent = currentWord.toUpperCase();
+                    speakLetter(letter);
+                    
+                    if(currentWord.length === wordObj.word.length) {
+                        setTimeout(() => checkAnswer(currentWord), 500);
+                    }
+                };
+                letterGrid.appendChild(btn);
+            });
+            
+            area.appendChild(letterGrid);
+            
+            const clearBtn = document.createElement('button');
+            clearBtn.className = 'clear-btn';
+            clearBtn.textContent = '🗑️ Borrar';
+            clearBtn.onclick = () => {
+                currentWord = '';
+                currentDisplay.textContent = '___';
+            };
+            area.appendChild(clearBtn);
+        }
+
+        function generateReadWords() {
+            const wordObj = simpleWords[Math.floor(Math.random() * simpleWords.length)];
+            currentAnswer = wordObj.word;
+            
+            const area = document.getElementById('interactionArea');
+            area.innerHTML = '';
+            
+            const emojiDisplay = document.createElement('div');
+            emojiDisplay.style.fontSize = '8em';
+            emojiDisplay.style.margin = '20px 0';
+            emojiDisplay.textContent = wordObj.emoji;
+            area.appendChild(emojiDisplay);
+            
+            const display = document.createElement('div');
+            display.className = 'word-display';
+            display.textContent = wordObj.word.toUpperCase();
+            display.style.color = wordObj.color;
+            area.appendChild(display);
+            
+            speak(`¿Qué palabra es?`, 0.8);
+            
+            const options = [wordObj.word];
+            while(options.length < 4) {
+                const opt = simpleWords[Math.floor(Math.random() * simpleWords.length)].word;
+                if(!options.includes(opt)) options.push(opt);
+            }
+            
+            shuffle(options);
+            createAudioOptions(options);
+        }
+
+        function generateMasterWords() {
+            const types = ['simple-words', 'build-words', 'read-words'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            if(type === 'simple-words') generateSimpleWords();
+            else if(type === 'build-words') generateBuildWords();
+            else generateReadWords();
+        }
+
+        function createLetterOptions(options) {
+            const area = document.getElementById('interactionArea');
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt.toUpperCase();
+                btn.onclick = () => checkAnswer(opt);
+                optionsDiv.appendChild(btn);
+            });
+            
+            area.appendChild(optionsDiv);
+        }
+
+        function createSyllableOptions(options) {
+            const area = document.getElementById('interactionArea');
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt.toUpperCase();
+                btn.onclick = () => {
+                    speakSyllable(opt);
+                    setTimeout(() => checkAnswer(opt), 600);
+                };
+                optionsDiv.appendChild(btn);
+            });
+            
+            area.appendChild(optionsDiv);
+        }
+
+        function createWordOptions(options) {
+            const area = document.getElementById('interactionArea');
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt.toUpperCase();
+                btn.onclick = () => {
+                    speakWord(opt);
+                    setTimeout(() => checkAnswer(opt), 800);
+                };
+                optionsDiv.appendChild(btn);
+            });
+            
+            area.appendChild(optionsDiv);
+        }
+
+        function createAudioOptions(options) {
+            const area = document.getElementById('interactionArea');
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = '🔊';
+                btn.onclick = () => {
+                    speakWord(opt);
+                    setTimeout(() => checkAnswer(opt), 1000);
+                };
+                optionsDiv.appendChild(btn);
+            });
+            
+            area.appendChild(optionsDiv);
+        }
+
+        function checkAnswer(answer) {
+            const feedback = document.getElementById('feedback');
+            
+            if(answer === currentAnswer) {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '¡Excelente! ⭐🎉🎊 ¡Lo hiciste muy bien!';
+                speak('¡Correcto! ¡Muy bien! ¡Excelente!', 0.9, 1.2);
+                score += 10;
+                streak++;
+                correctInLevel++;
+                
+                // Agregar confetti visual
+                createConfetti();
+                
+                updateStats();
+                
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                    
+                    if(correctInLevel >= 3) {
+                        levelUp();
+                    } else {
+                        generateQuestion();
+                    }
+                }, 2500);
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `Intenta de nuevo 😊<br>La respuesta era: <strong>${currentAnswer.toUpperCase()}</strong>`;
+                speak(`Intenta de nuevo. La respuesta correcta es: ${currentAnswer}`, 0.85, 1.1);
+                streak = 0;
+                updateStats();
+                
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                    generateQuestion();
+                }, 3500);
+            }
+        }
+        
+        function createConfetti() {
+            const confettiEmojis = ['⭐', '🎉', '🎊', '✨', '💫', '🌟'];
+            for(let i = 0; i < 15; i++) {
+                const confetti = document.createElement('div');
+                confetti.textContent = confettiEmojis[Math.floor(Math.random() * confettiEmojis.length)];
+                confetti.style.position = 'fixed';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-50px';
+                confetti.style.fontSize = '2em';
+                confetti.style.zIndex = '9999';
+                confetti.style.pointerEvents = 'none';
+                document.body.appendChild(confetti);
+                
+                const duration = 2000 + Math.random() * 1000;
+                const animation = confetti.animate([
+                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                    { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 720}deg)`, opacity: 0 }
+                ], {
+                    duration: duration,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                });
+                
+                animation.onfinish = () => confetti.remove();
+            }
+        }
+
+        function levelUp() {
+            const levelUpDiv = document.getElementById('levelUp');
+            const levelName = document.getElementById('levelName');
+            
+            levelUpDiv.className = 'level-up show';
+            levelName.textContent = levels[currentLevel - 1].name;
+            
+            speak('¡Nivel completado! ¡Felicidades! ¡Muy bien!', 0.9, 1.2);
+            
+            setTimeout(() => {
+                levelUpDiv.className = 'level-up';
+                currentLevel++;
+                correctInLevel = 0;
+                
+                if(currentLevel > levels.length) {
+                    speak('¡Felicidades! ¡Has completado todos los niveles! ¡Eres un maestro del abecedario!', 0.9, 1.1);
+                    setTimeout(() => {
+                        alert('🏆 ¡FELICIDADES! 🏆\n\n¡Has completado ABC Mágico!\n\nYa conoces el abecedario completo y puedes leer palabras.\n\n¡Eres increíble! ⭐⭐⭐');
+                        currentLevel = 1;
+                        score = 0;
+                    }, 3000);
+                }
+                
+                updateStats();
+                generateQuestion();
+            }, 3000);
+        }
+
+        function updateStats() {
+            document.getElementById('level').textContent = currentLevel;
+            document.getElementById('score').textContent = score + ' ⭐';
+            document.getElementById('streak').textContent = streak + ' 🔥';
+            
+            const progress = document.getElementById('progress');
+            progress.style.width = `${(correctInLevel / 3) * 100}%`;
+            progress.textContent = `${correctInLevel}/3`;
+        }
+
+        function shuffle(array) {
+            for(let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Iniciar el juego
+        setTimeout(() => {
+            // Configurar botón de volumen
+            const volumeBtn = document.getElementById('volumeBtn');
+            let soundEnabled = true;
+            
+            volumeBtn.onclick = () => {
+                soundEnabled = !soundEnabled;
+                volumeBtn.textContent = soundEnabled ? '🔊' : '🔇';
+                if(soundEnabled) {
+                    speak('Sonido activado', 0.9, 1.1);
+                } else {
+                    synth.cancel();
+                }
+            };
+            
+            // Mensaje de bienvenida
+            speak('¡Bienvenido a A B C Mágico! ¡Vamos a aprender el abecedario!', 0.9, 1.1);
+            generateQuestion();
+        }, 500);
+    </script>
+</body>
+</html>

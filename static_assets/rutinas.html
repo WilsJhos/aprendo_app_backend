@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Rutinas Diarias Inclusivas</title>
+
+<style>
+:root{ --fondo:#eef6ff; }
+
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: var(--fondo);
+  text-align:center;
+  transition: background 0.5s;
+}
+
+.screen{ display:none; padding:20px; }
+.active{ display:block; }
+
+button{
+  padding:14px 26px;
+  font-size:18px;
+  margin:8px;
+  border:none;
+  border-radius:16px;
+  background:#6bcf9c;
+  color:white;
+  cursor:pointer;
+}
+
+button.sec{ background:#6c7ae0; }
+
+input, select{
+  padding:10px;
+  font-size:16px;
+  margin:6px;
+}
+
+.routine{
+  font-size:60px;
+  cursor:pointer;
+  margin:10px;
+  display:inline-block;
+}
+
+#btnSonido{
+  position:fixed;
+  top:15px;
+  left:15px;
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  border:none;
+  font-size:26px;
+  background:#4CAF50;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#btnSonido.off{ background:#e74c3c; }
+
+.error{ color:red; font-weight:bold; }
+</style>
+</head>
+
+<body>
+
+<button id="btnSonido" onclick="toggleSonido()">🔊</button>
+
+<!-- BIENVENIDA -->
+<div id="inicio" class="screen active">
+  <h1>Bienvenido 🌈</h1>
+
+  <input id="nombre" placeholder="Nombre"><br>
+  <input id="edad" type="number" placeholder="Edad"><br>
+
+  <select id="condicion">
+    <option value="">Selecciona condición</option>
+    <option value="Autismo">Autismo</option>
+    <option value="TDAH">TDAH</option>
+    <option value="Otros">Otros</option>
+  </select><br>
+
+  <label>🎨 Color preferido</label><br>
+  <input type="color" id="colorFondo" value="#eef6ff"><br>
+
+  <div id="errorInicio" class="error"></div>
+
+  <button onclick="entrar()">Entrar</button>
+</div>
+
+<!-- MENU -->
+<div id="menu" class="screen">
+  <h2>Hola <span id="nombreUser"></span> 😊</h2>
+
+  <button onclick="iniciarRutina('manana')">🌞 Mañana</button>
+  <button onclick="iniciarRutina('tarde')">🌤️ Tarde</button>
+  <button onclick="iniciarRutina('noche')">🌙 Noche</button>
+  <button onclick="verRegistro()">📊 Registro</button>
+  <button class="sec" onclick="volverInicio()">🏠 Volver a inicio</button>
+</div>
+
+<!-- RUTINA -->
+<div id="rutina" class="screen">
+  <h2 id="tituloPaso"></h2>
+  <div id="opciones"></div>
+  <button class="sec" onclick="mostrar('menu')">⬅ Regresar</button>
+</div>
+
+<!-- EMOCIONES -->
+<div id="emociones" class="screen">
+  <h2>¿Cómo te sentiste?</h2>
+  <div class="routine" onclick="emocion()">😊</div>
+  <div class="routine" onclick="emocion()">😌</div>
+  <div class="routine" onclick="emocion()">😴</div>
+</div>
+
+<!-- REGISTRO -->
+<div id="registro" class="screen">
+  <h2>Registro del terapeuta</h2>
+  <div id="datosRegistro"></div>
+  <button onclick="mostrar('menu')">Volver</button>
+</div>
+
+<script>
+let sonidoActivo=true;
+let nombreActual="", rutinaTipo="";
+let paso=0;
+let registros=[];
+
+/* ========= RUTINAS ========= */
+const rutinas={
+manana:[
+{t:"Levantarse", c:"🛏️", o:["🛏️","🍞","📺"]},
+{t:"Arreglar la cama", c:"🛏️", o:["🛏️","🎮","📺"]},
+{t:"Ir al baño", c:"🚽", o:["🚽","🍞","📺"]},
+{t:"Lavarse los dientes", c:"🦷", o:["🦷","🍔","📺"]},
+{t:"Vestirse", c:"👕", o:["👕","🛌","📺"]},
+{t:"Desayunar", c:"🍞", o:["🍞","📺","🧸"]},
+{t:"Ponerse zapatos", c:"👟", o:["👟","🍎","📺"]},
+{t:"Mochila lista", c:"🎒", o:["🎒","📺","🧸"]},
+{t:"Peinarse", c:"🪮", o:["🪮","📺","🛌"]},
+{t:"Salir de casa", c:"🚪", o:["🚪","📺","🛏️"]}
+],
+
+tarde:[
+{t:"Almorzar", c:"🍽️", o:["🍽️","📺","🎮"]},
+{t:"Lavarse las manos", c:"👐", o:["👐","🍞","📺"]},
+{t:"Hacer tareas", c:"📘", o:["📘","📺","🧸"]},
+{t:"Leer", c:"📖", o:["📖","📺","🎮"]},
+{t:"Jugar tranquilo", c:"🧩", o:["🧩","📺","🛌"]},
+{t:"Guardar juguetes", c:"🧸", o:["🧸","📺","🍞"]},
+{t:"Tomar agua", c:"🥤", o:["🥤","🍞","📺"]},
+{t:"Descansar", c:"😌", o:["😌","📺","🎮"]},
+{t:"Dibujar", c:"🎨", o:["🎨","📺","🛌"]},
+{t:"Merienda", c:"🧁", o:["🧁","📺","🍞"]}
+],
+
+noche:[
+{t:"Cenar", c:"🍽️", o:["🍽️","📺","🎮"]},
+{t:"Lavarse los dientes", c:"🦷", o:["🦷","🍔","📺"]},
+{t:"Ponerse pijama", c:"👚", o:["👚","🛏️","📺"]},
+{t:"Ordenar cuarto", c:"🧹", o:["🧹","📺","🛌"]},
+{t:"Leer cuento", c:"📖", o:["📖","📺","🎮"]},
+{t:"Apagar luces", c:"💡", o:["💡","📺","🎮"]},
+{t:"Ir a la cama", c:"🛏️", o:["🛏️","📺","🎮"]},
+{t:"Abrazar peluche", c:"🧸", o:["🧸","📺","🍞"]},
+{t:"Cerrar ojos", c:"😴", o:["😴","📺","🎮"]},
+{t:"Dormir", c:"🛌", o:["🛌","📺","🎮"]}
+]
+};
+
+function mezclar(a){ return a.sort(()=>Math.random()-0.5); }
+
+/* ========= SONIDO ========= */
+function toggleSonido(){
+  sonidoActivo=!sonidoActivo;
+  btnSonido.textContent=sonidoActivo?"🔊":"🔇";
+  btnSonido.classList.toggle("off",!sonidoActivo);
+}
+
+function hablar(texto){
+  if(!sonidoActivo) return;
+  const v=new SpeechSynthesisUtterance(texto);
+  v.lang="es-ES";
+  v.rate=0.9;
+  speechSynthesis.speak(v);
+}
+
+/* ========= NAVEGACIÓN ========= */
+function mostrar(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function entrar(){
+  if(!nombre.value || !edad.value || !condicion.value){
+    errorInicio.textContent="Completa todos los datos";
+    hablar("Completa todos los datos");
+    return;
+  }
+  errorInicio.textContent="";
+  nombreActual=nombre.value;
+  document.documentElement.style.setProperty('--fondo', colorFondo.value);
+  nombreUser.textContent=nombreActual;
+  hablar("Bienvenido "+nombreActual);
+  mostrar("menu");
+}
+
+function iniciarRutina(tipo){
+  rutinaTipo=tipo;
+  paso=0;
+  mostrarPaso();
+}
+
+function mostrarPaso(){
+  const p=rutinas[rutinaTipo][paso];
+  tituloPaso.textContent=p.t;
+  opciones.innerHTML="";
+  mezclar([...p.o]).forEach(op=>{
+    const d=document.createElement("div");
+    d.className="routine";
+    d.textContent=op;
+    d.onclick=()=>verificar(op);
+    opciones.appendChild(d);
+  });
+  hablar(p.t);
+  mostrar("rutina");
+}
+
+function verificar(op){
+  const p=rutinas[rutinaTipo][paso];
+  if(op===p.c){
+    hablar("Correcto");
+    paso++;
+    paso<rutinas[rutinaTipo].length ? mostrarPaso() : mostrar("emociones");
+  }else{
+    hablar("Incorrecto, intenta otra vez");
+  }
+}
+
+function emocion(){
+  registros.push({
+    nombre:nombreActual,
+    rutina:rutinaTipo,
+    fecha:new Date().toLocaleDateString()
+  });
+  hablar("Muy bien, terminaste la rutina");
+  mostrar("menu");
+}
+
+function verRegistro(){
+  datosRegistro.innerHTML=registros.map(r=>`
+    👤 ${r.nombre}<br>
+    🎮 ${r.rutina}<br>
+    📅 ${r.fecha}<hr>
+  `).join("");
+  mostrar("registro");
+}
+
+function volverInicio(){
+  nombre.value="";
+  edad.value="";
+  condicion.value="";
+  mostrar("inicio");
+}
+</script>
+
+</body>
+</html>

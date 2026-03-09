@@ -1,0 +1,121 @@
+[
+  {
+    "model": "core.gamesection",
+    "pk": 1,
+    "fields": {
+      "id_name": "abc",
+      "emoji": "🎨",
+      "title": "ABC Mágico",
+      "description": "Vocales, consonantes, sílabas y palabras con voz y animaciones.",
+      "tags": [
+        "📚 Lenguaje",
+        "⭐ 10 niveles"
+      ],
+      "color_class": "c1",
+      "file_name": "abc_magico.html",
+      "nav_label": "🎨 ABC"
+    }
+  },
+  {
+    "model": "core.gamesection",
+    "pk": 2,
+    "fields": {
+      "id_name": "numeros",
+      "emoji": "🔢",
+      "title": "Número Master",
+      "description": "Suma, resta, secuencias y tablas. Matemáticas con retroalimentación de voz.",
+      "tags": [
+        "🧮 Matemáticas",
+        "⭐ 10 niveles"
+      ],
+      "color_class": "c2",
+      "file_name": "numero_master.html",
+      "nav_label": "🔢 Números"
+    }
+  },
+  {
+    "model": "core.gamesection",
+    "pk": 3,
+    "fields": {
+      "id_name": "rutinas",
+      "emoji": "📋",
+      "title": "Rutinas Diarias Inclusivas",
+      "description": "Mañana, tarde y noche con emojis, voz y registro para terapeutas.",
+      "tags": [
+        "🌈 Autismo · TDAH",
+        "♿ Inclusivo"
+      ],
+      "color_class": "c3",
+      "file_name": "rutinas.html",
+      "nav_label": "📋 Rutinas"
+    }
+  },
+  {
+    "model": "core.gamesection",
+    "pk": 4,
+    "fields": {
+      "id_name": "serpiente",
+      "emoji": "🐍",
+      "title": "Serpiente",
+      "description": "El clásico Snake. Usa las flechas del teclado para comer y crecer.",
+      "tags": [
+        "🎮 Habilidad",
+        "⚡ Reflejos"
+      ],
+      "color_class": "c4",
+      "file_name": "serpiente.html",
+      "nav_label": "🐍 Serpiente"
+    }
+  },
+  {
+    "model": "core.gamesection",
+    "pk": 5,
+    "fields": {
+      "id_name": "simon",
+      "emoji": "🎶",
+      "title": "Simón Musical",
+      "description": "Memoriza y repite secuencias de colores y notas musicales.",
+      "tags": [
+        "🧠 Memoria",
+        "🎵 Música"
+      ],
+      "color_class": "c5",
+      "file_name": "simon.html",
+      "nav_label": "🎶 Simón"
+    }
+  },
+  {
+    "model": "core.gamesection",
+    "pk": 6,
+    "fields": {
+      "id_name": "terapeutico",
+      "emoji": "🌈",
+      "title": "Juego Terapéutico Clínico",
+      "description": "6 módulos: atención, emociones, rutinas, matemáticas, motricidad y memoria visual.",
+      "tags": [
+        "🧠 Clínico",
+        "👩‍⚕️ TEA · Dislexia · TDAH"
+      ],
+      "color_class": "c6",
+      "file_name": "terapeutico.html",
+      "nav_label": "🌈 Terapéutico"
+    }
+  },
+  {
+    "model": "core.gamesection",
+    "pk": 7,
+    "fields": {
+      "id_name": "respirador",
+      "emoji": "🫁",
+      "title": "Respirador Mágico",
+      "description": "Respiración guiada con animación, 6 ambientes visuales y 3 niveles.",
+      "tags": [
+        "😌 Relajación",
+        "🎯 3 niveles"
+      ],
+      "color_class": "c7",
+      "file_name": "respirador.html",
+      "nav_label": "🫁 Respirador"
+    }
+  }
+]
