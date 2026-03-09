@@ -138,6 +138,6 @@ CORS_ALLOW_ALL_ORIGINS = True  # Para desarrollo con Flutter
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
