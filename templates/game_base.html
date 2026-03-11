@@ -154,11 +154,39 @@
             .question-area { margin: 0.5rem 0; padding: 1rem; min-height: 150px; }
             h1 { font-size: 1.5rem !important; margin-bottom: 0.5rem !important; }
         }
+        /* Back Button */
+        .btn-back-home {
+            position: fixed;
+            top: 70px;
+            left: 16px;
+            z-index: 999;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 50px;
+            color: var(--text-color);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-back-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
     </style>
     {% block game_css %}{% endblock %}
 {% endblock %}
 
 {% block content %}
+    <a href="/" class="btn-back-home">⬅️ Atrás</a>
     <div class="game-container {% block container_extra_class %}{% endblock %}">
         <h1>{% block game_title %}{% endblock %}</h1>
         
@@ -192,6 +220,24 @@
 
 {% block extra_js %}
     <script>
+        // ── GAME STATS (localStorage) ──
+        const GAME_ID = '{{ game.id_name|default:"unknown" }}';
+        const GAME_NAME = '{{ game.title|default:"Juego" }}';
+        const GAME_EMOJI = '{{ game.emoji|default:"🎮" }}';
+
+        function saveGameStat(points) {
+            const key = 'gstat_' + GAME_ID;
+            const now = new Date();
+            let d = JSON.parse(localStorage.getItem(key) || '{"sessions":0,"totalScore":0,"bestScore":0,"lastPlayed":""}');
+            d.sessions += 1;
+            d.totalScore += (points || 0);
+            d.bestScore = Math.max(d.bestScore || 0, points || 0);
+            d.lastPlayed = now.toLocaleDateString('es-ES', { day:'2-digit', month:'short' });
+            d.name = GAME_NAME;
+            d.emoji = GAME_EMOJI;
+            localStorage.setItem(key, JSON.stringify(d));
+        }
+
         let score = 0;
         let streak = 0;
         let currentLevel = 1;
@@ -212,6 +258,11 @@
             let progress = (correctInLevel / 3) * 100;
             document.getElementById('progress-fill').style.width = progress + '%';
             document.getElementById('progress-text').textContent = correctInLevel + '/3';
+
+            // Every time the level advances (3 correct), save a stat snapshot
+            if (correctInLevel % 3 === 0 && correctInLevel > 0) {
+                saveGameStat(score);
+            }
         }
 
         function showFeedback(message, isCorrect) {

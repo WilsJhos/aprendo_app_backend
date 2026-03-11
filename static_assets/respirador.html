@@ -81,6 +81,11 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
 .level-advanced{border-color:rgba(108,99,255,.35);}
 .level-advanced:hover{box-shadow:0 16px 40px rgba(108,99,255,.2);}
 .glow-purple{background:rgba(108,99,255,.5);}
+.level-sleep{border-color:rgba(100,149,237,.35);}
+.level-sleep:hover{box-shadow:0 16px 40px rgba(100,149,237,.2);}
+.glow-blue{background:rgba(100,149,237,.5);}
+.control-voice{background:rgba(67,233,123,.15);color:#43E97B;border:1px solid rgba(67,233,123,.3);}
+.control-voice.off{background:rgba(255,255,255,.1);color:gray;border-color:rgba(255,255,255,.2);}
 
 /* EXERCISE */
 .exercise-content{max-width:680px;margin:0 auto;text-align:center;padding:10px 0;}
@@ -219,6 +224,14 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
         <div class="level-timer"><span>⏱️ 6-6-8 seg</span></div>
         <div class="level-glow glow-purple"></div>
       </div>
+      <div class="level-box level-sleep" onclick="selectLevel(4)">
+        <div class="level-badge">4</div>
+        <span class="level-emoji">🌙</span>
+        <h3>Sueño Profundo</h3>
+        <p class="level-desc">Relajación total</p>
+        <div class="level-timer"><span>⏱️ 4-7-8 seg</span></div>
+        <div class="level-glow glow-blue"></div>
+      </div>
     </div>
     <button class="btn-back-fun" onclick="goToWelcome()">⬅️ Volver</button>
   </div>
@@ -249,6 +262,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
     </div>
     <div class="controls-grid">
       <button class="control-fun control-pause" id="pauseBtn" onclick="togglePause()">⏸️ Pausar</button>
+      <button class="control-fun control-voice" id="voiceToggleBtn" onclick="toggleVoice()">🗣️ Voz: ON</button>
       <button class="control-fun control-stop" onclick="stopExercise()">⏹️ Terminar</button>
       <button class="control-fun control-change" onclick="changeLevelDuringExercise()">🔄 Cambiar</button>
     </div>
@@ -313,6 +327,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
         <div class="level-detail-card"><div class="level-detail-header header-green"><span>🌱</span><h4>Explorador</h4></div><div class="level-detail-body"><p>🎯 Sesiones: <strong id="level1Sessions">0</strong></p><p>⏰ Tiempo: <strong id="level1Time">0 min</strong></p></div></div>
         <div class="level-detail-card"><div class="level-detail-header header-orange"><span>🔥</span><h4>Aventurero</h4></div><div class="level-detail-body"><p>🎯 Sesiones: <strong id="level2Sessions">0</strong></p><p>⏰ Tiempo: <strong id="level2Time">0 min</strong></p></div></div>
         <div class="level-detail-card"><div class="level-detail-header header-purple"><span>⭐</span><h4>Maestro</h4></div><div class="level-detail-body"><p>🎯 Sesiones: <strong id="level3Sessions">0</strong></p><p>⏰ Tiempo: <strong id="level3Time">0 min</strong></p></div></div>
+        <div class="level-detail-card"><div class="level-detail-header header-purple" style="background:rgba(100,149,237,.2)"><span>🌙</span><h4>Sueño</h4></div><div class="level-detail-body"><p>🎯 Sesiones: <strong id="level4Sessions">0</strong></p><p>⏰ Tiempo: <strong id="level4Time">0 min</strong></p></div></div>
       </div>
     </div>
     <div class="history-section"><h3>📅 Historial</h3><div class="history-scroll" id="historyList"></div></div>
@@ -350,7 +365,7 @@ let patientName='';
 let currentLevel=1;
 let sessionData={totalTime:0,cycles:0,level:1};
 let sessionHistory=[];
-let levelStats={1:{sessions:0,time:0},2:{sessions:0,time:0},3:{sessions:0,time:0}};
+let levelStats={1:{sessions:0,time:0},2:{sessions:0,time:0},3:{sessions:0,time:0},4:{sessions:0,time:0}};
 let exerciseInterval=null;
 let breathInterval=null;
 let isPaused=false;
@@ -366,8 +381,39 @@ let animFrame=null;
 const levelConfigs={
   1:{name:'🌱 Explorador',inhale:4,hold:4,exhale:4,messages:['Inhala profundo...','Mantén el aire...','Exhala suavemente...']},
   2:{name:'🔥 Aventurero',inhale:5,hold:5,exhale:6,messages:['Respira con fuerza...','Aguanta el poder...','Libera el aire...']},
-  3:{name:'⭐ Maestro',inhale:6,hold:6,exhale:8,messages:['Inhala maestro...','Controla tu energía...','Exhala con maestría...']}
+  3:{name:'⭐ Maestro',inhale:6,hold:6,exhale:8,messages:['Inhala maestro...','Controla tu energía...','Exhala con maestría...']},
+  4:{name:'🌙 Sueño',inhale:4,hold:7,exhale:8,messages:['Inhala calma...','Mantén la paz...','Exhala todo el estrés...']}
 };
+
+let voiceGuideEnabled = true;
+let ambientAudio = new Audio();
+ambientAudio.loop = true;
+const themeAudioFiles = {
+  calm: 'https://actions.google.com/sounds/v1/water/slow_water_trickle.ogg',
+  forest: 'https://actions.google.com/sounds/v1/nature/forest_birds_in_spring.ogg',
+  sunset: 'https://actions.google.com/sounds/v1/ambiences/outdoor_crickets_and_insects.ogg',
+  ocean: 'https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg',
+  candy: 'https://actions.google.com/sounds/v1/foley/wind_chimes.ogg',
+  galaxy: 'https://actions.google.com/sounds/v1/science_fiction/alien_ambience.ogg'
+};
+
+function toggleVoice() {
+  voiceGuideEnabled = !voiceGuideEnabled;
+  const btn = document.getElementById('voiceToggleBtn');
+  btn.textContent = voiceGuideEnabled ? '🗣️ Voz: ON' : '🗣️ Voz: OFF';
+  btn.classList.toggle('off', !voiceGuideEnabled);
+  if(!voiceGuideEnabled) window.speechSynthesis.cancel();
+}
+
+function speakVoice(text) {
+  if(!voiceGuideEnabled) return;
+  window.speechSynthesis.cancel();
+  let u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-ES';
+  u.rate = currentLevel === 4 ? 0.75 : 0.9;
+  u.volume = Math.min(1, currentVolume * 2.5);
+  window.speechSynthesis.speak(u);
+}
 
 const themes={
   calm:{bg:['#1a1a2e','#16213e'],inner:['#6C63FF','#4facfe'],outer:['rgba(108,99,255,0.3)','rgba(79,172,254,0.2)']},
@@ -407,9 +453,16 @@ function startExercise(){
   document.getElementById('cyclesCount').textContent='0';
   document.getElementById('sessionProgressBar').style.width='0%';
   document.getElementById('pauseBtn').textContent='⏸️ Pausar';
+  document.getElementById('guidanceText').textContent='🌟 Respira y conecta con tu interior 🌟';
   updateTimer();
-  exerciseInterval=setInterval(tickSession,1000);
-  breathInterval=setInterval(tickBreath,1000);
+  
+  if(!ambientAudio.src && themeAudioFiles[currentTheme]) {
+    ambientAudio.src = themeAudioFiles[currentTheme];
+  }
+  ambientAudio.volume = currentVolume;
+  ambientAudio.play().catch(e=>console.log(e));
+  speakVoice("Prepárate");
+
   drawBreathCircle(0,breathPhaseIndex);
   countdown3();
 }
@@ -419,10 +472,24 @@ function countdown3(){
   document.getElementById('breathPhase').textContent='Prepárate';
   document.getElementById('breathCounter').textContent=n;
   const t=setInterval(()=>{
+    if(isPaused) return;
     n--;
-    if(n<=0){clearInterval(t); document.getElementById('breathCounter').textContent='';}
+    if(n<=0){
+      clearInterval(t); 
+      if (!isPaused && !exerciseInterval && document.getElementById('exerciseScreen').classList.contains('active')) {
+          const phaseNames=['Inhala','Sostén','Exhala'];
+          speakVoice(phaseNames[breathPhaseIndex]);
+          exerciseInterval=setInterval(tickSession,1000);
+          breathInterval=setInterval(tickBreath,1000);
+          const cfg=levelConfigs[currentLevel];
+          document.getElementById('breathPhase').textContent=phaseNames[breathPhaseIndex];
+          document.getElementById('guidanceText').textContent=cfg.messages[breathPhaseIndex];
+          document.getElementById('breathCounter').textContent=cfg.inhale;
+      }
+    }
     else document.getElementById('breathCounter').textContent=n;
   },1000);
+  window.countdownTimer = t;
 }
 
 function tickSession(){
@@ -452,10 +519,12 @@ function tickBreath(){
     breathPhaseIndex=(breathPhaseIndex+1)%3;
     if(breathPhaseIndex===0) currentCycles++;
     document.getElementById('cyclesCount').textContent=currentCycles;
+    const nextNames=['Inhala','Sostén','Exhala'];
+    speakVoice(nextNames[breathPhaseIndex]);
   }
   const progress=breathSecond/durations[breathPhaseIndex];
   drawBreathCircle(progress,breathPhaseIndex);
-  const msgs=['Inhala profundo...','Mantén el aire...','Exhala suavemente...'];
+  const msgs=cfg.messages || ['Inhala profundo...','Mantén el aire...','Exhala suavemente...'];
   const phaseNames=['Inhala','Sostén','Exhala'];
   document.getElementById('breathPhase').textContent=phaseNames[breathPhaseIndex];
   document.getElementById('guidanceText').textContent=msgs[breathPhaseIndex];
@@ -499,6 +568,15 @@ function drawBreathCircle(progress,phase){
 function togglePause(){
   isPaused=!isPaused;
   document.getElementById('pauseBtn').textContent=isPaused?'▶️ Reanudar':'⏸️ Pausar';
+  if(isPaused) {
+    ambientAudio.pause();
+    window.speechSynthesis.cancel();
+  } else {
+    ambientAudio.play().catch(e=>console.log(e));
+    if (breathInterval) {
+      speakVoice(document.getElementById('breathPhase').textContent);
+    }
+  }
 }
 
 function stopExercise(){
@@ -511,7 +589,10 @@ function stopExercise(){
 function clearExercise(){
   clearInterval(exerciseInterval);
   clearInterval(breathInterval);
-  exerciseInterval=null; breathInterval=null;
+  if(window.countdownTimer) clearInterval(window.countdownTimer);
+  exerciseInterval=null; breathInterval=null; window.countdownTimer=null;
+  ambientAudio.pause();
+  window.speechSynthesis.cancel();
 }
 
 function showResults(){
@@ -534,15 +615,15 @@ function newSession(){showScreen('levelSelectScreen');}
 // ── PROGRESS ──
 function loadProgressData(){
   document.getElementById('patientNameDisplay').textContent=patientName||'Sin nombre';
-  const total=levelStats[1].sessions+levelStats[2].sessions+levelStats[3].sessions;
-  const totalT=levelStats[1].time+levelStats[2].time+levelStats[3].time;
+  const total=levelStats[1].sessions+levelStats[2].sessions+levelStats[3].sessions+levelStats[4].sessions;
+  const totalT=levelStats[1].time+levelStats[2].time+levelStats[3].time+levelStats[4].time;
   const totalC=sessionHistory.reduce((a,s)=>a+s.cycles,0);
   document.getElementById('totalSessions').textContent=total;
   document.getElementById('totalTime').textContent=totalT+' min';
   document.getElementById('totalCycles').textContent=totalC;
-  const fav=[1,2,3].sort((a,b)=>levelStats[b].sessions-levelStats[a].sessions)[0];
+  const fav=[1,2,3,4].sort((a,b)=>levelStats[b].sessions-levelStats[a].sessions)[0];
   document.getElementById('mostUsedLevel').textContent=levelStats[fav].sessions>0?levelConfigs[fav].name:'-';
-  [1,2,3].forEach(l=>{
+  [1,2,3,4].forEach(l=>{
     document.getElementById('level'+l+'Sessions').textContent=levelStats[l].sessions;
     document.getElementById('level'+l+'Time').textContent=levelStats[l].time+' min';
   });
@@ -561,7 +642,7 @@ function editPatientName(){
 
 function clearAllData(){
   if(confirm('¿Borrar todo el progreso?')){
-    sessionHistory=[]; levelStats={1:{sessions:0,time:0},2:{sessions:0,time:0},3:{sessions:0,time:0}};
+    sessionHistory=[]; levelStats={1:{sessions:0,time:0},2:{sessions:0,time:0},3:{sessions:0,time:0},4:{sessions:0,time:0}};
     loadProgressData();
   }
 }
@@ -570,10 +651,19 @@ function clearAllData(){
 function changeTheme(t){
   currentTheme=t;
   document.querySelectorAll('.theme-bubble').forEach(b=>b.classList.toggle('active',b.dataset.theme===t));
+  if(themeAudioFiles[t]) {
+    ambientAudio.src = themeAudioFiles[t];
+    if(document.getElementById('exerciseScreen').classList.contains('active') && !isPaused) {
+      ambientAudio.play().catch(e=>console.log("Audio play error:", e));
+    }
+  }
 }
 
 // ── VOLUME ──
-function updateVolume(v){ currentVolume=v/100; }
+function updateVolume(v){ 
+  currentVolume=v/100;
+  ambientAudio.volume = currentVolume;
+}
 </script>
 </body>
 </html>

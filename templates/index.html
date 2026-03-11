@@ -23,6 +23,86 @@
         max-width: 600px;
         margin: 0 auto;
     }
+
+    /* ── STATS RANKING PANEL ── */
+    .stats-panel {
+        max-width: 1200px;
+        margin: 0 auto 2.5rem;
+        padding: 0 1.5rem;
+    }
+    .stats-panel-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 1.2rem;
+    }
+    .stats-panel-header h2 { font-size: 1.4rem; font-weight: 800; }
+    .stats-badge {
+        padding: 4px 12px;
+        border-radius: 50px;
+        background: linear-gradient(135deg, var(--accent-color), #ec4899);
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .stats-scroll {
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        scrollbar-width: thin;
+    }
+    .stats-scroll::-webkit-scrollbar { height: 4px; }
+    .stats-scroll::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 4px; }
+    .stat-game-card {
+        min-width: 170px;
+        flex-shrink: 0;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 20px 16px;
+        text-align: center;
+        position: relative;
+        backdrop-filter: blur(10px);
+        transition: transform 0.2s;
+    }
+    .stat-game-card:hover { transform: translateY(-4px); }
+    .stat-game-card.rank-1 { border-color: #FFD700; box-shadow: 0 0 20px rgba(255,215,0,0.2); }
+    .stat-game-card.rank-2 { border-color: #C0C0C0; }
+    .stat-game-card.rank-3 { border-color: #CD7F32; }
+    .rank-badge {
+        position: absolute;
+        top: -10px; left: 50%;
+        transform: translateX(-50%);
+        width: 24px; height: 24px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.78rem; font-weight: 800; color: white;
+    }
+    .rank-badge.r1 { background: #FFD700; color: #333; }
+    .rank-badge.r2 { background: #C0C0C0; color: #333; }
+    .rank-badge.r3 { background: #CD7F32; }
+    .rank-badge.rx { background: var(--accent-color); }
+    .sg-emoji { font-size: 2rem; margin-bottom: 6px; display: block; }
+    .sg-name  { font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; display: block; }
+    .sg-stats { display: flex; flex-direction: column; gap: 4px; }
+    .sg-row   { display: flex; justify-content: space-between; font-size: 0.75rem; }
+    .sg-label { color: var(--secondary-color); }
+    .sg-val   { font-weight: 700; }
+    .sg-last  { font-size: 0.68rem; color: var(--secondary-color); margin-top: 8px; }
+    .stats-empty {
+        padding: 20px;
+        color: var(--secondary-color);
+        font-size: 0.9rem;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        text-align: center;
+        width: 100%;
+    }
+
+    /* ── GAME GRID ── */
     .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -47,6 +127,7 @@
         box-shadow: var(--shadow);
         position: relative;
         overflow: hidden;
+        transition: transform 0.2s, border-color 0.2s;
     }
     .card::before {
         content: '';
@@ -56,42 +137,20 @@
         opacity: 0;
         transition: opacity 0.3s;
     }
-    .card:hover {
-        transform: translateY(-8px);
-        border-color: var(--accent-color);
-    }
-    .card:hover::before {
-        opacity: 1;
-    }
+    .card:hover { transform: translateY(-8px); border-color: var(--accent-color); }
+    .card:hover::before { opacity: 1; }
     .emoji-wrapper {
-        width: 100px;
-        height: 100px;
+        width: 100px; height: 100px;
         background: var(--bg-color);
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         font-size: 3rem;
         margin-bottom: 1.5rem;
         box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
     }
-    .card h2 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
-    .card p {
-        font-size: 1rem;
-        color: var(--secondary-color);
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-    }
-    .tag-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.5rem;
-    }
+    .card h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+    .card p  { font-size: 1rem; color: var(--secondary-color); line-height: 1.6; margin-bottom: 1.5rem; }
+    .tag-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
     .tag {
         background: var(--bg-color);
         padding: 0.4rem 0.8rem;
@@ -101,27 +160,99 @@
         color: var(--secondary-color);
         border: 1px solid var(--card-border);
     }
+    .played-badge {
+        position: absolute;
+        top: 14px; right: 14px;
+        background: linear-gradient(135deg, var(--accent-color), #ec4899);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 50px;
+        display: none;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-    <section class="hero">
-        <h1>Mundo de Aprendizaje</h1>
-        <p>Una plataforma educativa diseñada para ser divertida, inclusiva y mágica para todos los niños.</p>
-    </section>
+<section class="hero">
+    <h1>Mundo de Aprendizaje</h1>
+    <p>Una plataforma educativa diseñada para ser divertida, inclusiva y mágica para todos los niños.</p>
+</section>
 
-    <div class="grid">
-        {% for section in sections %}
-            <a href="{% url 'game_detail' section.id_name %}" class="card">
-                <div class="emoji-wrapper">{{ section.emoji }}</div>
-                <h2>{{ section.title }}</h2>
-                <p>{{ section.description }}</p>
-                <div class="tag-container">
-                    {% for tag in section.tags %}
-                        <span class="tag">{{ tag }}</span>
-                    {% endfor %}
-                </div>
-            </a>
-        {% endfor %}
+<!-- STATS RANKING PANEL -->
+<div class="stats-panel">
+    <div class="stats-panel-header">
+        <h2>🏆 Ranking de Juegos</h2>
+        <span class="stats-badge">Tu progreso</span>
     </div>
+    <div id="statsScroll" class="stats-scroll">
+        <div class="stats-empty">Aún no has jugado ningún juego. ¡Empieza a explorar! 🚀</div>
+    </div>
+</div>
+
+<div class="grid">
+    {% for section in sections %}
+        <a href="{% url 'game_detail' section.id_name %}" class="card" data-gid="{{ section.id_name }}">
+            <span class="played-badge" id="pb_{{ section.id_name }}"></span>
+            <div class="emoji-wrapper">{{ section.emoji }}</div>
+            <h2>{{ section.title }}</h2>
+            <p>{{ section.description }}</p>
+            <div class="tag-container">
+                {% for tag in section.tags %}
+                    <span class="tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </a>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+    const KNOWN = ['respirador',{% for section in sections %}'{{ section.id_name }}',{% endfor %}];
+    const arr = [];
+    KNOWN.forEach(id => {
+        const raw = localStorage.getItem('gstat_' + id);
+        if (!raw) return;
+        try {
+            const d = JSON.parse(raw);
+            if (d.sessions > 0) arr.push({id, ...d});
+        } catch(e){}
+    });
+
+    arr.sort((a,b) => b.sessions - a.sessions);
+
+    const box = document.getElementById('statsScroll');
+    if (!arr.length) return;
+    box.innerHTML = '';
+
+    const MEDAL = ['🥇','🥈','🥉'];
+    const RC    = ['r1','r2','r3'];
+    const CC    = ['rank-1','rank-2','rank-3'];
+
+    arr.forEach((g, i) => {
+        const card = document.createElement('div');
+        card.className = 'stat-game-card ' + (CC[i] || '');
+        const badgeCls = RC[i] || 'rx';
+        const badgeLbl = i < 3 ? MEDAL[i] : (i+1);
+        card.innerHTML = `
+            <div class="rank-badge ${badgeCls}">${badgeLbl}</div>
+            <span class="sg-emoji">${g.emoji || '🎮'}</span>
+            <span class="sg-name">${g.name || g.id}</span>
+            <div class="sg-stats">
+                <div class="sg-row"><span class="sg-label">🎮 Sesiones</span><span class="sg-val">${g.sessions}</span></div>
+                <div class="sg-row"><span class="sg-label">⭐ Mejor</span><span class="sg-val">${g.bestScore || 0}</span></div>
+                <div class="sg-row"><span class="sg-label">📊 Total pts</span><span class="sg-val">${g.totalScore || 0}</span></div>
+            </div>
+            ${g.lastPlayed ? `<div class="sg-last">Último: ${g.lastPlayed}</div>` : ''}
+        `;
+        box.appendChild(card);
+
+        const pb = document.getElementById('pb_' + g.id);
+        if (pb) { pb.textContent = `${g.sessions} sesión${g.sessions !== 1 ? 'es' : ''}`; pb.style.display = 'block'; }
+    });
+})();
+</script>
 {% endblock %}
