@@ -7,5 +7,7 @@ urlpatterns = [
     path('game/<slug:id_name>/', views.game_detail, name='game_detail'),
     # API endpoints
     path('api/games/', views.GameSectionListAPI.as_view(), name='api_games'),
+    # core/urls.py  (añade dentro de urlpatterns)
+    path('remove-serpiente/', views.remove_serpiente, name='remove_serpiente'),
     
 ]
