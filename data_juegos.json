@@ -54,23 +54,6 @@
     "model": "core.gamesection",
     "pk": 4,
     "fields": {
-      "id_name": "serpiente",
-      "emoji": "🐍",
-      "title": "Serpiente",
-      "description": "El clásico Snake. Usa las flechas del teclado para comer y crecer.",
-      "tags": [
-        "🎮 Habilidad",
-        "⚡ Reflejos"
-      ],
-      "color_class": "c4",
-      "file_name": "serpiente.html",
-      "nav_label": "🐍 Serpiente"
-    }
-  },
-  {
-    "model": "core.gamesection",
-    "pk": 5,
-    "fields": {
       "id_name": "simon",
       "emoji": "🎶",
       "title": "Simón Musical",
@@ -86,7 +69,7 @@
   },
   {
     "model": "core.gamesection",
-    "pk": 6,
+    "pk": 5,
     "fields": {
       "id_name": "terapeutico",
       "emoji": "🌈",
@@ -103,7 +86,7 @@
   },
   {
     "model": "core.gamesection",
-    "pk": 7,
+    "pk": 6,
     "fields": {
       "id_name": "respirador",
       "emoji": "🫁",
