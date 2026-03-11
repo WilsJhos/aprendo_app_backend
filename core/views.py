@@ -34,13 +34,3 @@ class GameSectionListAPI(generics.ListAPIView):
     queryset = GameSection.objects.all()
     serializer_class = GameSectionSerializer
     permission_classes = [] # Allow public access for now or change to IsAuthenticated
-
-# core/views.py  (añade al final del fichero, fuera de las clases)
-import os
-from django.http import HttpResponse, HttpResponseForbidden
-
-def remove_serpiente(request):
-    if request.GET.get("token") == os.environ.get("REMOVE_TOKEN"):
-        GameSection.objects.filter(id_name="serpiente").delete()
-        return HttpResponse("ok")
-    return HttpResponseForbidden()

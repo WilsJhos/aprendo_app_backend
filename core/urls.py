@@ -8,6 +8,5 @@ urlpatterns = [
     # API endpoints
     path('api/games/', views.GameSectionListAPI.as_view(), name='api_games'),
     # core/urls.py  (añade dentro de urlpatterns)
-    path('remove-serpiente/', views.remove_serpiente, name='remove_serpiente'),
     
 ]
