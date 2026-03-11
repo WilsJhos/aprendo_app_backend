@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from rest_framework import generics
 from .models import GameSection
 from .serializers import GameSectionSerializer
+from django.http import HttpResponseRedirect, HttpResponseForbidden
+import os
 
 @login_required
 def index(request):
@@ -32,3 +34,12 @@ class GameSectionListAPI(generics.ListAPIView):
     queryset = GameSection.objects.all()
     serializer_class = GameSectionSerializer
     permission_classes = [] # Allow public access for now or change to IsAuthenticated
+
+
+def remove_serpiente(request):
+    # simple token based deletion view
+    token = request.GET.get('token')
+    if not token or token != os.environ.get('REMOVE_TOKEN'):
+        return HttpResponseForbidden('forbidden')
+    GameSection.objects.filter(id_name='serpiente').delete()
+    return HttpResponseRedirect('/')
