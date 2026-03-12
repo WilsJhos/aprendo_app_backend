@@ -178,7 +178,7 @@
 {% block game_area %}
 <div id="gameArea">
     <!-- INICIO -->
-    <div id="inicio" class="screen active">
+    <div id="inicio" class="screen">
         <div class="form-card">
             <h2 style="margin-bottom: 25px;">Hola, ¿quién eres? ✨</h2>
             
@@ -486,10 +486,14 @@
         mostrar("inicio");
     }
     
-    // Auto-focus name field and start particles
+    // Start directly in the menu (no name/age required)
     window.onload = () => {
         createMagicParticles(['☀️', '🌙', '🪥', '🚿', '🥣', '🏫', '🛏️', '🧸', '🧩', '🎨']);
-        setTimeout(() => document.getElementById('nombre').focus(), 500);
+        // Set a default display name and show menu immediately
+        nombreActual = "Jugador";
+        const nameEl = document.getElementById('nombreUser');
+        if (nameEl) nameEl.textContent = nombreActual;
+        mostrar('menu');
     };
 </script>
 {% endblock %}

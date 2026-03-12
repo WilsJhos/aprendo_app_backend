@@ -71,7 +71,7 @@ input, select{
 <button id="btnSonido" onclick="toggleSonido()">🔊</button>
 
 <!-- BIENVENIDA -->
-<div id="inicio" class="screen active">
+<div id="inicio" class="screen">
   <h1>Bienvenido 🌈</h1>
 
   <input id="nombre" placeholder="Nombre"><br>
@@ -267,6 +267,14 @@ function volverInicio(){
   condicion.value="";
   mostrar("inicio");
 }
+
+// Auto-enter menu on load so user doesn't need to provide name
+document.addEventListener('DOMContentLoaded', function(){
+  nombreActual = "Jugador";
+  const nu = document.getElementById('nombreUser');
+  if(nu) nu.textContent = nombreActual;
+  mostrar('menu');
+});
 </script>
 
 </body>
