@@ -4,23 +4,17 @@
 
 {% block game_css %}
 <style>
-    /* Override base styles to match user's colorful design */
+    /* Use project color variables so this game matches the site theme */
     body {
-        background: linear-gradient(45deg, #ff1744, #ffea00, #00e5ff, #76ff03) !important;
-        background-size: 600% 600% !important;
-        animation: fondo_anim 12s ease infinite !important;
-    }
-    @keyframes fondo_anim {
-        0% { background-position: 0% 50% }
-        50% { background-position: 100% 50% }
-        100% { background-position: 0% 50% }
+        background: radial-gradient(circle at top left, var(--bg-color), var(--glass-bg));
+        background-size: cover;
     }
 
     .game-container {
         font-family: "Comic Sans MS", "Chalkboard SE", cursive, Arial, sans-serif;
-        background: rgba(255, 255, 255, 0.2) !important;
+        background: var(--card-bg);
         backdrop-filter: blur(10px);
-        border: 4px solid white !important;
+        border: 1px solid var(--card-border);
         max-width: 1000px !important;
     }
 
@@ -45,7 +39,7 @@
         font-size: 20px;
         border: none;
         border-radius: 30px;
-        background: #ffcc80;
+        background: linear-gradient(135deg, var(--accent-color), #ec4899);
         cursor: pointer;
         transition: transform 0.2s, box-shadow 0.2s;
         display: flex;
@@ -53,6 +47,7 @@
         align-items: center;
         justify-content: center;
         font-weight: bold;
+        color: white;
     }
 
     .botonMenu:hover {
@@ -111,7 +106,7 @@
     }
 
     .botonSalir {
-        background: #ef5350;
+        background: var(--accent-color);
         color: white;
         font-size: 20px;
         border: none;
