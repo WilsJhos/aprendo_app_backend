@@ -12,6 +12,15 @@
         --math-secondary: #4facfe;
     }
 
+    /* Smooth transitions reused from terapeutico */
+    .anim-enter { animation: fadeInUp 320ms ease both; }
+    .anim-leave { animation: fadeOutDown 300ms ease both; }
+    .anim-elem { opacity: 0; transform: translateY(8px) scale(0.98); transition: transform 260ms ease, opacity 260ms ease; }
+    .anim-elem.anim-appear { opacity: 1; transform: translateY(0) scale(1); }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeOutDown { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(12px); } }
+
     /* Force dark theme for this game regardless of global theme */
     div.game-container {
         background: #0f172a !important;
@@ -106,12 +115,24 @@
             currentAnswer = n1 + n2;
             
             const qEl = document.getElementById('question');
-            if (qEl) qEl.textContent = `${n1} + ${n2}`;
+            if (qEl) {
+                qEl.textContent = `${n1} + ${n2}`;
+                qEl.classList.add('anim-elem');
+                setTimeout(()=> qEl.classList.add('anim-appear'), 30);
+            }
             
             generateOptions(currentAnswer);
 
-            if (window.speak) {
+            // Use a robust speak wrapper: prefer Flutter bridge, fallback to Web Speech API
+            if (typeof speakText === 'function') {
+                speakText(`¿Cuánto es ${n1} más ${n2}?`);
+            } else if (window.speak) {
                 window.speak(`¿Cuánto es ${n1} más ${n2}?`);
+            } else if ('speechSynthesis' in window) {
+                const u = new SpeechSynthesisUtterance(`¿Cuánto es ${n1} más ${n2}?`);
+                u.lang = 'es-ES';
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(u);
             }
         }
 
@@ -125,12 +146,13 @@
             }
             options.sort(() => Math.random() - 0.5);
             
-            options.forEach(opt => {
+            options.forEach((opt, i) => {
                 const btn = document.createElement('button');
-                btn.className = 'math-btn';
+                btn.className = 'math-btn anim-elem';
                 btn.textContent = opt;
                 btn.onclick = () => checkAnswer(opt);
                 optsDiv.appendChild(btn);
+                setTimeout(()=> btn.classList.add('anim-appear'), 80 * i + 40);
             });
         }
 
@@ -156,6 +178,36 @@
                 createMagicParticles(['1','2','3','4','5','6','7','8','9','0','+','=','%']);
             }
             nextQuestion();
+        }
+
+        // Robust speech helper: tries Flutter bridge, then Web Speech API
+        function speakText(text, rate = 1.0, pitch = 1.0) {
+            try {
+                if (window.FlutterTTS && window.FlutterTTS.postMessage) {
+                    window.FlutterTTS.postMessage(JSON.stringify({text, rate, pitch}));
+                    return;
+                }
+                if (window.flutter_inappwebview && window.flutter_inappwebview.callHandler) {
+                    // some Flutter WebView variants expose callHandler
+                    try { window.flutter_inappwebview.callHandler('FlutterTTS', {text, rate, pitch}); return; } catch(e){}
+                }
+                if (window.speak) {
+                    window.speak(text, rate, pitch);
+                    return;
+                }
+                if ('speechSynthesis' in window) {
+                    const u = new SpeechSynthesisUtterance(text);
+                    u.lang = 'es-ES';
+                    u.rate = rate;
+                    u.pitch = pitch;
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(u);
+                    return;
+                }
+                console.warn('No TTS available for:', text);
+            } catch (err) {
+                console.error('speakText error', err);
+            }
         }
 
         if (document.readyState === 'loading') {
