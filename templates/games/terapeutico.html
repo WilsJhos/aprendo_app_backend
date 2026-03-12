@@ -167,7 +167,7 @@
 
 {% block game_area %}
 <!-- PERFIL -->
-<div class="pantalla" id="perfil" style="max-width: 500px; margin: 20px auto;">
+<div class="pantalla hidden" id="perfil" style="max-width: 500px; margin: 20px auto;">
     <h2 style="font-size: 30px; margin-bottom: 25px;">👧 Perfil del niño</h2>
     
     <div style="text-align: left; margin: 0 auto; max-width: 380px;">
@@ -197,7 +197,7 @@
 </div>
 
 <!-- INICIO -->
-<div class="pantalla hidden" id="inicio">
+<div class="pantalla" id="inicio">
     <h2 id="saludo" style="font-size: 32px; margin-bottom: 30px;"></h2>
     <div class="menu">
         <button class="botonMenu" onmouseenter="vozGuia('Juguemos con atención')" onclick="modulo='colores';iniciar()">
@@ -540,6 +540,13 @@ function salirJuego(){
 
     window.onload = () => {
         createMagicParticles(['🏥', '💊', '😊', '🛡️', '☀️', '🌈', '💖', '⭐', '🎈']);
+        // Show inicio directly without requiring profile input
+        try {
+            document.getElementById('perfil').classList.add('hidden');
+            document.getElementById('inicio').classList.remove('hidden');
+            const s = document.getElementById('saludo');
+            if (s) s.innerText = '👋 Hola Jugador';
+        } catch (e) {}
     };
 </script>
 {% endblock %}
