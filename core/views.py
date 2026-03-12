@@ -13,9 +13,11 @@ def index(request):
     sections = GameSection.objects.all()
     return render(request, 'index.html', {'sections': sections})
 
-@login_required
 def game_detail(request, id_name):
     game = get_object_or_404(GameSection, id_name=id_name)
+    # Allow unauthenticated users to access the 'rutinas' game
+    if not request.user.is_authenticated and game.file_name != 'rutinas.html' and game.id_name != 'rutinas':
+        return redirect('login')
     return render(request, f'games/{game.file_name}', {'game': game})
 
 def signup(request):
