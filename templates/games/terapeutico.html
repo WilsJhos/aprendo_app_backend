@@ -572,8 +572,14 @@ function salirJuego(){
         showScreen('inicio');
     }
 
-    window.onload = () => {
-        createMagicParticles(['🏥', '💊', '😊', '🛡️', '☀️', '🌈', '💖', '⭐', '🎈']);
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            if (typeof createMagicParticles === 'function') {
+                createMagicParticles(['🏥', '💊', '😊', '🛡️', '☀️', '🌈', '💖', '⭐', '🎈']);
+            }
+        } catch (e) {
+            console.warn('createMagicParticles not available', e);
+        }
         // Show inicio directly without requiring profile input
         try {
             document.getElementById('perfil').classList.add('hidden');
@@ -584,6 +590,6 @@ function salirJuego(){
             const btns = document.querySelectorAll('#inicio .botonMenu');
             btns.forEach((b, i) => { b.classList.add('anim-elem'); setTimeout(()=> b.classList.add('anim-appear'), 80 * i + 60); });
         } catch (e) {}
-    };
+    });
 </script>
 {% endblock %}

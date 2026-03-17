@@ -15,5 +15,4 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'aprendo_app_django.settings')
 
 application = get_wsgi_application()
 
-# Para Vercel
 app = application

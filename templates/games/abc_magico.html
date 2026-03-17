@@ -145,12 +145,16 @@
             if (window.speak) window.speak(currentAnswer); 
         }
 
-        window.onload = () => {
-            if (typeof createMagicParticles === 'function') {
-                createMagicParticles(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']);
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                if (typeof createMagicParticles === 'function') {
+                    createMagicParticles(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']);
+                }
+            } catch (e) {
+                console.warn('createMagicParticles not available', e);
             }
             // Small delay to ensure bridge is ready
             setTimeout(nextQuestion, 500);
-        };
+        });
     </script>
 {% endblock %}

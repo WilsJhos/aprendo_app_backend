@@ -282,9 +282,15 @@
         document.getElementById('score-display').innerText = nivel;
     }
 
-    window.onload = () => { 
-        createMagicParticles(['🎵', '🎶', '🎹', '🎸', '🎷', '🎺']);
+    document.addEventListener('DOMContentLoaded', () => { 
+        try {
+            if (typeof createMagicParticles === 'function') {
+                createMagicParticles(['🎵', '🎶', '🎹', '🎸', '🎷', '🎺']);
+            }
+        } catch (e) {
+            console.warn('createMagicParticles not available', e);
+        }
         setTimeout(playRound, 1500); 
-    }
+    });
 </script>
 {% endblock %}

@@ -487,13 +487,20 @@
     }
     
     // Start directly in the menu (no name/age required)
-    window.onload = () => {
-        createMagicParticles(['☀️', '🌙', '🪥', '🚿', '🥣', '🏫', '🛏️', '🧸', '🧩', '🎨']);
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            if (typeof createMagicParticles === 'function') {
+                createMagicParticles(['☀️', '🌙', '🪥', '🚿', '🥣', '🏫', '🛏️', '🧸', '🧩', '🎨']);
+            }
+        } catch (e) {
+            console.warn('createMagicParticles not available', e);
+        }
+        
         // Set a default display name and show menu immediately
         nombreActual = "Jugador";
         const nameEl = document.getElementById('nombreUser');
         if (nameEl) nameEl.textContent = nombreActual;
         mostrar('menu');
-    };
+    });
 </script>
 {% endblock %}

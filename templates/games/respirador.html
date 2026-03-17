@@ -505,10 +505,16 @@ function setVol(v) {
 }
 
 // ── INIT ──
-window.addEventListener('load', () => {
-  // Set default background
-  document.getElementById('resp-app').style.background = TColor['calm'].bg;
-  if (window.createMagicParticles) createMagicParticles(['🫁','✨','🌿','☁️','🌸'], 20);
+window.addEventListener('DOMContentLoaded', () => {
+    // Set default background
+    document.getElementById('resp-app').style.background = TColor['calm'].bg;
+    try {
+        if (typeof window.createMagicParticles === 'function') {
+            createMagicParticles(['🫁','✨','🌿','☁️','🌸'], 20);
+        }
+    } catch (e) {
+        console.warn('createMagicParticles not available', e);
+    }
 });
 </script>
 {% endblock %}
