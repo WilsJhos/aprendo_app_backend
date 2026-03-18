@@ -24,7 +24,7 @@
         margin: 0 auto;
     }
 
-    /* ── STATS RANKING PANEL ── */
+    
     .stats-panel {
         max-width: 1200px;
         margin: 0 auto 2.5rem;
@@ -102,7 +102,7 @@
         width: 100%;
     }
 
-    /* ── GAME GRID ── */
+    
     .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -180,7 +180,7 @@
     <p>Una plataforma educativa diseñada para ser divertida, inclusiva y mágica para todos los niños.</p>
 </section>
 
-<!-- STATS RANKING PANEL -->
+
 <div class="stats-panel">
     <div class="stats-panel-header">
         <h2>🏆 Ranking de Juegos</h2>
@@ -211,7 +211,11 @@
 {% block extra_js %}
 <script>
 (function(){
-    const KNOWN = ['respirador',{% for section in sections %}'{{ section.id_name }}',{% endfor %}];
+    const KNOWN = ['respirador'];
+    document.querySelectorAll('.card[data-gid]').forEach(el => {
+        KNOWN.push(el.getAttribute('data-gid'));
+    });
+
     const arr = [];
     KNOWN.forEach(id => {
         const raw = localStorage.getItem('gstat_' + id);
@@ -246,12 +250,14 @@
                 <div class="sg-row"><span class="sg-label">⭐ Mejor</span><span class="sg-val">${g.bestScore || 0}</span></div>
                 <div class="sg-row"><span class="sg-label">📊 Total pts</span><span class="sg-val">${g.totalScore || 0}</span></div>
             </div>
-            ${g.lastPlayed ? `<div class="sg-last">Último: ${g.lastPlayed}</div>` : ''}
-        `;
+        ` + (g.lastPlayed ? `<div class="sg-last">Último: ${g.lastPlayed}</div>` : '');
         box.appendChild(card);
 
         const pb = document.getElementById('pb_' + g.id);
-        if (pb) { pb.textContent = `${g.sessions} sesión${g.sessions !== 1 ? 'es' : ''}`; pb.style.display = 'block'; }
+        if (pb) { 
+            pb.textContent = g.sessions + ' sesión' + (g.sessions !== 1 ? 'es' : ''); 
+            pb.style.display = 'block'; 
+        }
     });
 })();
 </script>

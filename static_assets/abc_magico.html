@@ -572,20 +572,20 @@
             'z': {emoji: '👟', word: 'Zapato', color: '#34495e'}
         };
 
-        // Sintetizador de voz mejorado
+        
         const synth = window.speechSynthesis;
         let voiceLoaded = false;
         let spanishVoice = null;
         
-        // Cargar voces disponibles
+        
         function loadVoices() {
             const voices = synth.getVoices();
-            // Buscar voz en español
+           
             spanishVoice = voices.find(voice => voice.lang.startsWith('es')) || voices[0];
             voiceLoaded = true;
         }
         
-        // Cargar voces cuando estén disponibles
+       
         if (synth.onvoiceschanged !== undefined) {
             synth.onvoiceschanged = loadVoices;
         }
@@ -595,7 +595,7 @@
             return new Promise((resolve) => {
                 synth.cancel();
                 
-                // Esperar un momento antes de hablar
+                
                 setTimeout(() => {
                     const utterance = new SpeechSynthesisUtterance(text);
                     utterance.lang = 'es-ES';
@@ -716,7 +716,7 @@
             
             area.appendChild(container);
             
-            // Mensaje de ayuda
+            
             const hint = document.createElement('div');
             hint.style.marginTop = '20px';
             hint.style.fontSize = '1.1em';
@@ -724,7 +724,7 @@
             hint.textContent = '👆 Haz clic en las letras para escucharlas';
             area.appendChild(hint);
             
-            // Auto avanzar después de interactuar
+            
             setTimeout(() => {
                 correctInLevel = 3;
                 levelUp();
@@ -827,7 +827,7 @@
             
             area.appendChild(grid);
             
-            // Mensaje de ayuda
+            
             const hint = document.createElement('div');
             hint.style.marginTop = '20px';
             hint.style.fontSize = '1.1em';
@@ -890,7 +890,7 @@
             
             area.appendChild(grid);
             
-            // Mensaje de ayuda
+            
             const hint = document.createElement('div');
             hint.style.marginTop = '20px';
             hint.style.fontSize = '1.2em';
@@ -1306,9 +1306,9 @@
             }
         }
 
-        // Iniciar el juego
+        
         setTimeout(() => {
-            // Configurar botón de volumen
+            
             const volumeBtn = document.getElementById('volumeBtn');
             let soundEnabled = true;
             
@@ -1322,7 +1322,7 @@
                 }
             };
             
-            // Mensaje de bienvenida
+            
             speak('¡Bienvenido a A B C Mágico! ¡Vamos a aprender el abecedario!', 0.9, 1.1);
             generateQuestion();
         }, 500);

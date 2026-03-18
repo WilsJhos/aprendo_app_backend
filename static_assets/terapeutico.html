@@ -46,7 +46,7 @@ canvas{background:#fafafa;border-radius:15px}
 
 <h1>🌈 Aprendo Jugando 🌈</h1>
 
-<!-- PERFIL - CORREGIDA Y MÁS GRANDE -->
+
 <div class="pantalla" id="perfil" style="max-width: 500px; margin: 20px auto; padding: 25px;">
   <h2 style="font-size: 28px; margin-bottom: 25px;">👧 Perfil del niño</h2>
   
@@ -63,7 +63,7 @@ canvas{background:#fafafa;border-radius:15px}
     
     <div style="margin-bottom: 30px;">
       <label style="font-size: 20px; display: block; margin-bottom: 8px; font-weight: bold;">Diagnóstico</label>
-      <!-- DIAGNÓSTICOS REORDENADOS SEGÚN LA IMAGEN -->
+      
       <select id="diag" style="width: 100%; padding: 12px; font-size: 18px; border-radius:15px; border:2px solid #ffcc80; box-sizing:border-box; background-color:white;">
         <option value="TEA">TEA</option>
         <option value="Síndrome de Down">Síndrome de Down</option>
@@ -77,11 +77,11 @@ canvas{background:#fafafa;border-radius:15px}
   <button class="botonMenu" onclick="crearPerfil()" style="width: 200px; height: 200px; font-size: 22px; margin-top: 10px;">🎮 Entrar</button>
 </div>
 
-<!-- INICIO -->
+
 <div class="pantalla hidden" id="inicio">
   <h2 id="saludo"></h2>
   <div class="menu">
-    <!-- BOTONES CON VOZ GUÍA MEJORADA -->
+    
     <button class="botonMenu"
       onmouseenter="vozGuia('Juguemos con atención')"
       ontouchstart="vozGuia('Juguemos con atención')"
@@ -107,7 +107,7 @@ canvas{background:#fafafa;border-radius:15px}
       ontouchstart="vozGuia('Juguemos con motricidad')"
       onclick="modulo='motricidad';iniciar()">🖐️ Motricidad</button>
     
-    <!-- NUEVO MÓDULO CON VOZ GUÍA MEJORADA -->
+   
     <button class="botonMenu"
       onmouseenter="vozGuia('Juguemos con memoria visual')"
       ontouchstart="vozGuia('Juguemos con memoria visual')"
@@ -116,7 +116,7 @@ canvas{background:#fafafa;border-radius:15px}
   <button onclick="verPanel()">👩⚕️ Panel terapeuta</button>
 </div>
 
-<!-- JUEGO -->
+
 <div class="pantalla hidden" id="juego">
   <div class="timer" id="timer"></div>
   <div class="instruccion" id="instruccion"></div>
@@ -125,20 +125,20 @@ canvas{background:#fafafa;border-radius:15px}
   <button class="botonSalir" onclick="salirJuego()">🚪 Salir</button>
 </div>
 
-<!-- PANEL TERAPEUTA -->
+
 <div class="pantalla hidden" id="panel">
   <h2>📊 Progreso clínico (última sesión)</h2>
-  <!-- CANVAS MÁS ANCHO PARA MOSTRAR LOS 6 MÓDULOS CON NOMBRES COMPLETOS -->
+  
   <canvas id="graf" width="450" height="280"></canvas><br>
   <button onclick="volver()">⬅ Volver</button>
 </div>
 
 <script>
-// ===== SISTEMA DE SONIDOS (EXTRAÍDO DEL CÓDIGO VIEJO) =====
+
 const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
 
 function sonidoAcierto() {
-  // Sonido agradable para acierto (600 Hz)
+  
   try {
     const oscillator = ctxAudio.createOscillator();
     const gainNode = ctxAudio.createGain();
@@ -160,7 +160,7 @@ function sonidoAcierto() {
 }
 
 function sonidoError() {
-  // Sonido suave para error (300 Hz)
+  
   try {
     const oscillator = ctxAudio.createOscillator();
     const gainNode = ctxAudio.createGain();
@@ -182,7 +182,7 @@ function sonidoError() {
 }
 
 function sonidoClick() {
-  // Sonido suave para clics (400 Hz)
+  
   try {
     const oscillator = ctxAudio.createOscillator();
     const gainNode = ctxAudio.createGain();
@@ -203,45 +203,45 @@ function sonidoClick() {
   }
 }
 
-// FUNCIÓN VOZ GUÍA MEJORADA - CON CONTROL DE REPETICIÓN
+
 let ultimaVoz = null;
 let vocesDisponibles = [];
-let vozCompletada = false; // NUEVA VARIABLE PARA CONTROLAR VOCES DE FINALIZACIÓN
+let vozCompletada = false; N
 
-// Cargar voces disponibles del navegador
+
 function cargarVoces() {
   vocesDisponibles = window.speechSynthesis.getVoices();
 }
 
 if (window.speechSynthesis) {
   speechSynthesis.onvoiceschanged = cargarVoces;
-  cargarVoces(); // Cargar inmediatamente si ya están disponibles
+  cargarVoces(); 
 }
 
 function vozGuia(texto, esFinalizacion = false){
   if(!window.speechSynthesis) return;
 
-  // Si es voz de finalización y ya se activó, no repetir
+  
   if(esFinalizacion && vozCompletada) {
     return;
   }
 
-  // Detener cualquier voz anterior suavemente
+  
   if(ultimaVoz) {
     window.speechSynthesis.cancel();
   }
 
-  // Pequeño retraso para evitar sobrecarga auditiva
+  a
   setTimeout(() => {
     const voz = new SpeechSynthesisUtterance(texto);
     voz.lang = "es-ES";
-    voz.rate = 0.8;   // Velocidad adecuada para niños
-    voz.pitch = 1.0;  // Tono natural
-    voz.volume = 0.9; // Volumen cómodo
+    voz.rate = 0.8;   
+    voz.pitch = 1.0;  
+    voz.volume = 0.9;
     
-    // Intentar usar una voz natural (no robótica)
+    
     if (vocesDisponibles.length > 0) {
-      // Preferir voces naturales en español
+      
       const vozNatural = vocesDisponibles.find(v => 
         v.lang === "es-ES" && 
         (v.name.includes("Natural") || v.name.includes("Premium") || !v.name.includes("Google"))
@@ -259,16 +259,16 @@ function vozGuia(texto, esFinalizacion = false){
     ultimaVoz = voz;
     window.speechSynthesis.speak(voz);
     
-    // Si es voz de finalización, marcar como completada
+    
     if (esFinalizacion) {
       vozCompletada = true;
     }
     
-    // Limpiar referencia cuando termine
+   
     voz.onend = function() {
       setTimeout(() => { 
         ultimaVoz = null;
-        // Si era voz de finalización, resetear después de un tiempo
+        o
         if (esFinalizacion) {
           setTimeout(() => { vozCompletada = false; }, 1000);
         }
@@ -280,25 +280,25 @@ function vozGuia(texto, esFinalizacion = false){
 const buenos=["🌟 ¡Excelente!","👏 ¡Muy bien!","😊 ¡Lo lograste!","💪 ¡Sigue así!"];
 const suavesMsg=["🤍 Intenta otra vez","🌈 No pasa nada","💭 Casi lo logras"];
 
-// LISTA DE ÁREAS COMPLETA CON MEMORIA VISUAL INCLUIDA
+
 const areas=["colores","emociones","rutina","mate","motricidad","memoria"];
-// OBJETO DE PROGRESO COMPLETO CON MEMORIA VISUAL INCLUIDA
+
 let perfilActual={progreso:{colores:0,emociones:0,rutina:0,mate:0,motricidad:0,memoria:0}};
 
 let modulo="",acciones=0,tiempo=0,reloj=null;
 const TOTAL=8;
 
-/* PERFIL */
+
 function crearPerfil(){
   saludo.innerText="👋 Hola "+nombre.value;
   perfil.classList.add("hidden");
   inicio.classList.remove("hidden");
 }
 
-/* JUEGO */
+
 function iniciar(){
   acciones=0; tiempo=0;
-  vozCompletada = false; // RESETEAR EL CONTROL DE VOCES DE FINALIZACIÓN
+  vozCompletada = false;
   inicio.classList.add("hidden");
   juego.classList.remove("hidden");
   reloj=setInterval(()=>{timer.innerText="⏱️ "+(++tiempo)+" s"},1000);
@@ -317,21 +317,21 @@ function cargar(){
   if(modulo==="rutina") rutinaAvanzada();
   if(modulo==="mate") matematica();
   if(modulo==="motricidad") motricidadMejorada();
-  // NUEVA LLAMADA AL MÓDULO DE MEMORIA
+ 
   if(modulo==="memoria") memoriaVisual();
 }
 
-/* JUEGOS CON SONIDOS IMPLEMENTADOS */
+
 function simple(lista){
   if(porcentaje()===100){
     let mensajeFinal = "";
     if(modulo === "colores") {
       mensajeFinal = "🎨 Atención 🎨<br><br>🌟 ¡Excelente trabajo!<br>Reconociste muy bien los colores<br>🎯 Has completado el nivel de atención";
-      // VOZ SOLO UNA VEZ - con parámetro true para indicar que es finalización
+    
       vozGuia("¡Excelente! Reconociste muy bien los colores, completaste el nivel de atención", true);
     } else if(modulo === "emociones") {
       mensajeFinal = "🎭 Emociones 🎭<br><br>🌟 ¡Excelente trabajo!<br>Identificaste muy bien las emociones<br>😊 Has completado el nivel de emociones";
-      // VOZ SOLO UNA VEZ - con parámetro true para indicar que es finalización
+      
       vozGuia("¡Muy bien! Identificaste muy bien las emociones, completaste el nivel", true);
     }
     
@@ -350,14 +350,14 @@ function simple(lista){
     let b=document.createElement("button");
     b.className="botonJuego"; b.innerText=x;
     b.onclick=()=>{
-      sonidoClick(); // SONIDO AL HACER CLICK
+      sonidoClick(); 
       if(x===obj){
-        sonidoAcierto(); // SONIDO DE ACIERTO
+        sonidoAcierto(); 
         acciones++;
         refuerzo.innerText=buenos[Math.floor(Math.random()*buenos.length)];
         setTimeout(cargar,3000);
       }else{
-        sonidoError(); // SONIDO DE ERROR
+        sonidoError(); 
         refuerzo.innerText=suavesMsg[Math.floor(Math.random()*suavesMsg.length)];
       }
     }
@@ -365,10 +365,10 @@ function simple(lista){
   });
 }
 
-/* MOTRICIDAD MEJORADA - CON FIGURA DENTRO DEL RECUADRO */
+
 function motricidadMejorada(){
   if(porcentaje()===100){
-    // VOZ SOLO UNA VEZ - con parámetro true para indicar que es finalización
+    
     vozGuia("¡Fantástico! Moviste muy bien las figuras, completaste el nivel de motricidad", true);
     zona.innerHTML=`
       <div class="finModulo">
@@ -392,10 +392,10 @@ function motricidadMejorada(){
   d.innerText=figura;
   d.draggable=true;
   
-  // SONIDO AL EMPEZAR A ARRASTRAR
+  
   d.ondragstart = () => sonidoClick();
 
-  // RECUADRO CON LA MISMA FIGURA ADENTRO
+  
   let drop=document.createElement("div");
   drop.className="drop";
   drop.innerHTML=`
@@ -405,7 +405,7 @@ function motricidadMejorada(){
 
   drop.ondragover=e=>e.preventDefault();
   drop.ondrop=()=>{
-    sonidoAcierto(); // SONIDO DE ACIERTO
+    sonidoAcierto();
     acciones++;
     refuerzo.innerText=buenos[Math.floor(Math.random()*buenos.length)];
     setTimeout(cargar,3000);
@@ -413,7 +413,7 @@ function motricidadMejorada(){
 
   d.ondragend=(e)=>{
     if(!e.dataTransfer.dropEffect || e.dataTransfer.dropEffect==="none"){
-      sonidoError(); // SONIDO DE ERROR
+      sonidoError(); 
       drop.innerHTML=`
         <div style="font-size: 60px; margin-bottom: 10px;">${figura}</div>
         <div style='font-size:16px; color:#666'>💭 Casi lo logras<br>Ponlo dentro del recuadro</div>
@@ -425,7 +425,7 @@ function motricidadMejorada(){
   zona.appendChild(drop);
 }
 
-/* RUTINAS */
+
 const rutinas=[
  {obj:"🪥",mom:"🌅",txt:"Mañana",msg:"🌟 ¡Excelente! En la mañana nos cepillamos los dientes"},
  {obj:"🚿",mom:"🌅",txt:"Mañana",msg:"🌟 ¡Excelente! En la mañana nos bañamos"},
@@ -437,7 +437,7 @@ const rutinas=[
 
 function rutinaAvanzada(){
   if(porcentaje()===100){
-    // VOZ SOLO UNA VEZ - con parámetro true para indicar que es finalización
+    
     vozGuia("¡Felicidades! Completaste tu rutina diaria, muy bien hecho", true);
     zona.innerHTML=`
       <div class="finModulo">
@@ -456,7 +456,7 @@ function rutinaAvanzada(){
   let d=document.createElement("div");
   d.className="botonJuego"; d.innerText=r.obj; d.draggable=true;
   
-  // SONIDO AL EMPEZAR A ARRASTRAR
+  
   d.ondragstart = () => sonidoClick();
 
   let drop=document.createElement("div");
@@ -464,7 +464,7 @@ function rutinaAvanzada(){
   drop.innerHTML=r.mom+"<div class='textoMomento'>"+r.txt+"</div>";
   drop.ondragover=e=>e.preventDefault();
   drop.ondrop=()=>{
-    sonidoAcierto(); // SONIDO DE ACIERTO
+    sonidoAcierto(); 
     acciones++;
     refuerzo.innerText=r.msg;
     setTimeout(cargar,3000);
@@ -474,10 +474,10 @@ function rutinaAvanzada(){
   zona.appendChild(drop);
 }
 
-/* MATEMÁTICA CON SONIDOS */
+
 function matematica(){
   if(porcentaje()===100){
-    // VOZ SOLO UNA VEZ - con parámetro true para indicar que es finalización
+   
     vozGuia("¡Muy bien! Completaste el nivel de matemáticas, eres muy inteligente", true);
     zona.innerHTML=`
       <div class="finModulo">
@@ -498,14 +498,14 @@ function matematica(){
     let b=document.createElement("button");
     b.className="botonJuego"; b.innerText=x;
     b.onclick=()=>{
-      sonidoClick(); // SONIDO AL HACER CLICK
+      sonidoClick();
       if(x===n){
-        sonidoAcierto(); // SONIDO DE ACIERTO
+        sonidoAcierto();
         acciones++;
         refuerzo.innerText=buenos[Math.floor(Math.random()*buenos.length)];
         setTimeout(cargar,3000);
       }else{
-        sonidoError(); // SONIDO DE ERROR
+        sonidoError();
         refuerzo.innerText=suavesMsg[Math.floor(Math.random()*suavesMsg.length)];
       }
     }
@@ -513,10 +513,10 @@ function matematica(){
   });
 }
 
-/* ===== NUEVO MÓDULO: MEMORIA VISUAL CON SONIDOS ===== */
+
 function memoriaVisual(){
   if(porcentaje()===100){
-    // VOZ SOLO UNA VEZ - con parámetro true para indicar que es finalización
+    
     vozGuia("¡Excelente! Encontraste todas las imágenes, tienes muy buena memoria", true);
     zona.innerHTML=`
       <div class="finModulo">
@@ -545,14 +545,14 @@ function memoriaVisual(){
     b.className="botonJuego";
     b.innerText=f;
     b.onclick=()=>{
-      sonidoClick(); // SONIDO AL HACER CLICK
+      sonidoClick(); 
       if(f===objetivo){
-        sonidoAcierto(); // SONIDO DE ACIERTO
+        sonidoAcierto();
         acciones++;
         refuerzo.innerText="🌟 ¡Muy bien! Encontraste la imagen correcta";
         setTimeout(cargar,3000);
       }else{
-        sonidoError(); // SONIDO DE ERROR
+        sonidoError();
         refuerzo.innerText="🤍 Intenta otra vez, mira con atención";
       }
     };
@@ -560,7 +560,7 @@ function memoriaVisual(){
   });
 }
 
-/* PANEL TERAPEUTA - MEJORADO CON NOMBRES COMPLETOS Y MAYÚSCULAS */
+
 function verPanel(){
   inicio.classList.add("hidden");
   panel.classList.remove("hidden");
@@ -568,7 +568,7 @@ function verPanel(){
   let ctx=graf.getContext("2d");
   ctx.clearRect(0,0,450,280);
 
-  // NOMBRES COMPLETOS Y CON MAYÚSCULA INICIAL PARA CADA MÓDULO
+  
   const nombresCompletos = {
     "colores": "Atención",
     "emociones": "Emociones", 
@@ -578,21 +578,21 @@ function verPanel(){
     "memoria": "Memoria"
   };
 
-  // Calcular el ancho de cada barra basado en el número de áreas (6)
+  
   const anchoBarra = 50;
   const espacioEntreBarras = 25;
   const espacioTotal = (anchoBarra + espacioEntreBarras) * areas.length;
   const inicioX = (450 - espacioTotal + espacioEntreBarras) / 2;
 
-  // Dibujar cada área con nombres completos
+  
   areas.forEach((a,i)=>{
     let p=perfilActual.progreso[a]||0;
-    let h=(p/100)*200; // Altura máxima de 200px
+    let h=(p/100)*200; 
     
-    // Posición X de la barra
+    
     let x = inicioX + i * (anchoBarra + espacioEntreBarras);
     
-    // Dibujar barra con color gradiente
+    
     let gradient = ctx.createLinearGradient(x, 250-h, x, 250);
     gradient.addColorStop(0, "#4caf50");
     gradient.addColorStop(1, "#2e7d32");
@@ -600,29 +600,29 @@ function verPanel(){
     ctx.fillStyle=gradient;
     ctx.fillRect(x, 250-h, anchoBarra, h);
     
-    // Dibujar borde de la barra
+    
     ctx.strokeStyle="#1b5e20";
     ctx.lineWidth=2;
     ctx.strokeRect(x, 250-h, anchoBarra, h);
     
-    // Dibujar porcentaje encima de la barra
+    
     ctx.fillStyle="#000";
     ctx.font="bold 14px Arial";
     ctx.textAlign="center";
     ctx.fillText(p+"%", x + anchoBarra/2, 235-h);
     
-    // Dibujar nombre del módulo completo y con mayúscula inicial
+    
     ctx.font="13px Arial";
     ctx.fillStyle="#333";
     
-    // Obtener el nombre completo del módulo
+    
     let nombreCompleto = nombresCompletos[a] || a;
     
-    // Dibujar el nombre completo debajo de la barra
+    
     ctx.fillText(nombreCompleto, x + anchoBarra/2, 270);
   });
 
-  // Dibujar título del eje Y
+  
   ctx.save();
   ctx.translate(30, 140);
   ctx.rotate(-Math.PI/2);

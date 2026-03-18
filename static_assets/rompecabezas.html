@@ -307,9 +307,9 @@
                 statusVoz.textContent = "¡EXCELENTE! Nivel completado.";
                 tocarMelodiaVictoria();
                 
-                // Integración de métricas si existe la función en la app web
-                if (typeof updateStats === 'function') {
-                    updateStats(currentLevel * 10, true);
+               
+                if (typeof saveGameStat === 'function') {
+                    saveGameStat(currentLevel * 10);
                 }
                 
                 setTimeout(() => {

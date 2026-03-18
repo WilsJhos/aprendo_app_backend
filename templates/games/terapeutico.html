@@ -4,7 +4,7 @@
 
 {% block game_css %}
 <style>
-    /* Use project color variables so this game matches the site theme */
+    
     body {
         background: radial-gradient(circle at top left, var(--bg-color), var(--glass-bg));
         background-size: cover;
@@ -98,7 +98,7 @@
 
     .hidden { display: none !important; }
 
-    /* Smooth transition helpers */
+   
     .anim-enter { animation: fadeInUp 320ms ease both; }
     .anim-leave { animation: fadeOutDown 300ms ease both; }
     .anim-elem { opacity: 0; transform: translateY(8px) scale(0.98); transition: transform 260ms ease, opacity 260ms ease; }
@@ -153,7 +153,7 @@
         border: 2px solid #ddd;
     }
 
-    /* Input styling */
+    
     .clinic-input {
         width: 100%;
         padding: 12px;
@@ -164,13 +164,13 @@
         margin-top: 5px;
     }
 
-    /* Hide standard game_base components if they interfere */
+   
     .stats, .progress-bar { display: none; }
 </style>
 {% endblock %}
 
 {% block game_area %}
-<!-- PERFIL -->
+
 <div class="pantalla hidden" id="perfil" style="max-width: 500px; margin: 20px auto;">
     <h2 style="font-size: 30px; margin-bottom: 25px;">👧 Perfil del niño</h2>
     
@@ -337,7 +337,7 @@ let perfilActual = { progreso: { colores: 0, emociones: 0, rutina: 0, mate: 0, m
 let modulo = "", acciones = 0, tiempo = 0, reloj = null;
 const TOTAL = 8;
 
-// Animation helpers
+
 function showScreen(id){
     const el = document.getElementById(id);
     if(!el) return;
@@ -422,7 +422,7 @@ function simple(lista){
             }
         }
         document.getElementById('zona').appendChild(b);
-        // staggered appearance
+       
         setTimeout(()=> b.classList.add('anim-appear'), 80 * i + 40);
     });
 }
@@ -580,13 +580,13 @@ function salirJuego(){
         } catch (e) {
             console.warn('createMagicParticles not available', e);
         }
-        // Show inicio directly without requiring profile input
+        
         try {
             document.getElementById('perfil').classList.add('hidden');
             document.getElementById('inicio').classList.remove('hidden');
             const s = document.getElementById('saludo');
             if (s) s.innerText = '👋 Hola Jugador';
-            // animate menu buttons
+            
             const btns = document.querySelectorAll('#inicio .botonMenu');
             btns.forEach((b, i) => { b.classList.add('anim-elem'); setTimeout(()=> b.classList.add('anim-appear'), 80 * i + 60); });
         } catch (e) {}

@@ -175,7 +175,7 @@ noche:[
 
 function mezclar(a){ return a.sort(()=>Math.random()-0.5); }
 
-/* ========= SONIDO ========= */
+
 function toggleSonido(){
   sonidoActivo=!sonidoActivo;
   btnSonido.textContent=sonidoActivo?"🔊":"🔇";
@@ -190,7 +190,7 @@ function hablar(texto){
   speechSynthesis.speak(v);
 }
 
-/* ========= NAVEGACIÓN ========= */
+
 function mostrar(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -268,7 +268,7 @@ function volverInicio(){
   mostrar("inicio");
 }
 
-// Auto-enter menu on load so user doesn't need to provide name
+
 document.addEventListener('DOMContentLoaded', function(){
   nombreActual = "Jugador";
   const nu = document.getElementById('nombreUser');

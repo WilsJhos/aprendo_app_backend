@@ -17,12 +17,12 @@
             margin: 0;
             font-family: 'Verdana', sans-serif;
             background-color: #222;
-            overflow: hidden; /* Evita scroll */
+            overflow: hidden; 
             user-select: none;
-            touch-action: manipulation; /* Mejora respuesta táctil */
+            touch-action: manipulation; 
         }
 
-        /* --- PANTALLA DE INICIO --- */
+       
         #welcome-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -64,14 +64,14 @@
         }
         .btn-start:active { transform: translateY(10px); box-shadow: none; }
 
-        /* --- TABLERO DE JUEGO (GRID 2x2) --- */
+        
         #game-board {
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
             height: 100vh;
             width: 100vw;
-            display: none; /* Se activa con JS */
+            display: none;
         }
 
         .pad {
@@ -79,18 +79,18 @@
             height: 100%;
             cursor: pointer;
             transition: opacity 0.2s, filter 0.2s;
-            opacity: 0.6; /* Apagado por defecto */
+            opacity: 0.6;
             border: 2px solid rgba(0,0,0,0.2);
             position: relative;
         }
 
-        /* Colores */
+       
         #pad-green  { background-color: var(--verde); border-bottom-right-radius: 0; }
         #pad-red    { background-color: var(--rojo); }
         #pad-yellow { background-color: var(--amarillo); }
         #pad-blue   { background-color: var(--azul); }
 
-        /* Estado ACTIVO (Iluminado) */
+       
         .pad.active {
             opacity: 1;
             filter: brightness(1.5);
@@ -98,12 +98,12 @@
             z-index: 10;
         }
 
-        /* Estado CORRECTO (Feedback visual rápido) */
+        
         .pad.success-tap {
             transform: scale(0.95);
         }
 
-        /* --- CONTROLES CENTRALES --- */
+        
         #center-hub {
             position: absolute;
             top: 50%; left: 50%;
@@ -112,7 +112,7 @@
             background: white;
             border-radius: 50%;
             border: 10px solid #333;
-            display: none; /* Se activa con JS */
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -143,13 +143,13 @@
             cursor: pointer;
         }
 
-        /* Overlay para bloquear clicks cuando la PC juega */
+        
         #block-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 200; display: none;
         }
 
-        /* OPCIONES DE VELOCIDAD (Radio Buttons grandes) */
+        
         .speed-opt {
             display: inline-block;
             margin: 10px;
@@ -195,16 +195,16 @@
     <div id="block-layer"></div>
 
     <script>
-        // --- CONFIGURACIÓN DE AUDIO (Web Audio API) ---
+        
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
-        // Frecuencias musicales armoniosas (Escala de Mi mayor aproximada)
+        
         const sounds = {
-            green: 329.63,  // Mi (E4)
-            red: 261.63,    // Do# (C#4) - Usamos Do para mayor contraste o La
-            yellow: 220.00, // La (A3)
-            blue: 164.81,   // Mi grave (E3)
-            error: 100      // Sonido grave error
+            green: 329.63,  
+            red: 261.63,    
+            yellow: 220.00, 
+            blue: 164.81,   
+            error: 100      
         };
 
         function playTone(color) {
@@ -213,10 +213,10 @@
             const osc = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             
-            osc.type = 'triangle'; // Sonido suave tipo flauta/gameboy
+            osc.type = 'triangle'; 
             
             if (color === 'error') {
-                osc.type = 'sawtooth'; // Sonido áspero para error
+                osc.type = 'sawtooth'; 
                 osc.frequency.value = sounds.error;
             } else {
                 osc.frequency.value = sounds[color];
@@ -225,7 +225,7 @@
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
 
-            // Envolvente de sonido (Fade in - Fade out rápido)
+            
             const now = audioCtx.currentTime;
             gainNode.gain.setValueAtTime(0, now);
             gainNode.gain.linearRampToValueAtTime(0.3, now + 0.05);
@@ -235,20 +235,20 @@
             osc.stop(now + 0.5);
         }
 
-        // --- LÓGICA DEL JUEGO ---
+        
         const colors = ['green', 'red', 'yellow', 'blue'];
         let gameSequence = [];
         let playerSequence = [];
         let level = 1;
-        let speed = 1000; // ms entre luces
+        let speed = 1000; s
         let isGameActive = false;
 
         function iniciarJuego() {
-            // Leer velocidad seleccionada
+            
             const radios = document.getElementsByName('speed');
             for (let r of radios) { if (r.checked) speed = parseInt(r.value); }
 
-            // Cambiar pantallas
+            
             document.getElementById('welcome-screen').style.display = 'none';
             document.getElementById('game-board').style.display = 'grid';
             document.getElementById('center-hub').style.display = 'flex';
@@ -274,11 +274,11 @@
             playerSequence = [];
             actualizarHUD("Observa...", level);
 
-            // Agregar nuevo color a la secuencia
+            
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
             gameSequence.push(randomColor);
 
-            // Reproducir secuencia con Delay
+            
             let i = 0;
             const interval = setInterval(() => {
                 activarPad(gameSequence[i]);
@@ -288,49 +288,49 @@
                     setTimeout(() => {
                         bloquearInput(false);
                         actualizarHUD("¡Tu turno!", level);
-                    }, speed); // Esperar un poco antes de dar el turno
+                    }, speed); 
                 }
             }, speed);
         }
 
-        // Ilumina el botón y suena
+        
         function activarPad(color) {
             const pad = document.getElementById(`pad-${color}`);
             pad.classList.add('active');
             playTone(color);
             
-            // Apagar después de medio segundo (o menos si es rápido)
+            
             setTimeout(() => {
                 pad.classList.remove('active');
             }, speed / 2); 
         }
 
-        // --- INTERACCIÓN DEL JUGADOR ---
+       
         function handleInput(color) {
             if (!isGameActive) return;
 
-            // Feedback visual de toque
+            
             const pad = document.getElementById(`pad-${color}`);
-            pad.classList.add('active'); // Iluminar
-            playTone(color); // Sonar
+            pad.classList.add('active'); 
+            playTone(color); 
             setTimeout(() => pad.classList.remove('active'), 200);
 
-            // Lógica
+           
             playerSequence.push(color);
             const index = playerSequence.length - 1;
 
-            // 1. Verificar si el último toque es correcto
+            
             if (playerSequence[index] !== gameSequence[index]) {
                 gameOver();
                 return;
             }
 
-            // 2. Verificar si completó la secuencia
+            
             if (playerSequence.length === gameSequence.length) {
                 bloquearInput(true);
                 actualizarHUD("¡Muy bien! 👍", level);
                 level++;
-                setTimeout(playRound, 1500); // Pausa antes del siguiente nivel
+                setTimeout(playRound, 1500); 
             }
         }
 
@@ -338,7 +338,7 @@
             bloquearInput(true);
             playTone('error');
             actualizarHUD("¡Oh no! 😔", level);
-            document.body.style.backgroundColor = "#500"; // Flash rojo de fondo
+            document.body.style.backgroundColor = "#500"; 
             
             setTimeout(() => {
                 document.body.style.backgroundColor = "#222";
@@ -347,7 +347,7 @@
             }, 500);
         }
 
-        // Bloquea la pantalla transparente para que no toquen mientras suena la máquina
+        
         function bloquearInput(bloquear) {
             const layer = document.getElementById('block-layer');
             if (bloquear) {

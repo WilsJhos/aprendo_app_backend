@@ -16,18 +16,18 @@
 }
 body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-start),var(--bg-end));min-height:100vh;color:var(--text);overflow-x:hidden;}
 
-/* particles */
+
 .particles{position:fixed;inset:0;pointer-events:none;z-index:0;}
 .particle{position:absolute;border-radius:50%;animation:floatUp linear infinite;opacity:0;}
 @keyframes floatUp{0%{transform:translateY(100vh) scale(0);opacity:0;}10%{opacity:.6;}90%{opacity:.4;}100%{transform:translateY(-100px) scale(1);opacity:0;}}
 
 .app-container{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
 
-/* SCREENS */
+
 .screen{display:none;flex:1;padding:20px;}
 .screen.active{display:flex;flex-direction:column;}
 
-/* WELCOME */
+
 .welcome-content{max-width:600px;margin:0 auto;text-align:center;padding:20px 0;}
 .logo-magical{position:relative;margin-bottom:24px;}
 .magic-circle{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));margin:0 auto 16px;animation:pulse 2s ease-in-out infinite;display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(108,99,255,.5);}
@@ -46,7 +46,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
 .input-magical input::placeholder{color:rgba(255,255,255,.5);}
 .input-magical input:focus{border-color:var(--primary);}
 
-/* BUTTONS */
+
 .btn-rainbow{display:inline-flex;align-items:center;gap:10px;padding:14px 32px;background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;border-radius:50px;color:#fff;font-family:inherit;font-size:1.1rem;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 8px 25px rgba(108,99,255,.4);margin:6px;}
 .btn-rainbow:hover{transform:translateY(-3px);box-shadow:0 14px 35px rgba(108,99,255,.5);}
 .btn-glass{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:50px;color:#fff;font-family:inherit;font-size:1rem;cursor:pointer;backdrop-filter:blur(10px);transition:all .2s;margin:6px;}
@@ -59,7 +59,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
 .pulse-animation{animation:btnPulse 2s ease-in-out infinite;}
 @keyframes btnPulse{0%,100%{box-shadow:0 8px 25px rgba(108,99,255,.4);}50%{box-shadow:0 8px 40px rgba(108,99,255,.7);}}
 
-/* LEVEL SELECT */
+
 .level-select-content{max-width:700px;margin:0 auto;text-align:center;padding:20px 0;}
 .title-fun{font-size:clamp(1.8rem,4vw,2.5rem);background:linear-gradient(135deg,#FFD700,#FF6584);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
 .subtitle-fun{color:var(--text-muted);margin-bottom:28px;font-size:1rem;}
@@ -87,7 +87,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
 .control-voice{background:rgba(67,233,123,.15);color:#43E97B;border:1px solid rgba(67,233,123,.3);}
 .control-voice.off{background:rgba(255,255,255,.1);color:gray;border-color:rgba(255,255,255,.2);}
 
-/* EXERCISE */
+
 .exercise-content{max-width:680px;margin:0 auto;text-align:center;padding:10px 0;}
 .exercise-header-fun{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;}
 .stat-bubble{background:var(--card-bg);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:12px 18px;display:flex;align-items:center;gap:10px;min-width:110px;}
@@ -122,7 +122,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
 .volume-control{display:flex;align-items:center;gap:10px;justify-content:center;font-size:1.1rem;}
 .volume-control input{width:120px;accent-color:var(--primary);}
 
-/* RESULTS */
+
 .results-content{max-width:600px;margin:0 auto;text-align:center;padding:20px 0;}
 .celebration-header{margin-bottom:24px;}
 .title-celebration{font-size:clamp(2rem,5vw,3rem);background:linear-gradient(135deg,#FFD700,#FF6584,#6C63FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:celebPulse 1.5s ease-in-out infinite;}
@@ -137,7 +137,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
 .feedback-section h3,.recommendations-section h3{margin-bottom:12px;font-size:1rem;}
 .results-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
 
-/* PROGRESS */
+
 .progress-page-content{max-width:700px;margin:0 auto;text-align:center;padding:20px 0;}
 .patient-card{background:var(--card-bg);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:20px;margin-bottom:24px;display:flex;align-items:center;gap:16px;justify-content:center;flex-wrap:wrap;}
 .patient-avatar{font-size:2.5rem;}
@@ -168,7 +168,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
 <div class="particles" id="particles"></div>
 <div class="app-container">
 
-<!-- WELCOME -->
+
 <div id="welcomeScreen" class="screen active">
   <div class="welcome-content">
     <div class="logo-magical">
@@ -194,7 +194,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
   </div>
 </div>
 
-<!-- LEVEL SELECT -->
+
 <div id="levelSelectScreen" class="screen">
   <div class="level-select-content">
     <h2 class="title-fun">🎯 Elige tu Aventura</h2>
@@ -237,7 +237,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
   </div>
 </div>
 
-<!-- EXERCISE -->
+
 <div id="exerciseScreen" class="screen">
   <div class="exercise-content">
     <div class="exercise-header-fun">
@@ -284,7 +284,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
   </div>
 </div>
 
-<!-- RESULTS -->
+
 <div id="resultsScreen" class="screen">
   <div class="results-content">
     <div class="celebration-header">
@@ -306,7 +306,7 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
   </div>
 </div>
 
-<!-- PROGRESS -->
+
 <div id="progressScreen" class="screen">
   <div class="progress-page-content">
     <h2 class="title-fun">📊 Tu Diario de Bienestar</h2>
@@ -339,10 +339,10 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
   </div>
 </div>
 
-</div><!-- app-container -->
+</div>
 
 <script>
-// ── PARTICLES ──
+
 (function(){
   const c=document.getElementById('particles');
   for(let i=0;i<25;i++){
@@ -354,13 +354,13 @@ body{font-family:'Baloo 2',cursive;background:linear-gradient(135deg,var(--bg-st
   }
 })();
 
-// ── SCREENS ──
+
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-// ── STATE ──
+
 let patientName='';
 let currentLevel=1;
 let sessionData={totalTime:0,cycles:0,level:1};
@@ -424,7 +424,7 @@ const themes={
   galaxy:{bg:['#0a0015','#1a0030'],inner:['#B06EFF','#6C63FF'],outer:['rgba(176,110,255,0.3)','rgba(108,99,255,0.2)']}
 };
 
-// ── WELCOME ──
+
 function startWelcomeFlow(){
   patientName=document.getElementById('patientNameInput').value.trim()||'Explorador';
   showScreen('levelSelectScreen');
@@ -434,7 +434,7 @@ function goToWelcome(){
   showScreen('welcomeScreen');
 }
 
-// ── LEVEL ──
+
 function selectLevel(n){
   currentLevel=n;
   document.getElementById('currentLevelName').textContent=levelConfigs[n].name;
@@ -445,7 +445,7 @@ function changeLevelDuringExercise(){
   showScreen('levelSelectScreen');
 }
 
-// ── EXERCISE ──
+
 function startExercise(){
   showScreen('exerciseScreen');
   elapsedSeconds=0; currentCycles=0; isPaused=false;
@@ -542,22 +542,22 @@ function drawBreathCircle(progress,phase){
   const t=themes[currentTheme];
   const phaseColors=[t.inner[0],t.inner[1],t.inner[0]];
   const col=phaseColors[phase];
-  // outer glow
+  
   const outerR=130+progress*20;
   const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,outerR);
   grad.addColorStop(0,col.replace(')',',0.15)').replace('rgb(','rgba('));
   grad.addColorStop(1,'transparent');
   ctx.fillStyle=grad;
   ctx.beginPath(); ctx.arc(cx,cy,outerR,0,Math.PI*2); ctx.fill();
-  // track
+ 
   ctx.beginPath(); ctx.arc(cx,cy,110,0,Math.PI*2);
   ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=14; ctx.stroke();
-  // arc
+ 
   if(progress>0){
     ctx.beginPath(); ctx.arc(cx,cy,110,-Math.PI/2,-Math.PI/2+progress*Math.PI*2);
     ctx.strokeStyle=col; ctx.lineWidth=14; ctx.lineCap='round'; ctx.stroke();
   }
-  // inner circle
+  
   const innerR=60+progress*18;
   const ig=ctx.createRadialGradient(cx,cy,0,cx,cy,innerR);
   ig.addColorStop(0,col);
@@ -612,7 +612,7 @@ function showResults(){
 
 function newSession(){showScreen('levelSelectScreen');}
 
-// ── PROGRESS ──
+
 function loadProgressData(){
   document.getElementById('patientNameDisplay').textContent=patientName||'Sin nombre';
   const total=levelStats[1].sessions+levelStats[2].sessions+levelStats[3].sessions+levelStats[4].sessions;
@@ -647,7 +647,7 @@ function clearAllData(){
   }
 }
 
-// ── THEME ──
+
 function changeTheme(t){
   currentTheme=t;
   document.querySelectorAll('.theme-bubble').forEach(b=>b.classList.toggle('active',b.dataset.theme===t));
@@ -659,7 +659,7 @@ function changeTheme(t){
   }
 }
 
-// ── VOLUME ──
+
 function updateVolume(v){ 
   currentVolume=v/100;
   ambientAudio.volume = currentVolume;

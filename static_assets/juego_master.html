@@ -317,8 +317,8 @@ document.addEventListener('DOMContentLoaded', () => {
             winScreen.classList.remove('hidden');
             
             // Integrate with app stats
-            if (typeof updateStats === 'function') {
-                updateStats(score, true);
+            if (typeof saveGameStat === 'function') {
+                saveGameStat(score);
             }
         }
 
@@ -336,8 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
             gameRunning = false;
             Voice.speak("Game Over. Inténtalo de nuevo.");
             gameOverScreen.classList.remove('hidden');
-            if (typeof updateStats === 'function') {
-                updateStats(score, false);
+            if (typeof saveGameStat === 'function') {
+                saveGameStat(score);
             }
         }
     }

@@ -184,7 +184,6 @@
 
     <!-- Controles móviles eliminados por control táctil directo -->
 
-    <!-- Pantallas de Estado -->
     <div id="start-screen" class="overlay">
         <h1>Misión Espacial</h1>
         <p>10 Vidas - 3 Niveles - ¡Gana!</p>
@@ -263,9 +262,9 @@ document.addEventListener('DOMContentLoaded', () => {
             osc.start();
             osc.stop(audioCtx.currentTime + duration);
         },
-        collect: () => Sound.playTone(880, 'sine', 0.1), // Sonido agudo
+        collect: () => Sound.playTone(880, 'sine', 0.1),
         hit: () => {
-            Sound.playTone(150, 'sawtooth', 0.3); // Sonido grave
+            Sound.playTone(150, 'sawtooth', 0.3);
             Sound.playTone(100, 'sawtooth', 0.3);
         },
         win: () => {
@@ -294,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let prevLevel = level;
         
         if (score >= 100) {
-            level = 4; // Ganó
+            level = 4;
         } else if (score >= 50) {
             level = 3;
         } else if (score >= 20) {
@@ -304,10 +303,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (level > prevLevel) {
-            gameSpeed += 2; // Aumentar dificultad
+            gameSpeed += 2;
             Voice.speak(`¡Subiendo al nivel ${level}!`);
             showFeedback(`¡NIVEL ${level}!`);
-            Sound.win(); // Pequeña fanfarria
+            Sound.win();
         }
 
         if (level === 4) {
@@ -316,9 +315,9 @@ document.addEventListener('DOMContentLoaded', () => {
             Voice.speak("¡Felicidades, ganaste el juego!");
             winScreen.classList.remove('hidden');
             
-            // Integrate with app stats
-            if (typeof updateStats === 'function') {
-                updateStats(score, true);
+            
+            if (typeof saveGameStat === 'function') {
+                saveGameStat(score);
             }
         }
 
@@ -336,8 +335,8 @@ document.addEventListener('DOMContentLoaded', () => {
             gameRunning = false;
             Voice.speak("Game Over. Inténtalo de nuevo.");
             gameOverScreen.classList.remove('hidden');
-            if (typeof updateStats === 'function') {
-                updateStats(score, false);
+            if (typeof saveGameStat === 'function') {
+                saveGameStat(score);
             }
         }
     }
@@ -345,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('keydown', e => { 
         if(keys.hasOwnProperty(e.code)) {
             keys[e.code] = true;
-            // Prevent scrolling when using arrow keys
+            
             if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].indexOf(e.code) > -1) {
                 e.preventDefault();
             }
@@ -357,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } 
     });
 
-    // Touch buttons event listeners removed
+    
 
     // -- CONTROL TÁCTIL (ARRASTRAR CON EL DEDO) --
     let isDragging = false;
@@ -375,13 +374,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     canvas.addEventListener('touchmove', (e) => {
         if (!isDragging || !gameRunning) return;
-        e.preventDefault(); // Prevenir el scroll en el celular
+        e.preventDefault();
         const rect = canvas.getBoundingClientRect();
         const touch = e.touches[0];
         const touchX = touch.clientX - rect.left;
         const touchY = touch.clientY - rect.top;
 
-        // Movimiento relativo al arrastre
         player.x += (touchX - dragStartX) * 1.5; 
         player.y += (touchY - dragStartY) * 1.5;
 
@@ -393,7 +391,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     canvas.addEventListener('touchend', () => { isDragging = false; });
     
-    // Control con ratón (opcional para probar en PC arrastrando)
     canvas.addEventListener('mousedown', (e) => {
         if (!gameRunning) return;
         const rect = canvas.getBoundingClientRect();
@@ -480,7 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 x: canvas.width, y: Math.random() * canvas.height, size: 10, color: '#ffdd59'
             });
         }
-        // Obstáculos
+        
         if (Math.random() < 0.02) {
             obstacles.push({
                 x: canvas.width, y: Math.random() * (canvas.height - 30), width: 30, height: 30, speed: gameSpeed
@@ -531,14 +528,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.shadowBlur = 10; ctx.shadowColor = player.color;
         ctx.fillRect(player.x, player.y, player.width, player.height);
         ctx.shadowBlur = 0;
-
-        // Estrellas
+        
         ctx.fillStyle = '#ffdd59';
         stars.forEach(s => {
             ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
         });
 
-        // Obstáculos
         ctx.fillStyle = '#ff4757';
         obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.width, o.height));
     }

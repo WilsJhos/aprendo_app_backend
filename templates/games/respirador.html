@@ -3,10 +3,10 @@
 
 {% block extra_css %}
 <style>
-  /* ── FULL-SCREEN OVERRIDE ── */
+  
   main { padding: 0 !important; align-items: stretch !important; }
 
-  /* Back button */
+
   .resp-back {
     position: fixed;
     top: 70px;
@@ -33,7 +33,7 @@
   *{ box-sizing: border-box; margin: 0; padding: 0; }
 
   #resp-app {
-    position: fixed; inset: 0; top: 60px;   /* below header */
+    position: fixed; inset: 0; top: 60px;
     background: linear-gradient(135deg, #0f0c29, #302b63);
     color: #fff;
     font-family: 'Outfit', sans-serif;
@@ -41,11 +41,11 @@
     transition: background 2s ease;
   }
 
-  /* SCREENS */
+  
   .rscreen { display: none; position: absolute; inset: 0; flex-direction: column; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
   .rscreen.active { display: flex; }
 
-  /* CARD */
+
   .r-card {
     background: rgba(255,255,255,0.09);
     border: 1px solid rgba(255,255,255,0.15);
@@ -59,7 +59,7 @@
   .r-title { font-size: clamp(1.8rem,5vw,2.6rem); font-weight: 800; background: linear-gradient(135deg,#fff,#FFD700,#FF6584); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
   .r-sub { color: rgba(255,255,255,0.7); margin-bottom: 28px; font-size: 1rem; line-height: 1.5; }
 
-  /* BUTTONS */
+
   .rbtn-main { display: inline-flex; align-items: center; gap: 10px; padding: 15px 36px; background: linear-gradient(135deg,#6C63FF,#FF6584); border: none; border-radius: 50px; color: #fff; font-family: inherit; font-size: 1.1rem; font-weight: 700; cursor: pointer; box-shadow: 0 8px 25px rgba(108,99,255,.45); transition: transform .2s, box-shadow .2s; margin: 6px; }
   .rbtn-main:hover { transform: translateY(-3px); box-shadow: 0 14px 35px rgba(108,99,255,.6); }
   .rbtn-sec { display: inline-flex; align-items: center; gap: 8px; padding: 12px 26px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 50px; color: #fff; font-family: inherit; font-size: .95rem; cursor: pointer; transition: all .2s; margin: 6px; }
@@ -72,7 +72,7 @@
   .ctrl-voice { background: rgba(67,233,123,.15); color: #43E97B; border: 1px solid rgba(67,233,123,.3); }
   .ctrl-voice.off { background: rgba(255,255,255,.07); color: gray; border-color: rgba(255,255,255,.15); }
 
-  /* LEVEL SELECT */
+
   .levels-wrap { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
   .lv-box { background: rgba(255,255,255,.07); border: 2px solid rgba(255,255,255,.12); border-radius: 22px; padding: 22px 16px; min-width: 130px; flex: 1; max-width: 160px; cursor: pointer; text-align: center; transition: transform .25s, box-shadow .25s; }
   .lv-box:hover { transform: translateY(-6px); }
@@ -85,7 +85,6 @@
   .lv-desc { font-size: .78rem; color: rgba(255,255,255,.6); margin-bottom: 8px; }
   .lv-timer { background: rgba(255,255,255,.08); border-radius: 8px; padding: 4px 8px; font-size: .73rem; }
 
-  /* EXERCISE */
   .ex-header { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
   .stat-bub { background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
   .stat-icon { font-size: 1.4rem; }
@@ -106,7 +105,6 @@
 
   .ctrls { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
 
-  /* THEME ORBS */
   .th-grid { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
   .th-orb { width: 40px; height: 40px; border-radius: 50%; border: 2px solid transparent; background: rgba(255,255,255,.1); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
   .th-orb:hover { transform: scale(1.15); }
@@ -115,7 +113,6 @@
   .vol-row { display: flex; align-items: center; gap: 10px; justify-content: center; }
   .vol-row input { width: 110px; accent-color: #6C63FF; }
 
-  /* RESULTS */
   .res-cards { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
   .res-card { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 18px; padding: 18px; min-width: 120px; flex: 1; max-width: 160px; text-align: center; }
   .res-emoji { font-size: 1.8rem; margin-bottom: 6px; }
@@ -129,7 +126,6 @@
 <a href="/" class="resp-back">⬅️ Atrás</a>
 <div id="resp-app">
 
-  <!-- WELCOME -->
   <div id="scr-welcome" class="rscreen active">
     <div class="r-card">
       <div style="font-size:4rem;margin-bottom:12px;">🫁</div>
@@ -139,7 +135,6 @@
     </div>
   </div>
 
-  <!-- LEVEL SELECT -->
   <div id="scr-lvl" class="rscreen">
     <h2 style="font-size:1.8rem;margin-bottom:8px;font-weight:800;">🎯 Elige tu Aventura</h2>
     <p style="color:rgba(255,255,255,.65);margin-bottom:22px;">¿Qué modo quieres practicar hoy?</p>
@@ -172,7 +167,6 @@
     <button class="rbtn-sec" onclick="showRScreen('welcome')">⬅️ Volver</button>
   </div>
 
-  <!-- EXERCISE -->
   <div id="scr-ex" class="rscreen">
     <div class="ex-header">
       <div class="stat-bub"><div class="stat-icon">🏆</div><div><span class="stat-lbl">Nivel</span><span class="stat-val" id="rLvlName">-</span></div></div>
@@ -216,7 +210,6 @@
     </div>
   </div>
 
-  <!-- RESULTS -->
   <div id="scr-res" class="rscreen">
     <div class="r-card">
       <div style="font-size:3rem;margin-bottom:12px;">🎉</div>
@@ -232,12 +225,12 @@
     </div>
   </div>
 
-</div><!-- resp-app -->
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// ── GAME STATS (localStorage) ──
+
 function saveRespStat() {
   const key = 'gstat_respirador';
   const d = JSON.parse(localStorage.getItem(key) || '{"sessions":0,"totalScore":0,"bestScore":0,"lastPlayed":""}');
@@ -250,14 +243,12 @@ function saveRespStat() {
   localStorage.setItem(key, JSON.stringify(d));
 }
 
-// ── STATE ──
 let rLevel = 1, rPaused = false, rVoiceOn = true;
 let rInterval = null, rBreathInt = null, rCdTimer = null;
 let rElapsed = 0, rCycles = 0, rPhaseIdx = 0, rPhSec = 0;
 let rVol = 0.35, rTheme = 'calm';
 const SESSION_SEC = 600;
 
-// ── LEVEL CONFIG ──
 const RCfg = {
   1: { name:'🌱 Explorador', in:4, hold:4, out:4,  msgs:['Inhala profundo...','Sostén el aire...','Exhala suavemente...'] },
   2: { name:'🔥 Aventurero', in:5, hold:5, out:6,  msgs:['Respira con fuerza...','Aguanta...','Libera el aire...'] },
@@ -265,7 +256,6 @@ const RCfg = {
   4: { name:'🌙 Sueño',     in:4, hold:7, out:8,  msgs:['Inhala calma...','Mantén la paz...','Exhala el estrés...'] }
 };
 
-// ── THEME COLORS ──
 const TColor = {
   calm:  { bg:'linear-gradient(135deg,#0f0c29,#302b63)', arc:'#6C63FF', glow:'rgba(108,99,255,0.3)' },
   forest:{ bg:'linear-gradient(135deg,#0d2b0d,#1a4a1a)', arc:'#43E97B', glow:'rgba(67,233,123,0.3)' },
@@ -275,7 +265,6 @@ const TColor = {
   sleep: { bg:'linear-gradient(135deg,#050510,#10103a)', arc:'#6495ED', glow:'rgba(100,149,237,0.3)' }
 };
 
-// ── AUDIO (Web Audio API generated tones) ──
 let audioCtx = null, noiseGain = null, noiseSource = null, filterNode = null;
 
 function ensureAudio() {
@@ -322,7 +311,6 @@ function stopAmbient() {
   if (noiseGain && audioCtx) noiseGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
 }
 
-// ── VOICE ──
 function rSpeak(txt) {
   if (!rVoiceOn) return;
   if (window.speak) {
@@ -339,13 +327,11 @@ function toggleRVoice() {
   if (!rVoiceOn && window.speechSynthesis) window.speechSynthesis.cancel();
 }
 
-// ── SCREENS ──
 function showRScreen(id) {
   document.querySelectorAll('.rscreen').forEach(s => s.classList.remove('active'));
   document.getElementById('scr-' + id).classList.add('active');
 }
 
-// ── EXERCISE ──
 function startEx(level) {
   rLevel = level;
   rElapsed = 0; rCycles = 0; rPhaseIdx = 0; rPhSec = 0; rPaused = false;
@@ -364,7 +350,6 @@ function startEx(level) {
   startAmbient();
   rSpeak('Prepárate. Comenzamos en tres.');
 
-  // Countdown 3 secs then kick off intervals
   let n = 3;
   rCdTimer = setInterval(() => {
     if (rPaused) return;
@@ -419,7 +404,6 @@ function updateRTimer(sec) {
   document.getElementById('rTimer').textContent = `${m}:${s.toString().padStart(2,'0')}`;
 }
 
-// ── CANVAS ──
 function drawOrb(prog, phase) {
   const canvas = document.getElementById('rCanvas');
   if (!canvas) return;
@@ -431,7 +415,6 @@ function drawOrb(prog, phase) {
   const tc = TColor[rTheme];
   const col = tc.arc;
 
-  // Outer glow
   const outerR = 110 + prog * 18;
   const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, outerR);
   grd.addColorStop(0, col + '44');
@@ -439,17 +422,14 @@ function drawOrb(prog, phase) {
   ctx.fillStyle = grd;
   ctx.beginPath(); ctx.arc(cx, cy, outerR, 0, Math.PI*2); ctx.fill();
 
-  // Track ring
   ctx.beginPath(); ctx.arc(cx, cy, 95, 0, Math.PI*2);
   ctx.strokeStyle = 'rgba(255,255,255,0.09)'; ctx.lineWidth = 13; ctx.stroke();
 
-  // Progress arc
   if (prog > 0) {
     ctx.beginPath(); ctx.arc(cx, cy, 95, -Math.PI/2, -Math.PI/2 + prog * Math.PI*2);
     ctx.strokeStyle = col; ctx.lineWidth = 13; ctx.lineCap = 'round'; ctx.stroke();
   }
 
-  // Inner circle
   const innerR = 48 + prog * 16;
   const ig = ctx.createRadialGradient(cx, cy, 0, cx, cy, innerR);
   ig.addColorStop(0, col + 'dd');
@@ -458,7 +438,6 @@ function drawOrb(prog, phase) {
   ctx.beginPath(); ctx.arc(cx, cy, innerR, 0, Math.PI*2); ctx.fill();
 }
 
-// ── PAUSE / STOP ──
 function toggleRPause() {
   rPaused = !rPaused;
   document.getElementById('rPauseBtn').textContent = rPaused ? '▶️ Reanudar' : '⏸️ Pausar';
@@ -485,7 +464,6 @@ function stopEx() {
   rSpeak('¡Excelente! Sesión completada. Tu respiración está más tranquila ahora.');
 }
 
-// ── THEME ──
 function setTheme(th, el) {
   rTheme = th;
   document.querySelectorAll('.th-orb').forEach(b => b.classList.toggle('active', b.dataset.th === th));
@@ -495,7 +473,6 @@ function setTheme(th, el) {
   }
 }
 
-// ── VOLUME ──
 function setVol(v) {
   rVol = v / 100;
   document.getElementById('rVolPct').textContent = v + '%';
@@ -504,9 +481,8 @@ function setVol(v) {
   }
 }
 
-// ── INIT ──
 window.addEventListener('DOMContentLoaded', () => {
-    // Set default background
+  
     document.getElementById('resp-app').style.background = TColor['calm'].bg;
     try {
         if (typeof window.createMagicParticles === 'function') {

@@ -11,17 +11,17 @@
         --abc-bg: #1e1b4b;
     }
 
-    /* Game specific colors and tokens */
+   
 
     .letter-display {
-        font-size: clamp(4rem, 20vw, 10rem); /* Adjusted font size */
+        font-size: clamp(4rem, 20vw, 10rem);
         font-weight: 900;
         color: white;
         text-shadow: 0 0 30px var(--abc-accent), 0 0 60px var(--abc-accent);
         cursor: pointer;
         transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         user-select: none;
-        margin: 1rem 0; /* Adjusted margin */
+        margin: 1rem 0;
     }
 
     .letter-display:hover { transform: scale(1.1) rotate(5deg); }
@@ -29,18 +29,18 @@
     .options-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: clamp(8px, 2vw, 15px); /* Adjusted gap */
+        gap: clamp(8px, 2vw, 15px); 
         width: 100%;
         max-width: 500px;
-        margin: 0 auto; /* Added margin auto for centering */
+        margin: 0 auto;
     }
 
     .abc-btn {
         background: rgba(255, 255, 255, 0.1);
         border: 2px solid rgba(255, 255, 255, 0.2);
-        border-radius: 16px; /* Adjusted border-radius */
-        padding: clamp(0.75rem, 5vw, 2rem); /* Adjusted padding */
-        font-size: clamp(1.5rem, 8vw, 3.5rem); /* Adjusted font size */
+        border-radius: 16px; 
+        padding: clamp(0.75rem, 5vw, 2rem); 
+        font-size: clamp(1.5rem, 8vw, 3.5rem);
         font-weight: 800;
         color: white;
         cursor: pointer;
@@ -56,7 +56,7 @@
     }
 
     .instruction {
-        font-size: clamp(1rem, 3.5vw, 1.5rem); /* Adjusted font size */
+        font-size: clamp(1rem, 3.5vw, 1.5rem); 
         font-weight: 600;
         opacity: 0.8;
         margin-bottom: 20px;
@@ -94,9 +94,9 @@
             
             generateOptions(letter);
             
-            // Speak AFTER UI is updated and options are ready
+            
             if (window.speak) {
-                window.speak(letter, 0.8, 1.2); // Slower and deeper for clearer letters
+                window.speak(letter, 0.8, 1.2);
             }
         }
 
@@ -153,7 +153,7 @@
             } catch (e) {
                 console.warn('createMagicParticles not available', e);
             }
-            // Small delay to ensure bridge is ready
+            
             setTimeout(nextQuestion, 500);
         });
     </script>

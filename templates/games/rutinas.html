@@ -9,7 +9,7 @@
     :root {
         --base-accent: #6bcf9c;
     }
-    /* Ensure rutinas takes full space but stays clean */
+    
     .rutinas-container {
         padding: clamp(0.5rem, 2vw, 1.5rem) !important;
         min-height: auto !important;
@@ -27,7 +27,7 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Modern Form Styling */
+    
     .form-card {
         background: var(--glass-bg);
         backdrop-filter: blur(12px);
@@ -71,7 +71,7 @@
         box-shadow: 0 0 0 3px rgba(107, 207, 156, 0.2);
     }
 
-    /* Dynamic Color Chips */
+
     .color-palette {
         display: flex;
         justify-content: center;
@@ -98,7 +98,6 @@
         transform: scale(1.1);
     }
 
-    /* Routine Steps */
     .opciones-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -216,10 +215,10 @@
                     <div class="color-chip" style="background: #feebc8;" onclick="selectColor('#feebc8', this)"></div>
                     <div class="color-chip" style="background: #c6f6d5;" onclick="selectColor('#c6f6d5', this)"></div>
                     
-                    <!-- Advanced Options -->
+                    
                     <div class="color-chip" style="background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);" onclick="selectColor('rainbow', this)" title="Arcoíris"></div>
                     
-                    <!-- Custom Picker -->
+                
                     <div class="color-chip" style="background: #fff; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;" onclick="document.getElementById('customColor').click()">
                         🎨
                     </div>
@@ -330,7 +329,6 @@
         document.querySelectorAll('.color-chip').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
         
-        // Update visual feedback for custom icon if it's a hex code
         if (color.startsWith('#')) {
             el.style.backgroundColor = color;
         }
@@ -357,7 +355,6 @@
         const condicion = document.getElementById('condicion');
         const errorInicio = document.getElementById('errorInicio');
 
-        // Check values with trim for robustness
         const nombreVal = nombre.value.trim();
         const edadVal = edad.value.trim();
         const condicionVal = condicion.value;
@@ -372,7 +369,6 @@
         nombreActual = nombreVal;
         document.getElementById('nombreUser').textContent = nombreActual;
         
-        // Apply personalized styles safely
         try {
             if(colorSeleccionado === 'rainbow') {
                 document.body.style.background = 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%)';
@@ -381,7 +377,7 @@
             }
         } catch(e) {}
 
-        // RE-ORDER: Show menu FIRST, then speak for better mobile UX
+        
         mostrar("menu");
         if (window.speak) {
             window.speak("Bienvenido " + nombreActual + ". ¿Por dónde empezamos hoy?");
@@ -413,10 +409,9 @@
             });
         }
         
-        // Show screen FIRST for immediate mobile responsiveness
+        
         mostrar("rutina");
 
-        // Small delay for speak in WebViews
         setTimeout(() => {
             if (window.speak) {
                 window.speak(p.t);
@@ -455,7 +450,6 @@
             fecha: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
         });
         
-        // Show menu first
         mostrar("menu");
         
         if (window.speak) {
@@ -486,7 +480,6 @@
         mostrar("inicio");
     }
     
-    // Start directly in the menu (no name/age required)
     document.addEventListener('DOMContentLoaded', () => {
         try {
             if (typeof createMagicParticles === 'function') {
@@ -496,7 +489,7 @@
             console.warn('createMagicParticles not available', e);
         }
         
-        // Set a default display name and show menu immediately
+        
         nombreActual = "Jugador";
         const nameEl = document.getElementById('nombreUser');
         if (nameEl) nameEl.textContent = nombreActual;

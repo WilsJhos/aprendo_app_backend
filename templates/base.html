@@ -10,7 +10,7 @@
     {% load static %}
     <style>
         :root {
-            /* Light Theme */
+            
             --bg-color: #f8fafc;
             --text-color: #1e293b;
             --card-bg: rgba(255, 255, 255, 0.8);
@@ -141,7 +141,7 @@
             .user-info { display: block; }
         }
 
-        /* --- BACKGROUND ANIMATION --- */
+       
         .bg-magic {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -210,7 +210,7 @@
     </main>
     
     <script>
-        // Global utilities safe check
+        
         const synth = window.speechSynthesis || null;
         let spanishVoice = null;
 
@@ -218,13 +218,13 @@
             const voices = synth.getVoices();
             if (voices.length === 0) return;
 
-            // Debug: See what voices the browser actually has
+            
             console.log("--- VOCES DETECTADAS ---");
             const esVoices = voices.filter(v => v.lang.toLowerCase().startsWith('es'));
             esVoices.forEach(v => console.log(`Voz: ${v.name} | Lang: ${v.lang}`));
 
             if (esVoices.length > 0) {
-                // Prioridad absoluta a voces latinas/mexicanas de Windows o Google
+                
                 spanishVoice = esVoices.find(v => v.lang.toLowerCase() === 'es-mx') || 
                               esVoices.find(v => v.name.toLowerCase().includes('mexico')) ||
                               esVoices.find(v => v.name.toLowerCase().includes('sabina')) ||
@@ -234,7 +234,7 @@
                               esVoices[0];
             } else {
                 spanishVoice = null;
-                // DEBUG: Si no hay español, muéstrame QUÉ HAY en el sistema
+              
                 console.log("AVISO: No hay voces en español. Lista completa del sistema:");
                 voices.forEach(v => console.log(`- ${v.name} (${v.lang})`));
             }
@@ -258,10 +258,10 @@
             retryVoices++;
         }, 200);
 
-        // Make speak function global and more robust
+        
         window.speak = function(text, rate = 1.0, pitch = 1.6) {
             return new Promise((resolve) => {
-                // 1. Prioridad: Intentar hablar a través de Flutter (Bridge Nativo)
+                
                 if (window.FlutterSpeak && window.FlutterSpeak.postMessage) {
                     try {
                         window.FlutterSpeak.postMessage(JSON.stringify({
@@ -276,7 +276,7 @@
                     }
                 }
 
-                // 2. Fallback: Usar Web Speech API estándar (Navegador)
+                
                 if (!synth) {
                     console.warn("SpeechSynthesis no disponible.");
                     return resolve();
@@ -309,7 +309,7 @@
             });
         };
 
-        // Theme Toggle Logic
+        
         function toggleTheme() {
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
@@ -325,7 +325,7 @@
             btn.innerHTML = theme === 'light' ? '🌙' : '☀️';
         }
 
-        // Initialize Theme from Storage
+        
         (function() {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
@@ -334,7 +334,7 @@
             window.createMagicParticles = function(items = null, count = 15) {
                 const bg = document.getElementById('bg-magic');
                 if (!bg) return;
-                bg.innerHTML = ''; // Clear existing
+                bg.innerHTML = ''; 
                 
                 for (let i = 0; i < count; i++) {
                     const b = document.createElement('div');
@@ -356,7 +356,7 @@
                 }
             };
 
-            // Default bubbles for landing
+            
             if (window.location.pathname === '/' || window.location.pathname.endsWith('index.html')) {
                 window.createMagicParticles();
             }
