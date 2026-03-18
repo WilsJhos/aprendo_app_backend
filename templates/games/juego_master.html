@@ -352,8 +352,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    window.addEventListener('keydown', e => { if(keys.hasOwnProperty(e.code)) keys[e.code] = true; });
-    window.addEventListener('keyup', e => { if(keys.hasOwnProperty(e.code)) keys[e.code] = false; });
+    window.addEventListener('keydown', e => { 
+        if(keys.hasOwnProperty(e.code)) {
+            keys[e.code] = true;
+            // Prevent scrolling when using arrow keys
+            if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].indexOf(e.code) > -1) {
+                e.preventDefault();
+            }
+        } 
+    });
+    window.addEventListener('keyup', e => { 
+        if(keys.hasOwnProperty(e.code)) {
+            keys[e.code] = false;
+        } 
+    });
 
     // Móvil
     const touchBtns = document.querySelectorAll('.ctrl-btn');
@@ -374,6 +386,61 @@ document.addEventListener('DOMContentLoaded', () => {
             if(dir === 'left') keys.ArrowLeft = false;
             if(dir === 'right') keys.ArrowRight = false;
         });
+    });
+
+    // -- CONTROL TÁCTIL (ARRASTRAR CON EL DEDO) --
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+
+    canvas.addEventListener('touchstart', (e) => {
+        if (!gameRunning) return;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        dragStartX = touch.clientX - rect.left;
+        dragStartY = touch.clientY - rect.top;
+        isDragging = true;
+    }, {passive: false});
+
+    canvas.addEventListener('touchmove', (e) => {
+        if (!isDragging || !gameRunning) return;
+        e.preventDefault(); // Prevenir el scroll en el celular
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        const touchX = touch.clientX - rect.left;
+        const touchY = touch.clientY - rect.top;
+
+        // Movimiento relativo al arrastre
+        player.x += (touchX - dragStartX) * 1.5; 
+        player.y += (touchY - dragStartY) * 1.5;
+
+        dragStartX = touchX;
+        dragStartY = touchY;
+
+        keepPlayerInBounds();
+    }, {passive: false});
+
+    canvas.addEventListener('touchend', () => { isDragging = false; });
+    
+    // Control con ratón (opcional para probar en PC arrastrando)
+    canvas.addEventListener('mousedown', (e) => {
+        if (!gameRunning) return;
+        const rect = canvas.getBoundingClientRect();
+        dragStartX = e.clientX - rect.left;
+        dragStartY = e.clientY - rect.top;
+        isDragging = true;
+    });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    window.addEventListener('mousemove', (e) => {
+        if(!isDragging || !gameRunning) return;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        player.x += (mouseX - dragStartX) * 1.5;
+        player.y += (mouseY - dragStartY) * 1.5;
+        dragStartX = mouseX;
+        dragStartY = mouseY;
+        keepPlayerInBounds();
     });
 
     // Voz
