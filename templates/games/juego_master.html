@@ -182,17 +182,7 @@
         <div id="feedback-msg"></div>
     </div>
 
-    <!-- CONTROLES MÓVILES -->
-    <div id="mobile-controls">
-        <div class="d-pad">
-            <button class="ctrl-btn up" data-dir="up"><i class="fas fa-chevron-up"></i></button>
-            <div class="mid-row" style="display:flex;grid-column:1/4;grid-row:2;gap:70px;">
-                <button class="ctrl-btn left" data-dir="left"><i class="fas fa-chevron-left"></i></button>
-                <button class="ctrl-btn right" data-dir="right"><i class="fas fa-chevron-right"></i></button>
-            </div>
-            <button class="ctrl-btn down" data-dir="down"><i class="fas fa-chevron-down"></i></button>
-        </div>
-    </div>
+    <!-- Controles móviles eliminados por control táctil directo -->
 
     <!-- Pantallas de Estado -->
     <div id="start-screen" class="overlay">
@@ -367,26 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } 
     });
 
-    // Móvil
-    const touchBtns = document.querySelectorAll('.ctrl-btn');
-    touchBtns.forEach(btn => {
-        btn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const dir = btn.getAttribute('data-dir');
-            if(dir === 'up') keys.ArrowUp = true;
-            if(dir === 'down') keys.ArrowDown = true;
-            if(dir === 'left') keys.ArrowLeft = true;
-            if(dir === 'right') keys.ArrowRight = true;
-        });
-        btn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            const dir = btn.getAttribute('data-dir');
-            if(dir === 'up') keys.ArrowUp = false;
-            if(dir === 'down') keys.ArrowDown = false;
-            if(dir === 'left') keys.ArrowLeft = false;
-            if(dir === 'right') keys.ArrowRight = false;
-        });
-    });
+    // Touch buttons event listeners removed
 
     // -- CONTROL TÁCTIL (ARRASTRAR CON EL DEDO) --
     let isDragging = false;
