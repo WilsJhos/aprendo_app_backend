@@ -2,7 +2,7 @@
 
 {% block game_title %}🚀 Misión Espacial: Caza Letras{% endblock %}
 
-{% block container_extra_class %}force-dark-game{% endblock %}
+{% block container_extra_class %}premium-game-container{% endblock %}
 
 {% block game_css %}
 <style>
@@ -328,30 +328,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DRAWING ---
     function draw() {
-        ctx.fillStyle = '#000';
+        const isDark = (localStorage.getItem('game_theme') || 'light') === 'dark';
+        
+        ctx.fillStyle = isDark ? '#000' : '#f1f5f9';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Nebulae
+        // Nebulae / Sky Clouds
         nebulae.forEach(n => {
             const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
-            grad.addColorStop(0, n.color);
+            if (isDark) {
+                grad.addColorStop(0, n.color);
+            } else {
+                grad.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+            }
             grad.addColorStop(1, 'transparent');
             ctx.fillStyle = grad;
-            ctx.fillRect(0,0, canvas.width, canvas.height);
+            ctx.globalAlpha = isDark ? 1.0 : 0.6;
+            ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fill();
         });
+        ctx.globalAlpha = 1.0;
 
-        // Stars
-        ctx.fillStyle = '#fff';
+        // Stars / Birds
+        ctx.fillStyle = isDark ? '#fff' : '#4f46e5';
         backgroundStars.forEach(s => {
             ctx.globalAlpha = s.opacity;
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
+            if (isDark) {
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
+            } else {
+                // Draw small 'v' shapes for birds in sky mode
+                ctx.beginPath();
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(s.x + 2, s.y + 2);
+                ctx.lineTo(s.x + 4, s.y);
+                ctx.stroke();
+            }
         });
         ctx.globalAlpha = 1.0;
 
         // Trail
         player.trail.forEach((t, i) => {
             ctx.globalAlpha = t.age * 0.3;
-            ctx.fillStyle = '#54a0ff';
+            ctx.fillStyle = isDark ? '#54a0ff' : '#4f46e5';
             ctx.beginPath(); ctx.arc(t.x, t.y, 10 + i, 0, Math.PI*2); ctx.fill();
         });
         ctx.globalAlpha = 1.0;
@@ -361,9 +378,16 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.save();
             ctx.translate(c.x, c.y);
             ctx.rotate(Math.sin(c.angle) * 0.2);
-            ctx.shadowBlur = 15; ctx.shadowColor = '#00d2d3';
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 30px Outfit';
+            
+            if (isDark) {
+                ctx.shadowBlur = 15; ctx.shadowColor = '#00d2d3';
+                ctx.fillStyle = '#fff';
+            } else {
+                ctx.shadowBlur = 5; ctx.shadowColor = 'rgba(0,0,0,0.1)';
+                ctx.fillStyle = '#1e293b';
+            }
+            
+            ctx.font = 'bold 36px Outfit';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(c.char, 0, 0);

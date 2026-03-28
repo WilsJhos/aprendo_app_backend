@@ -2,7 +2,7 @@
 
 {% block game_title %}🔢 Número Master{% endblock %}
 
-{% block container_extra_class %}force-dark-game{% endblock %}
+{% block container_extra_class %}premium-game-container{% endblock %}
 
 {% block game_css %}
 <style>
@@ -143,9 +143,6 @@
 {% endblock %}
 
 {% block game_area %}
-    <div class="theme-toggle-container">
-        <button onclick="toggleMathTheme()" id="mathThemeBtn" class="theme-btn" title="Día/Noche">🌙</button>
-    </div>
     <div class="question-card">
         <div class="instruction">¿Cuál es el resultado?</div>
         <div class="question-text" id="question">2 + 2</div>
@@ -248,23 +245,15 @@
             nextQuestion();
         }
 
-        function toggleMathTheme() {
-            const current = localStorage.getItem('math_theme') || 'light';
-            const next = current === 'light' ? 'dark' : 'light';
-            localStorage.setItem('math_theme', next);
-            applyMathTheme();
-        }
+        window.addEventListener('themeChanged', (e) => {
+            const btn = document.getElementById('mathThemeBtn');
+            if (btn) btn.textContent = (e.detail.theme === 'dark') ? '☀️' : '🌙';
+        });
 
         function applyMathTheme() {
-            const theme = localStorage.getItem('math_theme') || 'light';
+            const theme = localStorage.getItem('game_theme') || 'light';
             const btn = document.getElementById('mathThemeBtn');
-            if (theme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                if(btn) btn.textContent = '☀️';
-            } else {
-                document.documentElement.removeAttribute('data-theme');
-                if(btn) btn.textContent = '🌙';
-            }
+            if (btn) btn.textContent = (theme === 'dark') ? '☀️' : '🌙';
         }
 
         function speakText(text, rate = 1.0, pitch = 1.0) {

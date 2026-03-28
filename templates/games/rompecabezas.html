@@ -2,7 +2,7 @@
 
 {% block game_title %}🧩 Rompecabezas Musical{% endblock %}
 
-{% block container_extra_class %}force-dark-game{% endblock %}
+{% block container_extra_class %}premium-game-container{% endblock %}
 
 {% block game_css %}
 <style>
@@ -132,9 +132,6 @@
 {% endblock %}
 
 {% block game_area %}
-    <div class="theme-toggle-container">
-        <button onclick="togglePuzzleTheme()" id="puzThemeBtn" class="theme-btn" title="Día/Noche">🌙</button>
-    </div>
     <div class="rompecabezas-header">
         <h1>🧩 Reto Puzzle</h1>
         <div class="info-juego">
@@ -163,23 +160,15 @@
 
 {% block game_js %}
 <script>
-    function applyPuzzleTheme() {
-        const theme = localStorage.getItem('puzzle_theme') || 'light';
+    window.addEventListener('themeChanged', (e) => {
         const btn = document.getElementById('puzThemeBtn');
-        if (theme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            if(btn) btn.textContent = '☀️';
-        } else {
-            document.documentElement.removeAttribute('data-theme');
-            if(btn) btn.textContent = '🌙';
-        }
-    }
+        if (btn) btn.textContent = (e.detail.theme === 'dark') ? '☀️' : '🌙';
+    });
 
-    function togglePuzzleTheme() {
-        const current = localStorage.getItem('puzzle_theme') || 'light';
-        const next = current === 'light' ? 'dark' : 'light';
-        localStorage.setItem('puzzle_theme', next);
-        applyPuzzleTheme();
+    function applyPuzzleTheme() {
+        const theme = localStorage.getItem('game_theme') || 'light';
+        const btn = document.getElementById('puzThemeBtn');
+        if (btn) btn.textContent = (theme === 'dark') ? '☀️' : '🌙';
     }
 
     document.addEventListener('DOMContentLoaded', () => {
