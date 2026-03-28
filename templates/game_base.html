@@ -186,6 +186,96 @@
 {% endblock %}
 
 {% block content %}
+    <style>
+        .audio-settings-panel {
+            position: fixed;
+            top: 70px;
+            right: 16px;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .audio-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .btn-audio-toggle {
+            background: var(--accent-color);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .btn-audio-toggle:active { transform: scale(0.9); }
+        .btn-audio-toggle.muted { background: #64748b; }
+
+        .speed-selector {
+            display: flex;
+            background: rgba(0,0,0,0.05);
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .speed-opt {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+        }
+
+        .speed-opt.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .label-sm { font-size: 0.7rem; font-weight: 700; opacity: 0.7; text-transform: uppercase; }
+
+        @media (max-width: 600px) {
+            .audio-settings-panel { top: auto; bottom: 85px; right: 10px; padding: 8px; flex-direction: row; }
+            .audio-row { flex-direction: column; gap: 4px; }
+        }
+    </style>
+
+    <div class="audio-settings-panel" id="global-audio-panel">
+        <div class="audio-row">
+            <span class="label-sm">Audio</span>
+            <button onclick="toggleGlobalAudio()" id="btn-mute" class="btn-audio-toggle" title="Activar/Desactivar Voz">🔊</button>
+        </div>
+        <div class="audio-row" style="border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
+            <span class="label-sm">Velocidad</span>
+            <div class="speed-selector">
+                <button onclick="setGlobalSpeed(1)" class="speed-opt" id="speed-1">x1</button>
+                <button onclick="setGlobalSpeed(1.5)" class="speed-opt" id="speed-1-5">x2</button>
+                <button onclick="setGlobalSpeed(2)" class="speed-opt" id="speed-2">x3</button>
+                <button onclick="setGlobalSpeed(3)" class="speed-opt" id="speed-3">x4</button>
+            </div>
+        </div>
+    </div>
+
     <a href="/" class="btn-back-home">⬅️ Atrás</a>
     <div class="game-container {% block container_extra_class %}{% endblock %}">
         <h1>{% block game_title %}{% endblock %}</h1>
@@ -221,6 +311,56 @@
 {% block extra_js %}
     <script>
         
+        // --- GLOBAL AUDIO SETTINGS ---
+        let globalAudioEnabled = localStorage.getItem('global_audio') !== 'false';
+        let globalVoiceSpeed = parseFloat(localStorage.getItem('global_speed') || '1.0');
+
+        function updateAudioUI() {
+            const btnMute = document.getElementById('btn-mute');
+            if (btnMute) {
+                btnMute.textContent = globalAudioEnabled ? '🔊' : '🔇';
+                btnMute.classList.toggle('muted', !globalAudioEnabled);
+            }
+            
+            // Update speed buttons
+            document.querySelectorAll('.speed-opt').forEach(btn => btn.classList.remove('active'));
+            const speedId = 'speed-' + globalVoiceSpeed.toString().replace('.', '-');
+            const activeBtn = document.getElementById(speedId);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        function toggleGlobalAudio() {
+            globalAudioEnabled = !globalAudioEnabled;
+            localStorage.setItem('global_audio', globalAudioEnabled);
+            updateAudioUI();
+        }
+
+        function setGlobalSpeed(speed) {
+            globalVoiceSpeed = speed;
+            localStorage.setItem('global_speed', speed);
+            updateAudioUI();
+        }
+
+        // Universal speak function
+        window.speak = function(text, rate = 1.0, pitch = 1.0) {
+            if (!globalAudioEnabled) return;
+
+            const finalRate = rate * globalVoiceSpeed;
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'es-ES';
+                u.rate = Math.min(Math.max(finalRate, 0.1), 10); // Standard range
+                u.pitch = pitch;
+                window.speechSynthesis.speak(u);
+            }
+        };
+
+        // Proactive initialization
+        document.addEventListener('DOMContentLoaded', updateAudioUI);
+
+        // --- GAME STATS LOGIC ---
         const GAME_ID = '{{ game.id_name|default:"unknown" }}';
         const GAME_NAME = '{{ game.title|default:"Juego" }}';
         const GAME_EMOJI = '{{ game.emoji|default:"🎮" }}';
@@ -256,10 +396,11 @@
             document.getElementById('level').textContent = currentLevel;
             
             let progress = (correctInLevel / 3) * 100;
-            document.getElementById('progress-fill').style.width = progress + '%';
-            document.getElementById('progress-text').textContent = correctInLevel + '/3';
+            const fill = document.getElementById('progress-fill');
+            const txt = document.getElementById('progress-text');
+            if(fill) fill.style.width = progress + '%';
+            if(txt) txt.textContent = correctInLevel + '/3';
 
-            
             if (correctInLevel % 3 === 0 && correctInLevel > 0) {
                 saveGameStat(score);
             }
@@ -267,6 +408,7 @@
 
         function showFeedback(message, isCorrect) {
             const fb = document.getElementById('feedback');
+            if(!fb) return;
             fb.textContent = message;
             fb.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect') + ' show';
             setTimeout(() => fb.classList.remove('show'), 2000);

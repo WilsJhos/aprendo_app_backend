@@ -7,145 +7,136 @@
 {% block game_css %}
 <style>
     :root {
-        --primario: #6C5CE7;
-        --secundario: #00CEC9;
-        --acentuado: #FD79A8;
-        --fondo: #DFE6E9;
-        --texto: #2D3436;
-        --pieza-size: 90px;
+        /* Base Puzzle Colors */
+        --primario: #a29bfe;
+        --secundario: #81ecec;
+        --acentuado: #fd79a8;
+        --error: #ff7675;
+        --success: #55efc4;
+        
+        /* Theme Light (Default) */
+        --puz-card-bg: rgba(255, 255, 255, 0.9);
+        --puz-card-border: rgba(255, 255, 255, 0.5);
+        --puz-text: #2d3436;
+        --puz-text-muted: #636e72;
+        --puz-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        --pieza-size: 110px;
+        --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
+    [data-theme='dark'] {
+        --puz-card-bg: rgba(30, 41, 59, 0.8);
+        --puz-card-border: rgba(255, 255, 255, 0.1);
+        --puz-text: #f1f5f9;
+        --puz-text-muted: #94a3b8;
+        --puz-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        --primario: #38bdf8;
+        --bg-gradient: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+    }
+
+    /* Override for the game container background */
     div.game-container {
-        background: radial-gradient(circle at center, #2D3436 0%, #19191a 100%) !important;
-        color: white !important;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 40px;
-        font-family: 'Nunito', sans-serif;
+        background: var(--bg-gradient, radial-gradient(circle at center, #f8fafc 0%, #cbd5e1 100%)) !important;
+        transition: background 0.5s ease;
     }
 
-    .rompecabezas-header { text-align: center; margin-bottom: 20px; }
     .rompecabezas-header h1 {
-        font-family: 'Fredoka One', cursive, sans-serif;
-        color: var(--secundario);
-        text-align: center;
-        font-size: 2.2rem;
-        margin: 10px 0;
-    }
-
-    .info-juego {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 10px;
+        font-family: 'Fredoka One', cursive;
+        color: var(--primario);
+        text-shadow: 2px 2px 0 var(--acentuado);
+        font-size: 3rem;
+        margin-bottom: 20px;
     }
 
     .nivel-badge {
-        background: var(--acentuado);
+        background: var(--primario);
         color: white;
-        padding: 5px 15px;
-        border-radius: 15px;
-        font-weight: bold;
-        font-family: 'Fredoka One', cursive, sans-serif;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-weight: 800;
+        box-shadow: var(--puz-shadow);
     }
 
     #status-voz {
-        background: rgb(116, 115, 115);
-        color: #333;
-        padding: 5px 15px;
-        border-radius: 15px;
-        font-size: 0.9rem;
+        background: var(--puz-card-bg);
+        color: var(--puz-text);
+        padding: 5px 20px;
+        border-radius: 20px;
         border: 2px solid var(--secundario);
-    }
-
-    .instrucciones {
-        opacity: 0.9;
+        font-size: 1rem;
     }
 
     .juego-wrapper {
         position: relative;
-        margin: 20px auto;
-        padding: 10px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        margin: 30px auto;
+        padding: 15px;
+        background: var(--puz-card-bg);
+        border: 2px solid var(--puz-card-border);
+        border-radius: 24px;
+        box-shadow: var(--puz-shadow);
         display: inline-block;
+        transition: transform 0.3s ease;
     }
 
-    .tablero-fondo {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 0; 
-        background-size: cover;
-        background-repeat: no-repeat;
-        border-radius: 10px;
-        opacity: 0; 
-        transition: opacity 0.5s;
-    }
-
-    .tablero {
-        position: relative;
-        z-index: 1; 
-        display: grid;
-        gap: 2px;
-    }
+    .tablero { display: grid; gap: 4px; border-radius: 12px; overflow: hidden; }
 
     .pieza {
         width: var(--pieza-size);
         height: var(--pieza-size);
-        background-size: cover; 
+        background-size: cover;
         cursor: pointer;
-        border-radius: 4px;
-        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
-        transition: transform 0.2s, opacity 0.3s, border 0.2s;
-        user-select: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        transition: var(--transition);
+        border: 2px solid transparent;
     }
 
-    .pieza:hover { transform: scale(1.02); }
-    .pieza.seleccionada { border: 3px solid var(--acentuado); transform: scale(0.95); z-index: 2; position: relative;}
-    .pieza.correcta { filter: brightness(1.2); border: 1px solid rgba(0,255,0,0.5); }
+    .pieza:hover { transform: scale(1.05) rotate(2deg); z-index: 5; }
+    .pieza.seleccionada { border: 4px solid var(--acentuado); transform: scale(0.9) rotate(-3deg); z-index: 10; }
+    .pieza.correcta { border: 3px solid var(--success); filter: drop-shadow(0 0 5px var(--success)); }
 
-    .mostrar-pista .pieza { opacity: 0.15; }
-
-    .controles, .controles-nivel {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
+    .tablero-fondo { position: absolute; inset: 15px; z-index: 0; opacity: 0; transition: 0.5s; border-radius: 12px; }
 
     .btn {
-        border: none;
-        padding: 10px 20px;
-        font-size: 1rem;
+        padding: 15px 30px;
+        font-size: 1.2rem;
         border-radius: 50px;
+        border: none;
         cursor: pointer;
-        font-family: 'Fredoka One', cursive, sans-serif;
-        transition: transform 0.1s;
+        font-weight: 800;
+        transition: var(--transition);
+        color: white;
+        box-shadow: 0 6px 0 rgba(0,0,0,0.2);
     }
 
-    .btn:active { transform: scale(0.95); }
+    .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
 
-    .btn-accion { background-color: var(--primario); color: white; box-shadow: 0 4px 0 #4834d4; }
-    .btn-ayuda { background-color: #fdcb6e; color: #2d3436; box-shadow: 0 4px 0 #e17055; }
-    .btn-control { background-color: var(--secundario); color: white; box-shadow: 0 4px 0 #00b894; }
+    .btn-accion { background: var(--primario); }
+    .btn-ayuda { background: var(--acentuado); }
+    .btn-control { background: var(--secundario); color: #333; }
+
+    .theme-toggle-container {
+        position: absolute;
+        top: 20px; right: 20px; z-index: 100;
+    }
+    .theme-btn {
+        width: 50px; height: 50px; border-radius: 15px; border: none; background: var(--primario); color: white; cursor: pointer; font-size: 1.5rem; transition: var(--transition);
+    }
 
     @media (max-width: 600px) {
-        :root { --pieza-size: 60px; } 
-        .rompecabezas-header h1 { font-size: 1.5rem; }
+        :root { --pieza-size: 75px; }
+        .rompecabezas-header h1 { font-size: 2rem; }
     }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block game_area %}
+    <div class="theme-toggle-container">
+        <button onclick="togglePuzzleTheme()" id="puzThemeBtn" class="theme-btn" title="Día/Noche">🌙</button>
+    </div>
     <div class="rompecabezas-header">
-        <h1>🧩 Reto Musical</h1>
+        <h1>🧩 Reto Puzzle</h1>
         <div class="info-juego">
             <span id="nivel-indicador" class="nivel-badge">Nivel 1</span>
             <span id="status-voz">🎤 Escuchando...</span>
@@ -172,6 +163,25 @@
 
 {% block game_js %}
 <script>
+    function applyPuzzleTheme() {
+        const theme = localStorage.getItem('puzzle_theme') || 'light';
+        const btn = document.getElementById('puzThemeBtn');
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            if(btn) btn.textContent = '☀️';
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            if(btn) btn.textContent = '🌙';
+        }
+    }
+
+    function togglePuzzleTheme() {
+        const current = localStorage.getItem('puzzle_theme') || 'light';
+        const next = current === 'light' ? 'dark' : 'light';
+        localStorage.setItem('puzzle_theme', next);
+        applyPuzzleTheme();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         const tablero = document.getElementById('tablero');
         const fondoPista = document.getElementById('tablero-fondo');
@@ -232,8 +242,11 @@
             const totalWidth = config.cols * piezaSize;
             const totalHeight = config.filas * piezaSize;
 
-            const seed = `nivel${currentLevel}_img${Math.floor(Math.random()*1000)}`;
-            currentImgUrl = `https://picsum.photos/seed/${seed}/${totalWidth}/${totalHeight}`;
+            // Uso de imágenes tipo caricatura/infantil
+            const keywords = ['cartoon', 'animation', 'animal', 'toy', 'disney', 'pixelart'];
+            const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+            const seed = Math.floor(Math.random() * 1000);
+            currentImgUrl = `https://loremflickr.com/${totalWidth}/${totalHeight}/${randomKeyword}?lock=${seed}`;
 
             fondoPista.style.width = `${totalWidth}px`;
             fondoPista.style.height = `${totalHeight}px`;
@@ -379,6 +392,7 @@
                 console.log("Speech recognition not started automatically", e);
             }
         }
+        applyPuzzleTheme();
         cargarNivel(1);
     });
 </script>
