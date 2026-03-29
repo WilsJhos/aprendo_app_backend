@@ -489,15 +489,23 @@
         const trigger = document.getElementById('widget-trigger');
         const panel = document.getElementById('global-audio-panel');
         let isDragging = false;
+        let wasDragged = false;
         let startX, startY, startTop, startRight;
-        let hasMoved = false;
 
         trigger.addEventListener('mousedown', startDrag);
         trigger.addEventListener('touchstart', startDrag, { passive: false });
 
+        // Evento CLIC dedicado para máxima velocidad en toque
+        trigger.addEventListener('click', (e) => {
+            if (!wasDragged) {
+                panel.classList.toggle('open');
+            }
+            wasDragged = false;
+        });
+
         function startDrag(e) {
             isDragging = true;
-            hasMoved = false;
+            wasDragged = false;
             const event = e.type === 'touchstart' ? e.touches[0] : e;
             startX = event.clientX;
             startY = event.clientY;
@@ -517,13 +525,11 @@
             const deltaX = startX - event.clientX;
             const deltaY = event.clientY - startY;
 
-            // Mayor tolerancia para evitar que un mini-toque se detecte como arrastre
-            if (Math.abs(deltaX) > 15 || Math.abs(deltaY) > 15) hasMoved = true;
-
-            if (hasMoved) {
+            if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+                wasDragged = true;
                 hub.style.top = (startTop + deltaY) + 'px';
                 hub.style.right = (startRight + deltaX) + 'px';
-                hub.style.bottom = 'auto'; // Prevent conflicts
+                hub.style.bottom = 'auto';
             }
         }
 
@@ -533,11 +539,6 @@
             document.removeEventListener('touchmove', drag);
             document.removeEventListener('mouseup', stopDrag);
             document.removeEventListener('touchend', stopDrag);
-            
-            // Si no se movió, es un click -> abrir panel
-            if (!hasMoved) {
-                panel.classList.toggle('open');
-            }
         }
 
         // Proactive initialization
