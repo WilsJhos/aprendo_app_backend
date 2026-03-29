@@ -333,6 +333,23 @@
             if(btn) btn.innerHTML = theme === 'light' ? '🌙' : '☀️';
         }
 
+        // Detener voces al salir de la página
+        window.stopAllVoices = function() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            // Sincronización con Flutter APK
+            if (window.FlutterTTS_Cancel && window.FlutterTTS_Cancel.postMessage) {
+                try {
+                    window.FlutterTTS_Cancel.postMessage("stop");
+                } catch(e) {}
+            }
+        };
+
+        window.addEventListener('beforeunload', stopAllVoices);
+        window.addEventListener('pagehide', stopAllVoices);
+
+        // Proactive initialization
         (function() {
             const savedTheme = localStorage.getItem('app_theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
