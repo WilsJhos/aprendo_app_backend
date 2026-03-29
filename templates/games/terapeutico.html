@@ -19,11 +19,12 @@
     }
 
     .pantalla {
-        background: white;
+        background: var(--card-bg);
         margin: 10px;
         padding: 20px;
         border-radius: 30px;
         box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        border: 1px solid var(--card-border);
     }
 
     .menu {
@@ -154,39 +155,53 @@
     }
 
     
-    .clinic-input {
-        width: 100%;
-        padding: 12px;
-        font-size: 18px;
-        border-radius: 15px;
-        border: 2px solid #ffcc80;
-        box-sizing: border-box;
-        margin-top: 5px;
+    .botonArquetipo {
+        padding: 15px;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #64748b;
     }
 
-   
+    .botonArquetipo:hover { transform: translateY(-2px); border-color: var(--accent-color); }
+    .botonArquetipo.activo {
+        background: var(--accent-color);
+        color: white;
+        border-color: var(--accent-color);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
     .stats, .progress-bar { display: none; }
 </style>
 {% endblock %}
 
 {% block game_area %}
 
-<div class="pantalla hidden" id="perfil" style="max-width: 500px; margin: 20px auto;">
+<div class="pantalla hidden" id="perfil" style="max-width: 600px; margin: 20px auto;">
     <h2 style="font-size: 30px; margin-bottom: 25px;">👧 Perfil del niño</h2>
     
-    <div style="text-align: left; margin: 0 auto; max-width: 380px;">
-        <div style="margin-bottom: 20px;">
-            <label style="font-size: 20px; font-weight: bold;">Nombre</label>
+    <div style="text-align: left; margin: 0 auto; max-width: 450px;">
+        <div style="margin-bottom: 15px;">
+            <label style="font-size: 18px; font-weight: bold;">Nombre</label>
             <input id="nombre" class="clinic-input" placeholder="Escribe tu nombre">
         </div>
         
-        <div style="margin-bottom: 20px;">
-            <label style="font-size: 20px; font-weight: bold;">Edad</label>
-            <input id="edad" type="number" class="clinic-input" placeholder="Tu edad">
+        <div style="margin-bottom: 15px;">
+            <label style="font-size: 18px; font-weight: bold;">Elige tu camino</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                <button class="botonArquetipo" id="btn-explorador" onclick="cambiarArquetipo('explorador')">🧭 Explorador</button>
+                <button class="botonArquetipo" id="btn-aventurero" onclick="cambiarArquetipo('aventurero')">🛡️ Aventurero</button>
+                <button class="botonArquetipo" id="btn-maestro" onclick="cambiarArquetipo('maestro')">🪄 Maestro</button>
+                <button class="botonArquetipo" id="btn-sueno" onclick="cambiarArquetipo('sueno')">✨ Sueño</button>
+            </div>
         </div>
-        
-        <div style="margin-bottom: 30px;">
-            <label style="font-size: 20px; font-weight: bold;">Diagnóstico</label>
+
+        <div style="margin-bottom: 25px;">
+            <label style="font-size: 18px; font-weight: bold;">Diagnóstico</label>
             <select id="diag" class="clinic-input" style="background-color: white;">
                 <option value="TEA">TEA</option>
                 <option value="Síndrome de Down">Síndrome de Down</option>
@@ -197,12 +212,13 @@
         </div>
     </div>
     
-    <button class="botonMenu" onclick="crearPerfil()" style="width: 220px; height: 100px; margin: 0 auto;">🎮 Entrar</button>
+    <button class="botonMenu" onclick="crearPerfil()" style="width: 220px; height: 80px; margin: 0 auto;">🎮 Entrar</button>
 </div>
 
 <!-- INICIO -->
 <div class="pantalla" id="inicio">
-    <h2 id="saludo" style="font-size: 32px; margin-bottom: 30px;"></h2>
+    <h2 id="saludo" style="font-size: 32px; margin-bottom: 10px;"></h2>
+    <p id="subtitulo-rol" style="font-weight: bold; color: var(--accent-color); margin-bottom: 30px; font-size: 20px; text-transform: uppercase;"></p>
     <div class="menu">
         <button class="botonMenu" onmouseenter="vozGuia('Juguemos con atención')" onclick="modulo='colores';iniciar()">
             <span style="font-size: 3rem;">🎨</span> Atención
@@ -252,44 +268,81 @@
 
 {% block game_js %}
 <script>
-// ===== SISTEMA DE SONIDOS =====
+// ESTADO CLÍNICO
+const areas = ["colores", "emociones", "rutina", "mate", "motricidad", "memoria"];
+let perfilActual = {
+    nombre: "Jugador",
+    diag: "TEA",
+    progreso: { colores:0, emociones:0, rutina:0, mate:0, motricidad:0, memoria:0 }
+};
+
+// ===== SISTEMA DE SONIDOS ARQUETIPOS =====
 const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+let arquetipoActivo = 'maestro';
 
-function sonidoAcierto() {
-    try {
+const SkinsSonido = {
+    explorador: {
+        acierto: [1000, 1200, 1400], // Más agudo y suave
+        error: [200], 
+        click: [500],
+        tipo: 'sine',
+        color: '#82ccdd'
+    },
+    aventurero: {
+        acierto: [659, 830, 987], // Fanfarria más aguda
+        error: [250],
+        click: [700],
+        tipo: 'sine', // Cambiado a sine para suavidad
+        color: '#f8c291'
+    },
+    maestro: {
+        acierto: [1046, 1318, 1568], // Armonía mágica muy aguda
+        error: [150],
+        click: [400],
+        tipo: 'triangle',
+        color: '#60a5fa'
+    },
+    sueno: {
+        acierto: [1500, 1800, 2100], // Campanillas muy agudas y tenues
+        error: [100],
+        click: [300],
+        tipo: 'sine',
+        color: '#a29bfe'
+    }
+};
+
+function playSkinSound(tipoCausa) {
+    const skin = SkinsSonido[arquetipoActivo];
+    const freqs = skin[tipoCausa];
+    const contextTime = ctxAudio.currentTime;
+
+    freqs.forEach((f, i) => {
         const osc = ctxAudio.createOscillator();
         const g = ctxAudio.createGain();
         osc.connect(g); g.connect(ctxAudio.destination);
-        osc.frequency.value = 600; osc.type = 'sine';
-        g.gain.setValueAtTime(0.3, ctxAudio.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + 0.5);
-        osc.start(); osc.stop(ctxAudio.currentTime + 0.5);
-    } catch(e) {}
+        
+        osc.frequency.setValueAtTime(f, contextTime + (i * 0.1));
+        osc.type = skin.tipo;
+        
+        g.gain.setValueAtTime(0.2, contextTime + (i * 0.1));
+        g.gain.exponentialRampToValueAtTime(0.001, contextTime + (i * 0.1) + 0.4);
+        
+        osc.start(contextTime + (i * 0.1));
+        osc.stop(contextTime + (i * 0.1) + 0.4);
+    });
 }
 
-function sonidoError() {
-    try {
-        const osc = ctxAudio.createOscillator();
-        const g = ctxAudio.createGain();
-        osc.connect(g); g.connect(ctxAudio.destination);
-        osc.frequency.value = 300; osc.type = 'sawtooth';
-        g.gain.setValueAtTime(0.2, ctxAudio.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + 0.3);
-        osc.start(); osc.stop(ctxAudio.currentTime + 0.3);
-    } catch(e) {}
+function cambiarArquetipo(a) {
+    arquetipoActivo = a;
+    playSkinSound('click');
+    document.documentElement.style.setProperty('--accent-color', SkinsSonido[a].color);
+    vozGuia(`Modo ${a} activado.`);
 }
 
-function sonidoClick() {
-    try {
-        const osc = ctxAudio.createOscillator();
-        const g = ctxAudio.createGain();
-        osc.connect(g); g.connect(ctxAudio.destination);
-        osc.frequency.value = 400; osc.type = 'sine';
-        g.gain.setValueAtTime(0.1, ctxAudio.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.01, ctxAudio.currentTime + 0.1);
-        osc.start(); osc.stop(ctxAudio.currentTime + 0.1);
-    } catch(e) {}
-}
+// Reemplazos de funciones previas para compatibilidad
+const sonidoAcierto = () => playSkinSound('acierto');
+const sonidoError = () => playSkinSound('error');
+const sonidoClick = () => playSkinSound('click');
 
 // VOZ GUÍA
 let ultimaVoz = null;
@@ -312,9 +365,9 @@ function vozGuia(texto, esFinalizacion = false){
 
     setTimeout(() => {
         const v = new SpeechSynthesisUtterance(texto);
-        v.lang = "es-ES"; v.rate = 0.9;
+        v.lang = "es-ES"; v.rate = 1.0;
         if (vocesDisponibles.length > 0) {
-            const preferida = vocesDisponibles.find(v => v.lang === "es-ES" && !v.name.includes("Google"));
+            const preferida = vocesDisponibles.find(v => v.lang.includes("es") && !v.name.includes("Google"));
             if (preferida) v.voice = preferida;
         }
         ultimaVoz = v;
@@ -329,14 +382,15 @@ function vozGuia(texto, esFinalizacion = false){
     }, 100);
 }
 
-const buenos = ["🌟 ¡Excelente!", "👏 ¡Muy bien!", "😊 ¡Lo lograste!", "💪 ¡Sigue así!"];
-const suavesMsg = ["🤍 Intenta otra vez", "🌈 No pasa nada", "💭 Casi lo logras"];
-const areas = ["colores", "emociones", "rutina", "mate", "motricidad", "memoria"];
-let perfilActual = { progreso: { colores: 0, emociones: 0, rutina: 0, mate: 0, motricidad: 0, memoria: 0 } };
+const RefuerzosThemed = {
+    explorador: ["🌿 ¡Hallazgo increíble!", "🧭 ¡Camino correcto!", "🗺️ ¡Tesoro encontrado!", "🎒 ¡Gran explorador!"],
+    aventurero: ["⚔️ ¡Victoria heroica!", "🛡️ ¡Misión cumplida!", "🏆 ¡Eres un héroe!", "🔥 ¡Poder absoluto!"],
+    maestro: ["🔮 ¡Sabiduría pura!", "🪄 ¡Magia estelar!", "📜 ¡Conocimiento total!", "✨ ¡Hechizo exitoso!"],
+    sueno: ["🌙 ¡Nube alcanzada!", "☁️ ¡Sueño cumplido!", "⭐ ¡Estrella capturada!", "💤 ¡Paz y victoria!"]
+};
 
 let modulo = "", acciones = 0, tiempo = 0, reloj = null;
 const TOTAL = 8;
-
 
 function showScreen(id){
     const el = document.getElementById(id);
@@ -356,14 +410,28 @@ function hideScreen(id){
 }
 
 function crearPerfil(){
-    if(!document.getElementById('nombre').value) {
+    const n = document.getElementById('nombre').value;
+    if(!n) {
         vozGuia("Por favor, escribe tu nombre.");
         return;
     }
-    document.getElementById('saludo').innerText = "👋 Hola " + document.getElementById('nombre').value;
+    perfilActual.nombre = n;
+    perfilActual.diag = document.getElementById('diag').value;
+    document.getElementById('saludo').innerText = "👋 Hola " + n;
+    document.getElementById('subtitulo-rol').innerText = "Rumbo del " + arquetipoActivo;
     hideScreen('perfil');
     showScreen('inicio');
-    vozGuia("Hola, vamos a jugar.");
+    vozGuia("Hola " + n + ", vamos a jugar como un " + arquetipoActivo);
+}
+
+function cambiarArquetipo(a) {
+    arquetipoActivo = a;
+    playSkinSound('click');
+    document.documentElement.style.setProperty('--accent-color', SkinsSonido[a].color);
+    document.querySelectorAll('.botonArquetipo').forEach(b => b.classList.remove('activo'));
+    const target = document.getElementById('btn-' + a);
+    if(target) target.classList.add('activo');
+    localStorage.setItem('terapeuta_rol', a);
 }
 
 function iniciar(){
@@ -371,6 +439,7 @@ function iniciar(){
     vozCompletada = false;
     hideScreen('inicio');
     showScreen('juego');
+    if(reloj) clearInterval(reloj);
     reloj = setInterval(() => { 
         tiempo++; 
         document.getElementById('timer-clinic').innerText = "⏱️ " + tiempo + " s"; 
@@ -379,6 +448,16 @@ function iniciar(){
 }
 
 function porcentaje() { return Math.min(Math.round((acciones / TOTAL) * 100), 100); }
+
+function salirJuego(){
+    clearInterval(reloj);
+    if(perfilActual && perfilActual.progreso) {
+        perfilActual.progreso[modulo] = Math.max(perfilActual.progreso[modulo] || 0, porcentaje());
+    }
+    hideScreen('juego');
+    showScreen('inicio');
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
+}
 
 function cargar(){
     const zona = document.getElementById('zona');
@@ -391,6 +470,11 @@ function cargar(){
     if(modulo === "mate") matematica();
     if(modulo === "motricidad") motricidadMejorada();
     if(modulo === "memoria") memoriaVisual();
+}
+
+function darRefuerzo() {
+    const lista = RefuerzosThemed[arquetipoActivo];
+    document.getElementById('refuerzo').innerText = lista[Math.floor(Math.random() * lista.length)];
 }
 
 function simple(lista){
@@ -414,7 +498,7 @@ function simple(lista){
             sonidoClick();
             if(x === obj){
                 sonidoAcierto(); acciones++;
-                document.getElementById('refuerzo').innerText = buenos[Math.floor(Math.random() * buenos.length)];
+                darRefuerzo();
                 setTimeout(cargar, 1200);
             } else {
                 sonidoError();
@@ -422,7 +506,6 @@ function simple(lista){
             }
         }
         document.getElementById('zona').appendChild(b);
-       
         setTimeout(()=> b.classList.add('anim-appear'), 80 * i + 40);
     });
 }
@@ -447,7 +530,7 @@ function motricidadMejorada(){
     drop.ondragover = e => e.preventDefault();
     drop.ondrop = () => {
         sonidoAcierto(); acciones++;
-        document.getElementById('refuerzo').innerText = "🌟 ¡Muy bien!";
+        darRefuerzo();
         setTimeout(cargar, 2000);
     };
     d.classList.add('anim-elem'); drop.classList.add('anim-elem');
@@ -477,6 +560,7 @@ function rutinaAvanzada(){
     drop.ondragover = e => e.preventDefault();
     drop.ondrop = () => {
         sonidoAcierto(); acciones++;
+        darRefuerzo();
         setTimeout(cargar, 2000);
     };
     document.getElementById('zona').appendChild(d);
@@ -503,7 +587,7 @@ function matematica(){
         let b = document.createElement("button");
         b.className = "botonJuego"; b.innerText = x;
         b.onclick = () => {
-            if(x === n) { sonidoAcierto(); acciones++; setTimeout(cargar, 1500); }
+            if(x === n) { sonidoAcierto(); acciones++; darRefuerzo(); setTimeout(cargar, 1500); }
             else sonidoError();
         }
         b.classList.add('anim-elem');
@@ -525,7 +609,7 @@ function memoriaVisual(){
         let b = document.createElement("button");
         b.className = "botonJuego anim-elem"; b.innerText = f;
         b.onclick = () => {
-            if(f === obj) { sonidoAcierto(); acciones++; setTimeout(cargar, 1200); }
+            if(f === obj) { sonidoAcierto(); acciones++; darRefuerzo(); setTimeout(cargar, 1200); }
             else sonidoError();
         }
         document.getElementById('zona').appendChild(b);

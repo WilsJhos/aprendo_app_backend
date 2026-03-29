@@ -280,69 +280,96 @@
 
 {% block game_js %}
 <script>
-    let nombreActual = "", rutinaTipo = "";
+    let nombreActual = "Jugador", rutinaTipo = "manana", nivelActual = 1;
     let paso = 0;
     let registros = [];
     let colorSeleccionado = "#eef6ff";
 
-    const rutinas = {
-        manana: [
-            {t: "¡Buenos días! Es hora de levantarse", c: "🛏️", o: ["🛏️", "🍞", "📺"]},
-            {t: "¡Muy bien! Ahora arregla tu cama", c: "🛏️", o: ["🛏️", "🎮", "📺"]},
-            {t: "Ve al baño", c: "🚽", o: ["🚽", "🍞", "📺"]},
-            {t: "Cepilla tus dientes muy bien", c: "🦷", o: ["🦷", "🍔", "📺"]},
-            {t: "Es momento de vestirse", c: "👕", o: ["👕", "🛌", "📺"]},
-            {t: "A desayunar algo rico", c: "🍞", o: ["🍞", "📺", "🧸"]},
-            {t: "Ponte tus zapatos favoritos", c: "👟", o: ["👟", "🍎", "📺"]},
-            {t: "Prepara tu mochila", c: "🎒", o: ["🎒", "📺", "🧸"]},
-            {t: "Peina tu cabello", c: "🪮", o: ["🪮", "📺", "🛌"]},
-            {t: "¡Listo para salir!", c: "🚪", o: ["🚪", "📺", "🛏️"]}
-        ],
-        tarde: [
-            {t: "Es hora de almorzar", c: "🍽️", o: ["🍽️", "📺", "🎮"]},
-            {t: "Lava tus manos con jabón", c: "👐", o: ["👐", "🍞", "📺"]},
-            {t: "Haz tus deberes con calma", c: "📘", o: ["📘", "📺", "🧸"]},
-            {t: "Lee un poco tu libro favorito", c: "📖", o: ["📖", "📺", "🎮"]},
-            {t: "Tiempo de jugar tranquilo", c: "🧩", o: ["🧩", "📺", "🛌"]},
-            {t: "Guarda tus juguetes en su lugar", c: "🧸", o: ["🧸", "📺", "🍞"]},
-            {t: "Toma un poco de agua", c: "🥤", o: ["🥤", "🍞", "📺"]},
-            {t: "Momento de descansar un rato", c: "😌", o: ["😌", "📺", "🎮"]},
-            {t: "¡Vamos a dibujar algo!", c: "🎨", o: ["🎨", "📺", "🛌"]},
-            {t: "Una merienda saludable", c: "🍎", o: ["🍎", "📺", "🍞"]}
-        ],
-        noche: [
-            {t: "Es momento de cenar", c: "🍽️", o: ["🍽️", "📺", "🎮"]},
-            {t: "Cepilla tus dientes antes de dormir", c: "🦷", o: ["🦷", "🍔", "📺"]},
-            {t: "Ponte tu pijama cómoda", c: "👚", o: ["👚", "🛏️", "📺"]},
-            {t: "Ordena tu cuarto para mañana", c: "🧹", o: ["🧹", "📺", "🛌"]},
-            {t: "Lee un cuento mágico", c: "📖", o: ["📖", "📺", "🎮"]},
-            {t: "Apaga las luces", c: "💡", o: ["💡", "📺", "🎮"]},
-            {t: "¡A la cama!", c: "🛏️", o: ["🛏️", "📺", "🎮"]},
-            {t: "Abraza a tu peluche", c: "🧸", o: ["🧸", "📺", "🍞"]},
-            {t: "Cierra tus ojitos", c: "😴", o: ["😴", "📺", "🎮"]},
-            {t: "¡Dulces sueños!", c: "🛌", o: ["🛌", "📺", "🎮"]}
-        ]
+    // ===== SISTEMA DE SONIDOS ARQUETIPOS (Sincronizado) =====
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const SkinsSonido = {
+        manana: { acierto: [880, 1100], tipo: 'sine', color: '#f59e0b' },
+        tarde:  { acierto: [659, 830, 987], tipo: 'triangle', color: '#6366f1' },
+        noche:  { acierto: [523, 783, 1046], tipo: 'sine', color: '#1e1b4b' }
+    };
+
+    function playSuccessSound() {
+        const skin = SkinsSonido[rutinaTipo];
+        const contextTime = audioCtx.currentTime;
+        skin.acierto.forEach((f, i) => {
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.connect(g); g.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(f, contextTime + (i * 0.1));
+            osc.type = skin.tipo;
+            g.gain.setValueAtTime(0.1, contextTime + (i * 0.1));
+            g.gain.exponentialRampToValueAtTime(0.001, contextTime + (i * 0.1) + 0.5);
+            osc.start(contextTime + (i * 0.1));
+            osc.stop(contextTime + (i * 0.1) + 0.5);
+        });
+    }
+
+    const rutinasData = {
+        manana: {
+            1: { name: "Nivel 1: Despertar y Aseo", steps: [
+                {t: "¡Buenos días! Es hora de levantarse", c: "🛏️", o: ["🛏️", "🍞", "📺"]},
+                {t: "Ve al baño", c: "🚽", o: ["🚽", "🍞", "📺"]},
+                {t: "Lava tus manos y cara", c: "🧼", o: ["🧼", "🚗", "🧸"]},
+                {t: "Cepilla tus dientes muy bien", c: "🦷", o: ["🦷", "🍔", "📺"]}
+            ]},
+            2: { name: "Nivel 2: Vestirse", steps: [
+                {t: "Ponte tu ropa favorita", c: "👕", o: ["👕", "🛌", "📺"]},
+                {t: "Cepilla tu cabello", c: "🪮", o: ["🪮", "📺", "🛌"]},
+                {t: "Ponte tus zapatos", c: "👟", o: ["👟", "🍎", "📺"]}
+            ]},
+            3: { name: "Nivel 3: Salida", steps: [
+                {t: "A desayunar algo rico", c: "🍞", o: ["🍞", "📺", "🧸"]},
+                {t: "Prepara tu mochila", c: "🎒", o: ["🎒", "📺", "🧸"]},
+                {t: "¡Listo para la escuela!", c: "🏫", o: ["🏫", "🛏️", "🎮"]}
+            ]}
+        },
+        tarde: {
+            1: { name: "Nivel 1: Almuerzo", steps: [
+                {t: "Lava tus manos con jabón", c: "👐", o: ["👐", "🍞", "📺"]},
+                {t: "Es hora de almorzar", c: "🍽️", o: ["🍽️", "📺", "🎮"]},
+                {t: "Toma un poco de agua", c: "🥤", o: ["🥤", "🍞", "📺"]}
+            ]},
+            2: { name: "Nivel 2: Deberes", steps: [
+                {t: "Haz tus tareas con calma", c: "📘", o: ["📘", "📺", "🧸"]},
+                {t: "Lee un libro fantástico", c: "📖", o: ["📖", "📺", "🎮"]},
+                {t: "Recoge tus útiles", c: "✏️", o: ["✏️", "🎨", "📺"]}
+            ]},
+            3: { name: "Nivel 3: Diversión", steps: [
+                {t: "Tiempo de jugar un poco", c: "🧩", o: ["🧩", "📺", "🛌"]},
+                {t: "Guarda tus juguetes", c: "🧸", o: ["🧸", "📺", "🍞"]},
+                {t: "Dibuja algo hermoso", c: "🎨", o: ["🎨", "📺", "🛌"]}
+            ]}
+        },
+        noche: {
+            1: { name: "Nivel 1: Cena", steps: [
+                {t: "Es momento de cenar", c: "🍽️", o: ["🍽️", "📺", "🎮"]},
+                {t: "Lava los platos o ayuda", c: "🧽", o: ["🧽", "🧼", "📺"]},
+                {t: "Cepilla tus dientes", c: "🦷", o: ["🦷", "🍔", "📺"]}
+            ]},
+            2: { name: "Nivel 2: Preparación", steps: [
+                {t: "Ponte tu pijama cómoda", c: "👚", o: ["👚", "🛏️", "📺"]},
+                {t: "Prepara tu ropa para mañana", c: "👕", o: ["👕", "🧹", "🛌"]},
+                {t: "Lee un cuento mágico", c: "📖", o: ["📖", "📺", "🎮"]}
+            ]},
+            3: { name: "Nivel 3: Dormir", steps: [
+                {t: "Apaga las luces", c: "💡", o: ["💡", "📺", "🎮"]},
+                {t: "A la cama a descansar", c: "🛏️", o: ["🛏️", "📺", "🎮"]},
+                {t: "¡Dulces sueños!", c: "😴", o: ["😴", "📺", "🎮"]}
+            ]}
+        }
     };
 
     function selectColor(color, el) {
         colorSeleccionado = color;
         document.querySelectorAll('.color-chip').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
-        
-        if (color.startsWith('#')) {
-            el.style.backgroundColor = color;
-        }
-        
-        if(color === 'rainbow') {
-            document.documentElement.style.setProperty('--bg-color', '#fff');
-            document.querySelector('.game-container').style.background = 'linear-gradient(135deg, #fff5f5, #f0fff4, #eef6ff)';
-        } else {
-            document.documentElement.style.setProperty('--bg-color', color);
-            document.querySelector('.game-container').style.background = 'none';
-        }
+        document.documentElement.style.setProperty('--base-accent', color.length > 7 ? '#6bcf9c' : color);
     }
-
-    function mezclar(a) { return a.sort(() => Math.random() - 0.5); }
 
     function mostrar(id) {
         document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
@@ -350,95 +377,77 @@
     }
 
     function entrar() {
-        const nombre = document.getElementById('nombre');
-        const edad = document.getElementById('edad');
-        const condicion = document.getElementById('condicion');
-        const errorInicio = document.getElementById('errorInicio');
-
-        const nombreVal = nombre.value.trim();
-        const edadVal = edad.value.trim();
-        const condicionVal = condicion.value;
-
-        if (!nombreVal || !edadVal || !condicionVal) {
-            errorInicio.textContent = "¡Ey! Necesito saber quién eres primero 😊";
-            if (window.speak) window.speak("Completa todos los datos");
-            return;
-        }
-        
-        errorInicio.textContent = "";
-        nombreActual = nombreVal;
+        const n = document.getElementById('nombre').value.trim();
+        if (!n) { if(window.speak) window.speak("Dime tu nombre"); return; }
+        nombreActual = n;
         document.getElementById('nombreUser').textContent = nombreActual;
-        
-        try {
-            if(colorSeleccionado === 'rainbow') {
-                document.body.style.background = 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%)';
-            } else {
-                document.body.style.backgroundColor = colorSeleccionado;
-            }
-        } catch(e) {}
-
-        
         mostrar("menu");
-        if (window.speak) {
-            window.speak("Bienvenido " + nombreActual + ". ¿Por dónde empezamos hoy?");
-        }
     }
 
     function iniciarRutina(tipo) {
         rutinaTipo = tipo;
+        nivelActual = 1;
+        document.documentElement.style.setProperty('--base-accent', SkinsSonido[tipo].color);
+        iniciarNivel();
+    }
+
+    function iniciarNivel() {
         paso = 0;
-        correctInLevel = 0;
-        updateStats(0, true);
         mostrarPaso();
     }
 
     function mostrarPaso() {
-        const p = rutinas[rutinaTipo][paso];
-        const tituloPaso = document.getElementById('tituloPaso');
+        const nivel = rutinasData[rutinaTipo][nivelActual];
+        const p = nivel.steps[paso];
+        const pct = (paso / nivel.steps.length) * 100;
+
+        document.getElementById('tituloPaso').innerHTML = `
+            <div style="font-size: 1rem; color: var(--base-accent); font-weight: bold; margin-bottom: 5px;">${nivel.name}</div>
+            ${p.t}
+            <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.1); border-radius: 10px; margin-top: 15px;">
+                <div style="width: ${pct}%; height: 100%; background: var(--base-accent); border-radius: 10px; transition: 0.5s;"></div>
+            </div>
+        `;
+        
         const opciones = document.getElementById('opciones');
-        
-        if (tituloPaso) tituloPaso.textContent = p.t;
-        if (opciones) {
-            opciones.innerHTML = "";
-            mezclar([...p.o]).forEach(op => {
-                const d = document.createElement("div");
-                d.className = "routine-choice";
-                d.textContent = op;
-                d.onclick = () => verificar(op);
-                opciones.appendChild(d);
-            });
-        }
-        
+        opciones.innerHTML = "";
+        [...p.o].sort(() => Math.random() - 0.5).forEach(op => {
+            const d = document.createElement("div");
+            d.className = "routine-choice";
+            d.textContent = op;
+            d.onclick = () => verificar(op);
+            opciones.appendChild(d);
+        });
         
         mostrar("rutina");
-
-        setTimeout(() => {
-            if (window.speak) {
-                window.speak(p.t);
-            }
-        }, 100);
+        if (window.speak) window.speak(p.t);
     }
 
     function verificar(op) {
-        const p = rutinas[rutinaTipo][paso];
+        const nivel = rutinasData[rutinaTipo][nivelActual];
+        const p = nivel.steps[paso];
+        
         if (op === p.c) {
-            updateStats(10, true);
-            showFeedback("¡Excelente!", true);
-            if (window.speak) {
-                window.speak("¡Muy bien!", 1.2, 1.8);
-            }
+            playSuccessSound();
             paso++;
             
-            if (paso < rutinas[rutinaTipo].length) {
-                setTimeout(mostrarPaso, 1000);
+            if (paso < nivel.steps.length) {
+                setTimeout(mostrarPaso, 800);
             } else {
-                setTimeout(() => mostrar("emociones"), 1000);
+                // NIVEL COMPLETADO
+                if (nivelActual < 3) {
+                    nivelActual++;
+                    if(window.speak) window.speak("¡Nivel superado! Vamos al siguiente.");
+                    setTimeout(iniciarNivel, 1000);
+                } else {
+                    setTimeout(() => mostrar("emociones"), 1000);
+                }
             }
         } else {
-            showFeedback("Prueba otro dibujo", false);
-            if (window.speak) {
-                window.speak("Intenta con otro", 1.0, 1.4);
-            }
+            if (window.speak) window.speak("Intenta otra vez");
+            const el = event.currentTarget;
+            el.style.transform = "translateX(5px)";
+            setTimeout(() => el.style.transform = "translateX(0)", 100);
         }
     }
 
@@ -447,39 +456,23 @@
             nombre: nombreActual,
             rutina: rutinaTipo,
             emocion: sentimiento,
-            fecha: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            fecha: new Date().toLocaleDateString()
         });
-        
+        if(window.speak) window.speak("¡Excelente trabajo!");
         mostrar("menu");
-        
-        if (window.speak) {
-            window.speak("¡Lo lograste! Te sientes " + sentimiento + ". Qué buen trabajo.");
-        }
     }
 
     function verRegistro() {
         const datosRegistro = document.getElementById('datosRegistro');
-        if (registros.length === 0) {
-            datosRegistro.innerHTML = "<p style='text-align:center; opacity:0.6'>Aún no hay rutinas completadas.</p>";
-        } else {
-            datosRegistro.innerHTML = registros.map(r => `
-                <div style="background:var(--card-bg); padding:15px; border-radius:15px; margin-bottom:10px; border-left: 5px solid var(--accent-color);">
-                    <strong>👤 ${r.nombre}</strong><br>
-                    <small style="opacity:0.7">📅 ${r.fecha}</small><br>
-                    <div style="margin-top:5px;">
-                        <span>🎮 Rutina de ${r.rutina}</span> | 
-                        <span>✨ Sintiéndose ${r.emocion}</span>
-                    </div>
-                </div>
-            `).join("");
-        }
+        datosRegistro.innerHTML = registros.length ? registros.map(r => `
+            <div style="background:var(--card-bg); padding:15px; border-radius:15px; margin-bottom:10px; border-left: 5px solid var(--base-accent);">
+                <strong>👤 ${r.nombre}</strong> - ${r.rutina}<br>
+                <small>${r.fecha}</small> | ✨ ${r.emocion}
+            </div>
+        `).join("") : "<p>Aún no hay logros.</p>";
         mostrar("registro");
     }
 
-    function volverInicio() {
-        mostrar("inicio");
-    }
-    
     document.addEventListener('DOMContentLoaded', () => {
         try {
             if (typeof createMagicParticles === 'function') {
@@ -488,7 +481,6 @@
         } catch (e) {
             console.warn('createMagicParticles not available', e);
         }
-        
         
         nombreActual = "Jugador";
         const nameEl = document.getElementById('nombreUser');

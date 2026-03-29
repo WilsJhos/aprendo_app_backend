@@ -156,9 +156,12 @@
                 <input type="text" name="username" id="id_username" class="form-control" placeholder="Tu nombre mágico" required>
             </div>
             
-            <div class="form-group">
+            <div class="form-group" style="position: relative;">
                 <label for="id_password">Contraseña</label>
-                <input type="password" name="password" id="id_password" class="form-control" placeholder="Tu llave secreta" required>
+                <div style="position: relative; display: flex; align-items: center;">
+                    <input type="password" name="password" id="id_password" class="form-control" placeholder="Tu llave secreta" required style="padding-right: 50px;">
+                    <button type="button" onclick="togglePasswordVisibility()" id="toggle-p-btn" style="position: absolute; right: 15px; background: none; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.6; transition: 0.2s;">👁️</button>
+                </div>
             </div>
 
             <button type="submit" class="btn-auth">Entrar al Reino 🚀</button>
@@ -178,8 +181,22 @@
 </div>
 
 <script>
+    function togglePasswordVisibility() {
+        const passInput = document.getElementById('id_password');
+        const btn = document.getElementById('toggle-p-btn');
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            passInput.type = 'password';
+            btn.textContent = '👁️';
+        }
+    }
+
     window.onload = () => {
-        createMagicParticles(['🔑', '🌈', '⭐', '🧪', '🏹', '🛡️', '👑']);
+        if(typeof createMagicParticles === 'function') {
+            createMagicParticles(['🔑', '🌈', '⭐', '🧪', '🏹', '🛡️', '👑']);
+        }
     };
 </script>
 {% endblock %}

@@ -148,14 +148,22 @@
             {% for field in form %}
             <div class="form-group">
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                <input type="{{ field.field.widget.input_type|default:'text' }}" 
-                       name="{{ field.name }}" 
-                       id="{{ field.id_for_label }}" 
-                       class="form-control" 
-                       placeholder="{{ field.label }}"
-                       required>
+                <div style="position: relative; display: flex; align-items: center;">
+                    <input type="{% if 'password' in field.name %}password{% else %}text{% endif %}" 
+                           name="{{ field.name }}" 
+                           id="{{ field.id_for_label }}" 
+                           class="form-control" 
+                           placeholder="{{ field.label }}"
+                           required 
+                           style="color: var(--text-color) !important; background: var(--card-bg);">
+                    
+                    {% if 'password' in field.name %}
+                    <button type="button" onclick="togglePass('{{ field.id_for_label }}', this)" 
+                            style="position: absolute; right: 15px; background: none; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.6;">👁️</button>
+                    {% endif %}
+                </div>
                 {% if field.help_text %}
-                <p style="font-size: 0.75rem; opacity: 0.6; margin-top: 5px; line-height: 1.2;">{{ field.help_text|safe }}</p>
+                <p style="font-size: 0.75rem; opacity: 0.6; margin-top: 5px; line-height: 1.2; color: var(--text-muted);">{{ field.help_text|safe }}</p>
                 {% endif %}
             </div>
             {% endfor %}
@@ -170,8 +178,21 @@
 </div>
 
 <script>
+    function togglePass(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            btn.textContent = '👁️';
+        }
+    }
+
     window.onload = () => {
-        createMagicParticles(['🎈', '🎒', '🎨', '🧩', '🧸', '🌈', '✨']);
+        if(typeof createMagicParticles === 'function') {
+            createMagicParticles(['🎈', '🎒', '🎨', '🧩', '🧸', '🌈', '✨']);
+        }
     };
 </script>
 {% endblock %}

@@ -193,20 +193,10 @@
       <button class="rbtn-ctrl ctrl-stop"  onclick="stopEx()">⏹️ Terminar</button>
     </div>
 
-    <p style="font-size:.8rem;color:rgba(255,255,255,.55);margin-bottom:8px;">🎨 Ambiente:</p>
-    <div class="th-grid">
-      <button class="th-orb active" data-th="calm"   onclick="setTheme('calm',this)"  title="Tranquilo">☁️</button>
-      <button class="th-orb"        data-th="forest" onclick="setTheme('forest',this)" title="Bosque">🌳</button>
-      <button class="th-orb"        data-th="ocean"  onclick="setTheme('ocean',this)"  title="Océano">🌊</button>
-      <button class="th-orb"        data-th="rain"   onclick="setTheme('rain',this)"   title="Lluvia">🌧️</button>
-      <button class="th-orb"        data-th="space"  onclick="setTheme('space',this)"  title="Galaxia">🌌</button>
-      <button class="th-orb"        data-th="sleep"  onclick="setTheme('sleep',this)"  title="Sueño">🌙</button>
-    </div>
-
-    <div class="vol-row">
-      <span>🔊</span>
+    <div class="vol-row" style="margin-top: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 20px;">
+      <span style="font-size: 1.2rem;">🎵</span>
       <input type="range" id="rVol" min="0" max="100" value="50" oninput="setVol(this.value)">
-      <span id="rVolPct">50%</span>
+      <span id="rVolPct" style="font-weight: bold; width: 45px;">50%</span>
     </div>
   </div>
 
@@ -246,7 +236,7 @@ function saveRespStat() {
 let rLevel = 1, rPaused = false, rVoiceOn = true;
 let rInterval = null, rBreathInt = null, rCdTimer = null;
 let rElapsed = 0, rCycles = 0, rPhaseIdx = 0, rPhSec = 0;
-let rVol = 0.50, rTheme = 'calm';
+let rVol = 0.50;
 const SESSION_SEC = 600;
 
 const RCfg = {
@@ -256,60 +246,114 @@ const RCfg = {
   4: { name:'🌙 Sueño',     in:4, hold:7, out:8,  msgs:['Inhala calma...','Mantén la paz...','Exhala el estrés...'] }
 };
 
-const TColor = {
-  calm:  { bg:'linear-gradient(135deg,#0f0c29,#302b63)', arc:'#6C63FF', glow:'rgba(108,99,255,0.3)' },
-  forest:{ bg:'linear-gradient(135deg,#0d2b0d,#1a4a1a)', arc:'#43E97B', glow:'rgba(67,233,123,0.3)' },
-  ocean: { bg:'linear-gradient(135deg,#0d1b2b,#0d2b4a)', arc:'#4facfe', glow:'rgba(79,172,254,0.3)' },
-  rain:  { bg:'linear-gradient(135deg,#141414,#1e1e1e)', arc:'#a8b2d8', glow:'rgba(168,178,216,0.3)' },
-  space: { bg:'linear-gradient(135deg,#0a0015,#1a0030)', arc:'#B06EFF', glow:'rgba(176,110,255,0.3)' },
-  sleep: { bg:'linear-gradient(135deg,#050510,#10103a)', arc:'#6495ED', glow:'rgba(100,149,237,0.3)' }
+// ===== SISTEMA DE SONIDOS ARQUETIPOS Y MÚSICA GENERATIVA =====
+let audioCtx = null;
+let bgOsc = null, bgGain = null, bgChimes = null;
+
+const SkinsSonido = {
+    explorador: { acierto: [900, 1100], click: [400], tipo: 'sine', musica: [440, 880, 1320] }, // Agudo/Natural
+    aventurero: { acierto: [600, 900, 1200], click: [600], tipo: 'triangle', musica: [523, 659, 783] }, // Armonía aventurera
+    maestro:    { acierto: [1000, 1500, 2000], click: [300], tipo: 'sine', musica: [523, 783, 1046] }, // Celestial Maestro
+    sueno:      { acierto: [1100, 1400], click: [200], tipo: 'sine', musica: [392, 587, 880] }  // Suave Sueño
 };
 
-let audioCtx = null, noiseGain = null, noiseSource = null, filterNode = null;
-
 function ensureAudio() {
-  if (audioCtx) return;
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const bufLen = 2 * audioCtx.sampleRate;
-    const buf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
-    const d = buf.getChannelData(0);
-    for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
-
-    noiseSource = audioCtx.createBufferSource();
-    noiseSource.buffer = buf;
-    noiseSource.loop = true;
-
-    filterNode = audioCtx.createBiquadFilter();
-    filterNode.type = 'lowpass';
-    filterNode.frequency.value = applyThemeFilter(rTheme);
-
-    noiseGain = audioCtx.createGain();
-    noiseGain.gain.value = 0;
-
-    noiseSource.connect(filterNode);
-    filterNode.connect(noiseGain);
-    noiseGain.connect(audioCtx.destination);
-    noiseSource.start();
-  } catch(e) { console.warn('Audio init failed:', e); }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
 
-function applyThemeFilter(th) {
-  const map = { calm:600, forest:800, ocean:300, rain:3000, space:1400, sleep:200 };
-  return map[th] || 600;
+function stopMusic() {
+    if (bgGain) { bgGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5); }
+    if (bgChimes) { clearInterval(bgChimes); bgChimes = null; }
 }
 
-function startAmbient() {
-  ensureAudio();
-  if (!audioCtx) return;
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  filterNode.frequency.value = applyThemeFilter(rTheme);
-  noiseGain.gain.setTargetAtTime(rVol * 0.30, audioCtx.currentTime, 0.5);
+function startGenerativeMusic() {
+    ensureAudio();
+    stopMusic();
+    const map = { 1:'explorador', 2:'aventurero', 3:'maestro', 4:'sueno' };
+    const arq = map[rLevel] || 'explorador';
+    
+    bgGain = audioCtx.createGain();
+    bgGain.connect(audioCtx.destination);
+    bgGain.gain.setValueAtTime(0, audioCtx.currentTime);
+    bgGain.gain.linearRampToValueAtTime(rVol * 0.15, audioCtx.currentTime + 1); // Respect rVol
+
+    // FUN SEQUENCER
+    let step = 0;
+    const melodies = {
+        explorador: [440, 554, 659, 880, 659, 554],
+        aventurero: [523, 659, 523, 783, 783, 1046],
+        maestro:    [783, 1046, 783, 1318, 1046, 1568],
+        sueno:      [392, 493, 587, 783, 587, 493]
+    };
+    
+    const melody = melodies[arq];
+    const tempo = arq === 'aventurero' ? 300 : arq === 'sueno' ? 800 : 500;
+
+    bgChimes = setInterval(() => {
+        if (rPaused) return;
+        
+        const note = melody[step % melody.length];
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = arq === 'sueno' ? 'sine' : 'triangle';
+        osc.frequency.setValueAtTime(note, audioCtx.currentTime);
+        osc.connect(g);
+        g.connect(bgGain);
+        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (tempo / 1500));
+        osc.start();
+        osc.stop(audioCtx.currentTime + (tempo / 1500));
+        
+        if (step % 4 === 0 && arq !== 'sueno') {
+            const kick = audioCtx.createOscillator();
+            const kg = audioCtx.createGain();
+            kick.frequency.setValueAtTime(100, audioCtx.currentTime);
+            kick.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            kick.connect(kg); kg.connect(bgGain);
+            kg.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            kg.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            kick.start(); kick.stop(audioCtx.currentTime + 0.1);
+        }
+        step++;
+    }, tempo);
 }
 
-function stopAmbient() {
-  if (noiseGain && audioCtx) noiseGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
+function setVol(v) {
+    rVol = v / 100;
+    const disp = document.getElementById('rVolPct');
+    if (disp) disp.textContent = v + '%';
+    if (bgGain && audioCtx && !rPaused) {
+        bgGain.gain.setTargetAtTime(rVol * 0.15, audioCtx.currentTime, 0.3);
+    }
 }
+
+function playSkinSound(tipoCausa) {
+    ensureAudio();
+    const map = { 1:'explorador', 2:'aventurero', 3:'maestro', 4:'sueno' };
+    const arquetipo = map[rLevel] || 'explorador';
+    const skin = SkinsSonido[arquetipo];
+    const freqs = skin[tipoCausa];
+    const contextTime = audioCtx.currentTime;
+
+    freqs.forEach((f, i) => {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(f, contextTime + (i * 0.1));
+        osc.type = skin.tipo;
+        g.gain.setValueAtTime(0.08, contextTime + (i * 0.1));
+        g.gain.exponentialRampToValueAtTime(0.001, contextTime + (i * 0.1) + 0.6);
+        osc.start(contextTime + (i * 0.1));
+        osc.stop(contextTime + (i * 0.1) + 0.6);
+    });
+}
+
+const TColor = {
+  1: { bg:'linear-gradient(135deg,#0d2b0d,#1a4a1a)', arc:'#43E97B' }, // Explorador
+  2: { bg:'linear-gradient(135deg,#302b63,#0f0c29)', arc:'#6C63FF' }, // Aventurero
+  3: { bg:'linear-gradient(135deg,#0d1b2b,#0d2b4a)', arc:'#4facfe' }, // Maestro
+  4: { bg:'linear-gradient(135deg,#050510,#10103a)', arc:'#6495ED' }  // Sueño
+};
 
 function rSpeak(txt) {
   if (!rVoiceOn) return;
@@ -336,6 +380,9 @@ function startEx(level) {
   rLevel = level;
   rElapsed = 0; rCycles = 0; rPhaseIdx = 0; rPhSec = 0; rPaused = false;
   const cfg = RCfg[level];
+  
+  // Theme Update
+  document.getElementById('resp-app').style.background = TColor[level].bg;
 
   document.getElementById('rLvlName').textContent = cfg.name;
   document.getElementById('rCycles').textContent = '0';
@@ -347,7 +394,6 @@ function startEx(level) {
   updateRTimer(SESSION_SEC);
 
   showRScreen('ex');
-  startAmbient();
   rSpeak('Prepárate. Comenzamos en tres.');
 
   let n = 3;
@@ -360,6 +406,8 @@ function startEx(level) {
       document.getElementById('rPhase').textContent = phaseName(0);
       document.getElementById('rMsg').textContent = cfg.msgs[0];
       rSpeak(phaseName(0));
+      playSkinSound('acierto');
+      startGenerativeMusic(); // INICIA MÚSICA AQUÍ
       rInterval    = setInterval(tickSession, 1000);
       rBreathInt   = setInterval(tickBreath, 1000);
       drawOrb(0, 0);
@@ -392,6 +440,7 @@ function tickBreath() {
     document.getElementById('rPhase').textContent = phaseName(rPhaseIdx);
     document.getElementById('rMsg').textContent = cfg.msgs[rPhaseIdx];
     rSpeak(phaseName(rPhaseIdx));
+    playSkinSound('acierto');
   }
   const prog = rPhSec / dur[rPhaseIdx];
   const rem  = dur[rPhaseIdx] - rPhSec;
@@ -412,7 +461,7 @@ function drawOrb(prog, phase) {
   const cx = W/2, cy = H/2;
   ctx.clearRect(0, 0, W, H);
 
-  const tc = TColor[rTheme];
+  const tc = TColor[rLevel];
   const col = tc.arc;
 
   const outerR = 110 + prog * 18;
@@ -442,10 +491,10 @@ function toggleRPause() {
   rPaused = !rPaused;
   document.getElementById('rPauseBtn').textContent = rPaused ? '▶️ Reanudar' : '⏸️ Pausar';
   if (rPaused) {
-    stopAmbient();
+    if (bgGain) bgGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
     if (window.speechSynthesis) window.speechSynthesis.cancel();
   } else {
-    startAmbient();
+    if (bgGain) bgGain.gain.setTargetAtTime(0.04, audioCtx.currentTime, 0.5);
     rSpeak(phaseName(rPhaseIdx));
   }
 }
@@ -453,7 +502,7 @@ function toggleRPause() {
 function stopEx() {
   clearInterval(rInterval); clearInterval(rBreathInt); clearInterval(rCdTimer);
   rInterval = rBreathInt = rCdTimer = null;
-  stopAmbient();
+  stopMusic(); // DETIENE MÚSICA AQUÍ
   if (window.speechSynthesis) window.speechSynthesis.cancel();
   saveRespStat();
 

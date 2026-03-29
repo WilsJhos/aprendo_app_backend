@@ -11,8 +11,10 @@
     #game-wrapper {
         position: relative;
         width: 100%;
-        height: 600px;
-        max-width: 900px;
+        height: 75vh;
+        max-height: 700px;
+        min-height: 400px;
+        max-width: 1200px;
         margin: 0 auto;
         background: #000;
         overflow: hidden;
@@ -21,7 +23,7 @@
         box-shadow: 0 0 50px rgba(0,0,0,0.5);
     }
 
-    canvas { display: block; width: 100%; height: 100%; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
     #ui-layer {
         position: absolute;
@@ -62,7 +64,7 @@
     }
     .hidden { display: none !important; }
 
-    .overlay h1 { font-size: 4rem; margin-bottom: 20px; background: linear-gradient(to right, #00d2d3, #54a0ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .overlay h1 { font-size: 4rem; margin-bottom: 20px; background: linear-gradient(to right, #00d2d3, #54a0ff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
     .overlay button {
         padding: 18px 50px; font-size: 1.5rem; font-weight: 800;
         background: linear-gradient(135deg, #ff9f43, #ff6b6b);
@@ -74,6 +76,14 @@
 
     /* Custom scrollbar for game wrapper if any */
     ::-webkit-scrollbar { display: none; }
+
+    .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; transform: translate3d(0, 0, 0); }
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-2px, 0, 0); }
+        20%, 80% { transform: translate3d(4px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+        40%, 60% { transform: translate3d(6px, 0, 0); }
+    }
 </style>
 {% endblock %}
 
@@ -82,11 +92,14 @@
     <canvas id="gameCanvas"></canvas>
 
     <div id="ui-layer">
-        <div id="top-bar">
+        <div id="top-bar" style="pointer-events: auto;">
             <div id="lives-display" class="lives-container">❤️❤️❤️❤️❤️</div>
-            <div class="score-container">
-                <span class="level-label">Nivel <span id="inner-level">1</span></span>
-                <span class="score-val" id="inner-score">0</span>
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button id="pause-btn" style="background: rgba(255,255,255,0.1); border: 2px solid #00d2d3; color: #00d2d3; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; cursor: pointer; transition: 0.2s;">⏸️</button>
+                <div class="score-container">
+                    <span class="level-label">Nivel <span id="inner-level">1</span></span>
+                    <span class="score-val" id="inner-score">0</span>
+                </div>
             </div>
         </div>
         <div id="feedback-msg" class="feedback-msg">¡GENIAL!</div>
@@ -126,7 +139,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameOverScreen = document.getElementById('game-over-screen');
     const winScreen = document.getElementById('win-screen');
 
+    // --- PROCEDURAL AUDIO ENGINE ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSpaceSFX(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+
+        if (type === 'collect') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(1500, now + 0.1);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            osc.start(now); osc.stop(now + 0.2);
+        } else if (type === 'impact') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.4);
+            osc.start(now); osc.stop(now + 0.4);
+        } else if (type === 'level') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.setValueAtTime(660, now + 0.1);
+            osc.frequency.setValueAtTime(880, now + 0.2);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.5);
+            osc.start(now); osc.stop(now + 0.5);
+        }
+    }
+
     let gameRunning = false;
+    let isPaused = false;
     let score = 0;
     let lives = 5;
     let level = 1;
@@ -173,32 +222,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resize() {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
         initBackground();
     }
     window.addEventListener('resize', resize);
+    window.addEventListener('orientationchange', () => setTimeout(resize, 100)); // Delay for mobile recalc
     resize();
 
     // --- CONTROLS ---
     window.addEventListener('mousemove', (e) => {
-        if (!gameRunning) return;
+        if (!gameRunning || isPaused) return;
         const rect = canvas.getBoundingClientRect();
         player.targetX = e.clientX - rect.left - player.width/2;
         player.targetY = e.clientY - rect.top - player.height/2;
     });
 
     canvas.addEventListener('touchmove', (e) => {
-        if (!gameRunning) return;
+        if (!gameRunning || isPaused) return;
         e.preventDefault();
         const rect = canvas.getBoundingClientRect();
         const touch = e.touches[0];
         player.targetX = touch.clientX - rect.left - player.width/2;
-        player.targetY = touch.clientY - rect.top - player.height/2;
+        // INNOVACIÓN: Offset para celular (nave arriba del dedo)
+        player.targetY = touch.clientY - rect.top - player.height/2 - 70;
     }, { passive: false });
+
+    function togglePause() {
+        if (!gameRunning) return;
+        isPaused = !isPaused;
+        const btn = document.getElementById('pause-btn');
+        if (btn) {
+            btn.innerHTML = isPaused ? '▶️' : '⏸️';
+            btn.style.boxShadow = isPaused ? '0 0 20px #00d2d3' : 'none';
+        }
+        if (!isPaused) {
+            Voice.speak("¡Continuamos!");
+            gameLoop();
+        } else {
+            Voice.speak("Pausa.");
+            // Dim background when paused
+            ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "white"; ctx.font = "bold 40px Outfit"; ctx.textAlign = "center";
+            ctx.fillText("PAUSA", canvas.width/2, canvas.height/2);
+        }
+    }
+
+    document.getElementById('pause-btn').onclick = (e) => { 
+        e.stopPropagation();
+        togglePause(); 
+    };
 
     // --- GAME LOGIC ---
     function spawnCollectible() {
+        if (isPaused) return;
         collectibles.push({
             x: canvas.width + 50,
             y: Math.random() * (canvas.height - 40) + 20,
@@ -210,6 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function spawnObstacle() {
+        if (isPaused) return;
         obstacles.push({
             x: canvas.width + 100,
             y: Math.random() * (canvas.height - 60) + 30,
@@ -220,17 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function spawnParticle(x, y, color) {
-        for (let i = 0; i < 10; i++) {
-            particles.push({
-                x, y,
-                vx: (Math.random() - 0.5) * 8,
-                vy: (Math.random() - 0.5) * 8,
-                life: 1.0,
-                color: color || '#fff'
-            });
-        }
-    }
 
     function update() {
         // Smooth Player Move
@@ -260,6 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (Math.sqrt(dx*dx + dy*dy) < 40) {
                 score += 10;
                 scoreEl.innerText = score;
+                playSpaceSFX('collect');
                 spawnParticle(c.x, c.y, '#00d2d3');
                 speakChar(c.char);
                 collectibles.splice(i, 1);
@@ -303,26 +374,61 @@ document.addEventListener('DOMContentLoaded', () => {
             level++;
             gameSpeed += 0.8;
             levelEl.innerText = level;
+            playSpaceSFX('level');
             showFeedback(`NIVEL ${level}`);
             Voice.speak(`¡Excelente! Nivel ${level}`);
         }
     }
 
+    function getRank(s) {
+        if (s > 500) return "🌟 LEYENDA GALÁCTICA";
+        if (s > 300) return "🚀 CORONEL ESPACIAL";
+        if (s > 100) return "🛡️ CAPITÁN";
+        return "🛰️ CADETE";
+    }
+
     function takeDamage() {
         lives--;
         livesEl.innerText = '❤️'.repeat(lives);
-        showFeedback('¡CUIDADO!');
-        Voice.speak('¡Cuidado!');
         
-        canvas.style.transform = 'translateX(10px)';
-        setTimeout(() => canvas.style.transform = 'translateX(-10px)', 50);
-        setTimeout(() => canvas.style.transform = 'translateX(0)', 100);
+        // Efecto de sacudida
+        canvas.classList.add('shake');
+        setTimeout(() => canvas.classList.remove('shake'), 500);
+        playSpaceSFX('impact');
 
-        if (lives <= 0) {
+        if (lives > 0) {
+            showFeedback('¡CUIDADO!');
+            Voice.speak('¡Cuidado!');
+            spawnParticle(player.x, player.y, '#ff4757', 20);
+        } else {
+            // EXPLOSIÓN FINAL
             gameRunning = false;
-            gameOverScreen.classList.remove('hidden');
-            document.getElementById('final-stats').innerText = `Lograste ${score} puntos en Nivel ${level}`;
-            if (typeof saveGameStat === 'function') saveGameStat(score);
+            spawnParticle(player.x, player.y, '#ff4757', 80);
+            spawnParticle(player.x, player.y, '#f9ca24', 50);
+            
+            Voice.speak("¡Misión terminada! Has hecho un gran trabajo ahí fuera.");
+            
+            setTimeout(() => {
+                gameOverScreen.classList.remove('hidden');
+                const rank = getRank(score);
+                document.getElementById('final-stats').innerHTML = `
+                    <div style="font-size: 1.5rem; margin-bottom: 10px;">Rango: <span style="color: #f9ca24; font-weight:800;">${rank}</span></div>
+                    <div style="font-size: 1.2rem; opacity: 0.9;">Puntos: ${score} | Nivel: ${level}</div>
+                `;
+                if (typeof saveGameStat === 'function') saveGameStat(score);
+            }, 1000);
+        }
+    }
+
+    function spawnParticle(x, y, color, count = 10) {
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * 12,
+                vy: (Math.random() - 0.5) * 12,
+                life: 1.0,
+                color: color || '#fff'
+            });
         }
     }
 
@@ -488,7 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function gameLoop() {
-        if (!gameRunning) return;
+        if (!gameRunning || isPaused) return;
         update();
         draw();
         requestAnimationFrame(gameLoop);

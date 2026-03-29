@@ -154,47 +154,38 @@
     <script>
         let currentAnswer = 0;
 
-        const operators = [
-            { symbol: '+', name: 'más' },
-            { symbol: '-', name: 'menos' },
-            { symbol: '×', name: 'por' },
-            { symbol: '÷', name: 'entre' }
-        ];
-
         function nextQuestion() {
-            const opObj = operators[Math.floor(Math.random() * operators.length)];
-            let n1, n2, result;
+            let n1, n2, result, opSymbol, opName;
 
-            if (opObj.symbol === '+') {
+            // Innovación: Probabilidad Pesada (90% Suma, 10% Resta)
+            const rand = Math.random();
+            if (rand < 0.90) {
+                // SUMA (90%)
+                opSymbol = '+'; opName = 'más';
                 n1 = Math.floor(Math.random() * 10) + 1;
                 n2 = Math.floor(Math.random() * 10) + 1;
                 result = n1 + n2;
-            } else if (opObj.symbol === '-') {
-                n1 = Math.floor(Math.random() * 20) + 10;
-                n2 = Math.floor(Math.random() * 10) + 1;
+            } else {
+                // RESTA (10%)
+                opSymbol = '-'; opName = 'menos';
+                n1 = Math.floor(Math.random() * 15) + 5;
+                n2 = Math.floor(Math.random() * n1) + 1; // Asegurar resultado positivo
                 result = n1 - n2;
-            } else if (opObj.symbol === '×') {
-                n1 = Math.floor(Math.random() * 9) + 1;
-                n2 = Math.floor(Math.random() * 9) + 1;
-                result = n1 * n2;
-            } else { // Division
-                result = Math.floor(Math.random() * 9) + 1;
-                n2 = Math.floor(Math.random() * 9) + 1;
-                n1 = n2 * result;
             }
 
             currentAnswer = result;
             
             const qEl = document.getElementById('question');
             if (qEl) {
-                qEl.textContent = `${n1} ${opObj.symbol} ${n2}`;
-                qEl.classList.add('anim-elem');
-                setTimeout(()=> qEl.classList.add('anim-appear'), 30);
+                qEl.textContent = `${n1} ${opSymbol} ${n2}`;
+                qEl.classList.remove('anim-appear');
+                void qEl.offsetWidth; // Force reflow
+                qEl.classList.add('anim-appear');
             }
             
             generateOptions(currentAnswer);
 
-            const voiceText = `¿Cuánto es ${n1} ${opObj.name} ${n2}?`;
+            const voiceText = `¿Cuánto es ${n1} ${opName} ${n2}?`;
             speakText(voiceText);
         }
 
@@ -203,35 +194,31 @@
             optsDiv.innerHTML = '';
             let options = [correct];
             while(options.length < 4) {
-                // Rango más amplio para operaciones más complejas
-                let r = correct + Math.floor(Math.random() * 30) - 15;
-                if(r < 0) r = Math.floor(Math.random() * 20);
+                let r = correct + Math.floor(Math.random() * 10) - 5;
+                if(r < 0) r = Math.floor(Math.random() * 10);
                 if(!options.includes(r)) options.push(r);
             }
             options.sort(() => Math.random() - 0.5);
             
             options.forEach((opt, i) => {
                 const btn = document.createElement('button');
-                btn.className = 'math-btn anim-elem';
+                btn.className = 'math-btn';
                 btn.textContent = opt;
                 btn.onclick = () => checkAnswer(opt);
                 optsDiv.appendChild(btn);
-                setTimeout(()=> btn.classList.add('anim-appear'), 80 * i + 40);
             });
         }
 
         function checkAnswer(selected) {
-            try {
-                if(selected === currentAnswer) {
-                    showFeedback('¡Excelente! 💎', true);
-                    updateStats(10, true);
-                    setTimeout(nextQuestion, 2000);
-                } else {
-                    showFeedback('Sigue intentando 💪', false);
-                    updateStats(0, false);
-                }
-            } catch(err) {
-                console.error('checkAnswer error', err);
+            if(selected === currentAnswer) {
+                showFeedback('¡Genial! ✨', true);
+                updateStats(10, true);
+                speakText("¡Correcto!");
+                setTimeout(nextQuestion, 2000);
+            } else {
+                showFeedback('¡Tú puedes! 💪', false);
+                speakText("Sigue intentando");
+                updateStats(0, false);
             }
         }
 

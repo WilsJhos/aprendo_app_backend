@@ -178,7 +178,78 @@
 <section class="hero">
     <h1>Mundo de Aprendizaje</h1>
     <p>Una plataforma educativa diseñada para ser divertida, inclusiva y mágica para todos los niños.</p>
+
+    <!-- INNOVACIÓN: Selector de Arquetipo Global -->
+    <div class="arquetipo-hub">
+      <div class="aq-card" onclick="setGlobalTheme('explorador')" data-arq="explorador">
+        <span class="aq-emoji">🌱</span>
+        <span class="aq-name">Explorador</span>
+        <small>Descubre el mundo</small>
+      </div>
+      <div class="aq-card" onclick="setGlobalTheme('aventurero')" data-arq="aventurero">
+        <span class="aq-emoji">🔥</span>
+        <span class="aq-name">Aventurero</span>
+        <small>Supera retos</small>
+      </div>
+      <div class="aq-card" onclick="setGlobalTheme('maestro')" data-arq="maestro">
+        <span class="aq-emoji">⭐</span>
+        <span class="aq-name">Maestro</span>
+        <small>Domina la magia</small>
+      </div>
+      <div class="aq-card" onclick="setGlobalTheme('sueno')" data-arq="sueno">
+        <span class="aq-emoji">🌙</span>
+        <span class="aq-name">Sueño</span>
+        <small>Paz y calma</small>
+      </div>
+    </div>
 </section>
+
+<style>
+    .arquetipo-hub {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 3rem;
+        flex-wrap: wrap;
+        padding: 0 1rem;
+    }
+    .aq-card {
+        background: var(--card-bg);
+        border: 2px solid var(--card-border);
+        border-radius: 24px;
+        padding: 1.5rem;
+        width: 160px;
+        cursor: pointer;
+        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(10px);
+    }
+    .aq-card:hover {
+        transform: translateY(-10px) scale(1.05);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    .aq-card.active {
+        border-color: var(--accent-color);
+        background: rgba(var(--accent-rgb), 0.1);
+        box-shadow: 0 0 30px rgba(var(--accent-rgb), 0.2);
+    }
+    .aq-emoji { font-size: 2.5rem; }
+    .aq-name { font-weight: 800; font-size: 1rem; }
+    .aq-card small { opacity: 0.6; font-size: 0.75rem; font-weight: 600; }
+
+    /* Colores por Arquetipo */
+    body.theme-explorador { --accent-color: #43E97B; --accent-rgb: 67, 233, 123; }
+    body.theme-aventurero { --accent-color: #f59e0b; --accent-rgb: 245, 158, 11; }
+    body.theme-maestro    { --accent-color: #6366f1; --accent-rgb: 99, 102, 241; }
+    body.theme-sueno      { --accent-color: #6495ED; --accent-rgb: 100, 149, 237; }
+
+    @media (max-width: 600px) {
+        .aq-card { width: calc(50% - 1rem); padding: 1rem; }
+    }
+</style>
 
 
 <div class="stats-panel">
@@ -210,8 +281,70 @@
 
 {% block extra_js %}
 <script>
+let audioCtx = null;
+let previewInt = null;
+
+function ensureAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function stopPreview() {
+    if (previewInt) { clearInterval(previewInt); previewInt = null; }
+}
+
+function playMelodyPreview(arq) {
+    ensureAudio();
+    stopPreview();
+    
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const melodies = {
+        explorador: [440, 554, 659, 880],
+        aventurero: [523, 659, 783, 1046],
+        maestro:    [783, 1046, 1318, 1568],
+        sueno:      [392, 493, 587, 783]
+    };
+    
+    const m = melodies[arq];
+    let step = 0;
+    
+    previewInt = setInterval(() => {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = arq === 'sueno' ? 'sine' : 'triangle';
+        osc.frequency.setValueAtTime(m[step % m.length], audioCtx.currentTime);
+        osc.connect(g); g.connect(audioCtx.destination);
+        g.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        
+        step++;
+        if (step >= 4) stopPreview();
+    }, 200);
+}
+
+function setGlobalTheme(arq) {
+    // UI Update
+    document.body.className = 'theme-' + arq;
+    document.querySelectorAll('.aq-card').forEach(c => {
+        c.classList.toggle('active', c.getAttribute('data-arq') === arq);
+    });
+    
+    // Logic
+    localStorage.setItem('global_arquetipo', arq);
+    playMelodyPreview(arq);
+    
+    // Add a satisfying scale effect to the body
+    document.body.style.transition = '0.5s';
+}
+
 (function(){
-    const KNOWN = ['respirador'];
+    // LOAD SAVED ARQUETIPO
+    const saved = localStorage.getItem('global_arquetipo') || 'maestro';
+    setGlobalTheme(saved);
+
+    // STATS LOGIC (KEEP ORIGINAL)
+    const KNOWN = ['respirador', 'rompecabezas', 'terapeutico', 'rutinas'];
     document.querySelectorAll('.card[data-gid]').forEach(el => {
         KNOWN.push(el.getAttribute('data-gid'));
     });

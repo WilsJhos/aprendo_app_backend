@@ -8,124 +8,183 @@
 <style>
     :root {
         /* Base Puzzle Colors */
-        --primario: #a29bfe;
-        --secundario: #81ecec;
+        --primario: #6c5ce7;
+        --secundario: #00cec9;
         --acentuado: #fd79a8;
         --error: #ff7675;
         --success: #55efc4;
         
         /* Theme Light (Default) */
-        --puz-card-bg: rgba(255, 255, 255, 0.9);
-        --puz-card-border: rgba(255, 255, 255, 0.5);
+        --puz-card-bg: rgba(255, 255, 255, 0.95);
+        --puz-card-border: rgba(255, 255, 255, 0.8);
         --puz-text: #2d3436;
         --puz-text-muted: #636e72;
-        --puz-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        --puz-shadow: 0 10px 30px rgba(0,0,0,0.1);
         --pieza-size: 110px;
-        --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        --transition: all 0.3s ease;
     }
 
     [data-theme='dark'] {
-        --puz-card-bg: rgba(30, 41, 59, 0.8);
+        --puz-card-bg: rgba(30, 41, 59, 0.9);
         --puz-card-border: rgba(255, 255, 255, 0.1);
         --puz-text: #f1f5f9;
         --puz-text-muted: #94a3b8;
-        --puz-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        --primario: #38bdf8;
-        --bg-gradient: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-    }
-
-    /* Override for the game container background */
-    div.game-container {
-        background: var(--bg-gradient, radial-gradient(circle at center, #f8fafc 0%, #cbd5e1 100%)) !important;
-        transition: background 0.5s ease;
+        --puz-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        --primario: #a29bfe;
     }
 
     .rompecabezas-header h1 {
         font-family: 'Fredoka One', cursive;
         color: var(--primario);
-        text-shadow: 2px 2px 0 var(--acentuado);
-        font-size: 3rem;
-        margin-bottom: 20px;
+        text-shadow: 3px 3px 0 var(--acentuado);
+        font-size: clamp(2rem, 8vw, 3.5rem);
+        margin-bottom: 5px;
+    }
+
+    .info-juego {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-bottom: 15px;
     }
 
     .nivel-badge {
         background: var(--primario);
         color: white;
-        padding: 8px 20px;
-        border-radius: 20px;
+        padding: 10px 25px;
+        border-radius: 50px;
         font-weight: 800;
-        box-shadow: var(--puz-shadow);
+        box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
     }
 
     #status-voz {
         background: var(--puz-card-bg);
         color: var(--puz-text);
         padding: 5px 20px;
-        border-radius: 20px;
+        border-radius: 50px;
         border: 2px solid var(--secundario);
-        font-size: 1rem;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
 
-    .juego-wrapper {
+    .game-area-layout {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .tablero-container {
         position: relative;
-        margin: 30px auto;
-        padding: 15px;
         background: var(--puz-card-bg);
-        border: 2px solid var(--puz-card-border);
+        border: 4px solid var(--puz-card-border);
         border-radius: 24px;
         box-shadow: var(--puz-shadow);
-        display: inline-block;
-        transition: transform 0.3s ease;
+        padding: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
     }
 
-    .tablero { display: grid; gap: 4px; border-radius: 12px; overflow: hidden; }
+    .tablero { 
+        position: relative;
+        background: rgba(0,0,0,0.05);
+        border-radius: 12px;
+        /* Width/Height set by JS */
+    }
+
+    .tablero-guide {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        opacity: 0.15;
+        transition: opacity 0.5s ease;
+        border-radius: 12px;
+        pointer-events: none;
+    }
+
+    .slot {
+        position: absolute;
+        border: 1px dashed rgba(0,0,0,0.1);
+        z-index: 2;
+        pointer-events: none;
+    }
 
     .pieza {
+        position: absolute;
         width: var(--pieza-size);
         height: var(--pieza-size);
         background-size: cover;
-        cursor: pointer;
+        cursor: grab;
         border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        transition: var(--transition);
-        border: 2px solid transparent;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 10;
+        touch-action: none;
+        user-select: none;
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
     }
 
-    .pieza:hover { transform: scale(1.05) rotate(2deg); z-index: 5; }
-    .pieza.seleccionada { border: 4px solid var(--acentuado); transform: scale(0.9) rotate(-3deg); z-index: 10; }
-    .pieza.correcta { border: 3px solid var(--success); filter: drop-shadow(0 0 5px var(--success)); }
+    .pieza:active { cursor: grabbing; z-index: 1000 !important; }
 
-    .tablero-fondo { position: absolute; inset: 15px; z-index: 0; opacity: 0; transition: 0.5s; border-radius: 12px; }
+    .pieza.dragging {
+        transform: scale(1.1) rotate(2deg);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        opacity: 0.9;
+    }
+
+    .pieza.locked {
+        cursor: default;
+        z-index: 5;
+        box-shadow: none;
+        pointer-events: none;
+        animation: snapSuccess 0.3s ease-out;
+    }
+
+    @keyframes snapSuccess {
+        0% { transform: scale(1.2); filter: brightness(1.5); }
+        100% { transform: scale(1); filter: brightness(1); }
+    }
+
+    .tray-container {
+        width: 100%;
+        background: rgba(255,255,255,0.1);
+        border-radius: 20px;
+        padding: 20px;
+        min-height: 150px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        border: 2px dashed rgba(255,255,255,0.2);
+    }
 
     .btn {
-        padding: 15px 30px;
-        font-size: 1.2rem;
+        padding: 12px 25px;
+        font-size: 1.1rem;
         border-radius: 50px;
         border: none;
         cursor: pointer;
         font-weight: 800;
-        transition: var(--transition);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         color: white;
-        box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
-    .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+    .btn:active { transform: translateY(0); }
 
-    .btn-accion { background: var(--primario); }
-    .btn-ayuda { background: var(--acentuado); }
-    .btn-control { background: var(--secundario); color: #333; }
-
-    .theme-toggle-container {
-        position: absolute;
-        top: 20px; right: 20px; z-index: 100;
-    }
-    .theme-btn {
-        width: 50px; height: 50px; border-radius: 15px; border: none; background: var(--primario); color: white; cursor: pointer; font-size: 1.5rem; transition: var(--transition);
-    }
+    .btn-accion { background: linear-gradient(135deg, var(--primario), #a29bfe); }
+    .btn-ayuda { background: linear-gradient(135deg, var(--acentuado), #ff9ff3); }
+    .btn-control { background: var(--secundario); color: #1e293b; }
 
     @media (max-width: 600px) {
-        :root { --pieza-size: 75px; }
-        .rompecabezas-header h1 { font-size: 2rem; }
+        :root { --pieza-size: 70px; }
+        .nivel-badge { padding: 6px 15px; font-size: 0.9rem; }
+        .tablero-container { padding: 5px; }
     }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
@@ -135,27 +194,34 @@
     <div class="rompecabezas-header">
         <h1>🧩 Reto Puzzle</h1>
         <div class="info-juego">
-            <span id="nivel-indicador" class="nivel-badge">Nivel 1</span>
+            <span id="nivel-indicador" class="nivel-badge">Cargando...</span>
             <span id="status-voz">🎤 Escuchando...</span>
         </div>
-        <p class="instrucciones">Di: <strong>"Nivel 1"</strong>, <strong>"Ayuda"</strong> o <strong>"Reiniciar"</strong>.</p>
+        <p class="instrucciones">Arrastra las piezas a su lugar correcto. Di: <strong>"Pista"</strong> o <strong>"Reiniciar"</strong>.</p>
     </div>
 
-    <!-- Nivel -->
-    <div class="controles-nivel">
-        <button id="btn-anterior" class="btn btn-control">⬅️ Anterior</button>
-        <button id="btn-siguiente" class="btn btn-control">Siguiente ➡️</button>
-    </div>
+    <div class="game-area-layout">
+        <!-- Nivel Selectors -->
+        <div class="controles-nivel">
+            <button id="btn-anterior" class="btn btn-control">⬅️ Fácil</button>
+            <button id="btn-siguiente" class="btn btn-control">Difícil ➡️</button>
+        </div>
 
-    <div class="controles">
-        <button id="btn-ayuda" class="btn btn-ayuda">💡 Ayuda / Pista</button>
-        <button id="btn-reiniciar" class="btn btn-accion">🔄 Reiniciar Nivel</button>
-    </div>
+        <!-- Board Area -->
+        <div class="tablero-container">
+            <div id="tablero-guide" class="tablero-guide"></div>
+            <div id="tablero" class="tablero"></div>
+        </div>
 
-    <section class="juego-wrapper">
-        <div id="tablero-fondo" class="tablero-fondo"></div>
-        <div id="tablero" class="tablero"></div>
-    </section>
+        <!-- Tray Area -->
+        <div id="tray" class="tray-container"></div>
+
+        <!-- General Actions -->
+        <div class="controles">
+            <button id="btn-ayuda" class="btn btn-ayuda">💡 Ver Imagen Completa</button>
+            <button id="btn-reiniciar" class="btn btn-accion">🔄 Mezclar de Nuevo</button>
+        </div>
+    </div>
 {% endblock %}
 
 {% block game_js %}
@@ -173,215 +239,238 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         const tablero = document.getElementById('tablero');
-        const fondoPista = document.getElementById('tablero-fondo');
+        const tray = document.getElementById('tray');
+        const boardGuide = document.getElementById('tablero-guide');
         const nivelDisplay = document.getElementById('nivel-indicador');
         const statusVoz = document.getElementById('status-voz');
         
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
         const niveles = {
-            1: { filas: 3, cols: 3, total: 9 },
-            2: { filas: 3, cols: 6, total: 18 },
-            3: { filas: 6, cols: 6, total: 36 }
+            1: { filas: 2, cols: 2, total: 4, snapDist: 40 },
+            2: { filas: 3, cols: 3, total: 9, snapDist: 30 },
+            3: { filas: 3, cols: 4, total: 12, snapDist: 25 }
         };
 
         let currentLevel = 1;
-        let piezaSeleccionada = null;
         let currentImgUrl = '';
+        let pieces = [];
+        let isDragging = false;
+        let activePiece = null;
+        let offset = { x: 0, y: 0 };
 
-        function tocarSonido(frecuencia, tipo = 'sine', duracion = 0.1) {
+        // --- AUDIO HELPERS ---
+        function playSfx(freq, type = 'sine', duration = 0.1) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
-            const ganancia = audioCtx.createGain();
-            osc.type = tipo;
-            osc.frequency.value = frecuencia;
-            osc.connect(ganancia);
-            ganancia.connect(audioCtx.destination);
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
             osc.start();
-            ganancia.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duracion);
-            osc.stop(audioCtx.currentTime + duracion);
-        }
-        
-        function tocarMelodiaVictoria() {
-            const notas = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
-            notas.forEach((nota, i) => {
-                setTimeout(() => tocarSonido(nota, 'triangle', 0.2), i * 150);
-            });
+            osc.stop(audioCtx.currentTime + duration);
         }
 
+        function speak(text) {
+            if (window.speak) window.speak(text, 1.0, 1.1);
+        }
+
+        // --- LEVEL LOADING ---
         function cargarNivel(nivel) {
-            if (nivel < 1) nivel = 1;
-            if (nivel > 3) nivel = 3;
+            if (nivel < 1 || nivel > 3) return;
             currentLevel = nivel;
-
             const config = niveles[currentLevel];
-            nivelDisplay.textContent = `Nivel ${currentLevel} (${config.total} piezas)`;
+            
+            nivelDisplay.textContent = `Nivel ${currentLevel}`;
             tablero.innerHTML = ''; 
-            
-            tablero.style.gridTemplateColumns = `repeat(${config.cols}, var(--pieza-size))`;
-            tablero.style.gridTemplateRows = `repeat(${config.filas}, var(--pieza-size))`;
+            tray.innerHTML = '';
+            pieces = [];
 
-            const elemWrapper = document.querySelector('.juego-wrapper');
-            const computedStyle = getComputedStyle(elemWrapper);
-            // fallback size if variables aren't matched perfectly
-            let piezaSizeStr = computedStyle.getPropertyValue('--pieza-size').trim();
-            let piezaSize = parseInt(piezaSizeStr) || 90;
-            if (window.innerWidth <= 600) piezaSize = 60;
-            
+            // Reset Board Size
+            const piezaSize = getPieceSize();
             const totalWidth = config.cols * piezaSize;
             const totalHeight = config.filas * piezaSize;
 
-            // Uso de imágenes tipo caricatura/infantil
-            const keywords = ['cartoon', 'animation', 'animal', 'toy', 'disney', 'pixelart'];
+            tablero.style.width = `${totalWidth}px`;
+            tablero.style.height = `${totalHeight}px`;
+
+            // New Child-Friendly Image Selection
+            const keywords = ['landscape', 'parks', 'nature', 'disney', 'toys', 'cartoon', 'animals', 'beach', 'playground', 'castle'];
             const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
-            const seed = Math.floor(Math.random() * 1000);
-            currentImgUrl = `https://loremflickr.com/${totalWidth}/${totalHeight}/${randomKeyword}?lock=${seed}`;
+            const seed = Math.floor(Math.random() * 2000);
+            currentImgUrl = `https://loremflickr.com/${totalWidth * 2}/${totalHeight * 2}/${randomKeyword}?lock=${seed}`;
 
-            fondoPista.style.width = `${totalWidth}px`;
-            fondoPista.style.height = `${totalHeight}px`;
-            fondoPista.style.backgroundImage = `url(${currentImgUrl})`;
+            boardGuide.style.backgroundImage = `url(${currentImgUrl})`;
+            boardGuide.style.backgroundSize = `${totalWidth}px ${totalHeight}px`;
+            boardGuide.style.opacity = '0.15';
 
-            let posiciones = Array.from({length: config.total}, (_, i) => i);
-            posiciones.sort(() => Math.random() - 0.5);
+            // Create Pieces
+            for (let i = 0; i < config.total; i++) {
+                const fila = Math.floor(i / config.cols);
+                const col = i % config.cols;
 
-            posiciones.forEach((posOriginal, index) => {
-                const pieza = document.createElement('div');
-                pieza.classList.add('pieza');
-                pieza.dataset.id = posOriginal;
+                const piece = document.createElement('div');
+                piece.className = 'pieza';
+                piece.dataset.id = i;
+                piece.dataset.targetX = col * piezaSize;
+                piece.dataset.targetY = fila * piezaSize;
 
-                const fila = Math.floor(posOriginal / config.cols);
-                const col = posOriginal % config.cols;
+                piece.style.backgroundImage = `url(${currentImgUrl})`;
+                piece.style.backgroundSize = `${totalWidth}px ${totalHeight}px`;
+                piece.style.backgroundPosition = `-${col * piezaSize}px -${fila * piezaSize}px`;
 
-                pieza.style.backgroundImage = `url(${currentImgUrl})`;
-                pieza.style.backgroundSize = `${totalWidth}px ${totalHeight}px`;
-                pieza.style.backgroundPosition = `-${col * piezaSize}px -${fila * piezaSize}px`;
+                // Initial Placement in Tray (Grid-like for clarity)
+                piece.style.position = 'relative';
+                piece.style.transform = `rotate(${(Math.random() - 0.5) * 15}deg)`;
 
-                pieza.addEventListener('click', () => manejarClick(pieza));
-                
-                tablero.appendChild(pieza);
-            });
-
-            statusVoz.textContent = `Nivel ${currentLevel} listo. ¡Di Ayuda si necesitas!`;
-        }
-
-        function manejarClick(pieza) {
-            if (!piezaSeleccionada) {
-                piezaSeleccionada = pieza;
-                pieza.classList.add('seleccionada');
-                tocarSonido(300, 'triangle', 0.05);
-            } else {
-                if (piezaSeleccionada !== pieza) {
-                    intercambiarPiezas(piezaSeleccionada, pieza);
-                    piezaSeleccionada.classList.remove('seleccionada');
-                    piezaSeleccionada = null;
-                    verificarVictoria();
-                } else {
-                    piezaSeleccionada.classList.remove('seleccionada');
-                    piezaSeleccionada = null;
-                }
+                piece.addEventListener('pointerdown', startDrag);
+                tray.appendChild(piece);
+                pieces.push(piece);
             }
+
+            speak(`¡Nuevo rompecabezas de ${randomKeyword}! Arrastra las piezas.`);
         }
 
-        function intercambiarPiezas(nodeA, nodeB) {
-            const parent = nodeA.parentNode;
-            const siblingA = nodeA.nextSibling === nodeB ? nodeA : nodeA.nextSibling;
-            
-            nodeB.parentNode.insertBefore(nodeA, nodeB);
-            parent.insertBefore(nodeB, siblingA);
-            
-            tocarSonido(400, 'sine', 0.1);
+        function getPieceSize() {
+            const style = getComputedStyle(document.documentElement);
+            return parseInt(style.getPropertyValue('--pieza-size')) || 110;
         }
 
-        function verificarVictoria() {
-            const piezas = document.querySelectorAll('.pieza');
-            let correctas = 0;
+        // --- DRAG LOGIC ---
+        function startDrag(e) {
+            if (activePiece || e.target.classList.contains('locked') || !isPiece(e.target)) return;
+            
+            e.preventDefault();
+            isDragging = true;
+            activePiece = e.target;
+            activePiece.setPointerCapture(e.pointerId);
+            activePiece.classList.add('dragging');
 
-            piezas.forEach((pieza, index) => {
-                if (parseInt(pieza.dataset.id) === index) {
-                    correctas++;
-                    pieza.classList.add('correcta');
-                } else {
-                    pieza.classList.remove('correcta');
-                }
-            });
+            const rect = activePiece.getBoundingClientRect();
+            offset.x = e.clientX - rect.left;
+            offset.y = e.clientY - rect.top;
 
-            if (correctas === niveles[currentLevel].total) {
-                statusVoz.textContent = "¡EXCELENTE! Nivel completado.";
-                tocarMelodiaVictoria();
+            // Make it fixed and move to body for dragging across UI
+            activePiece.style.position = 'fixed'; 
+            activePiece.style.zIndex = '1000';
+            document.body.appendChild(activePiece);
+            
+            // Move piece to follow mouse/finger immediately
+            movePiece(e.clientX, e.clientY);
+
+            activePiece.addEventListener('pointermove', onDrag);
+            activePiece.addEventListener('pointerup', endDrag);
+            playSfx(400, 'triangle', 0.05);
+        }
+
+        function isPiece(el) {
+            return el.classList.contains('pieza');
+        }
+
+        function onDrag(e) {
+            if (!isDragging || !activePiece) return;
+            movePiece(e.clientX, e.clientY);
+        }
+
+        function movePiece(clientX, clientY) {
+            activePiece.style.left = `${clientX - offset.x}px`;
+            activePiece.style.top = `${clientY - offset.y}px`;
+        }
+
+        function endDrag(e) {
+            if (!isDragging || !activePiece) return;
+            
+            isDragging = false;
+            activePiece.classList.remove('dragging');
+            
+            const boardRect = tablero.getBoundingClientRect();
+            const pieceRect = activePiece.getBoundingClientRect();
+            
+            const relX = pieceRect.left - boardRect.left;
+            const relY = pieceRect.top - boardRect.top;
+            
+            const targetX = parseFloat(activePiece.dataset.targetX);
+            const targetY = parseFloat(activePiece.dataset.targetY);
+            
+            const dist = Math.sqrt(Math.pow(relX - targetX, 2) + Math.pow(relY - targetY, 2));
+            const config = niveles[currentLevel];
+
+            if (dist < config.snapDist) {
+                // SNAP SUCCESS
+                activePiece.classList.add('locked');
+                activePiece.style.position = 'absolute';
+                activePiece.style.left = `${targetX}px`;
+                activePiece.style.top = `${targetY}px`;
+                activePiece.style.transform = 'none';
+                activePiece.style.zIndex = '5';
+                tablero.appendChild(activePiece);
                 
-                // Integración de métricas si existe la función en la app web
-                if (typeof saveGameStat === 'function') {
-                    saveGameStat(currentLevel * 10);
-                }
+                playSfx(880, 'sine', 0.2);
+                checkWin();
+            } else {
+                // Return to tray
+                activePiece.style.position = 'relative'; 
+                activePiece.style.left = `0`;
+                activePiece.style.top = `0`;
+                activePiece.style.zIndex = '10';
+                activePiece.style.transform = `rotate(${(Math.random() - 0.5) * 10}deg)`;
+                tray.appendChild(activePiece);
+                playSfx(200, 'sine', 0.1);
+            }
+
+            activePiece.releasePointerCapture(e.pointerId);
+            activePiece.removeEventListener('pointermove', onDrag);
+            activePiece.removeEventListener('pointerup', endDrag);
+            activePiece = null;
+        }
+
+        function checkWin() {
+            const lockedCount = document.querySelectorAll('.tablero .pieza.locked').length;
+            if (lockedCount === niveles[currentLevel].total) {
+                boardGuide.style.opacity = '1';
+                speak("¡Increíble! Lo has logrado.");
+                if (typeof saveGameStat === 'function') saveGameStat(currentLevel * 25);
                 
                 setTimeout(() => {
-                    if (currentLevel < 3) {
-                        alert("¡Felicidades! Pasando al siguiente nivel...");
-                        cambiarNivel(1);
-                    } else {
-                        alert("¡ERES UN CAMPEÓN! Has terminado todos los niveles.");
-                    }
-                }, 2000);
+                    if (currentLevel < 3) cargarNivel(currentLevel + 1);
+                    else alert("¡Felicidades! Eres un maestro de los puzzles.");
+                }, 1500);
             }
         }
 
-        function activarPista() {
-            tablero.classList.add('mostrar-pista');
-            fondoPista.style.opacity = '1'; 
-            
-            tocarSonido(600, 'sine', 0.3); 
-
+        function showHint() {
+            boardGuide.style.opacity = '0.7';
             setTimeout(() => {
-                tablero.classList.remove('mostrar-pista');
-                fondoPista.style.opacity = '0';
+                boardGuide.style.opacity = '0.15';
             }, 3000);
+            speak("Mira la imagen con atención.");
         }
 
-        function cambiarNivel(direccion) {
-            cargarNivel(currentLevel + direccion);
-        }
-
+        // --- BUTTONS ---
         document.getElementById('btn-reiniciar').addEventListener('click', () => cargarNivel(currentLevel));
-        document.getElementById('btn-anterior').addEventListener('click', () => cambiarNivel(-1));
-        document.getElementById('btn-siguiente').addEventListener('click', () => cambiarNivel(1));
-        document.getElementById('btn-ayuda').addEventListener('click', activarPista);
+        document.getElementById('btn-anterior').addEventListener('click', () => cargarNivel(currentLevel - 1));
+        document.getElementById('btn-siguiente').addEventListener('click', () => cargarNivel(currentLevel + 1));
+        document.getElementById('btn-ayuda').addEventListener('click', showHint);
 
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
+        // Voice Support
+        if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRec();
             recognition.continuous = true;
             recognition.lang = 'es-ES';
-            recognition.interimResults = false;
-
-            recognition.onresult = (event) => {
-                const last = event.results.length - 1;
-                const texto = event.results[last][0].transcript.trim().toLowerCase();
-                console.log("Voz:", texto);
-
-                if (texto.includes('reiniciar') || texto.includes('otra vez')) {
-                    cargarNivel(currentLevel);
-                } 
-                else if (texto.includes('ayuda') || texto.includes('pista') || texto.includes('no sé')) {
-                    activarPista();
-                }
-                else if (texto.includes('siguiente') || texto.includes('adelante')) {
-                    cambiarNivel(1);
-                }
-                else if (texto.includes('anterior') || texto.includes('atrás')) {
-                    cambiarNivel(-1);
-                }
-                else if (texto.includes('nivel 1') || texto.includes('nivel uno')) cargarNivel(1);
-                else if (texto.includes('nivel 2') || texto.includes('nivel dos')) cargarNivel(2);
-                else if (texto.includes('nivel 3') || texto.includes('nivel tres')) cargarNivel(3);
+            recognition.onresult = (e) => {
+                const text = e.results[e.results.length - 1][0].transcript.toLowerCase();
+                if (text.includes('pista') || text.includes('ayuda')) showHint();
+                if (text.includes('reiniciar')) cargarNivel(currentLevel);
+                if (text.includes('fácil')) cargarNivel(1);
+                if (text.includes('difícil')) cargarNivel(3);
             };
-
-            try {
-                recognition.start();
-            } catch (e) {
-                console.log("Speech recognition not started automatically", e);
-            }
+            try { recognition.start(); } catch(e) {}
         }
-        applyPuzzleTheme();
+
         cargarNivel(1);
     });
 </script>

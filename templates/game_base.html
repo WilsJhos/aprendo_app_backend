@@ -240,21 +240,64 @@
 
 {% block content %}
     <style>
-        .audio-settings-panel {
+        /* INNOVACIÓN: Widget de Control Flotante y Arrastrable */
+        #widget-control-hub {
             position: fixed;
-            top: 70px;
-            right: 16px;
-            z-index: 999;
+            top: 20px;
+            right: 20px;
+            z-index: 5000;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            padding: 12px;
+            align-items: flex-end;
+            gap: 10px;
+            pointer-events: none; /* Allows clicking through the hub except for buttons */
+        }
+
+        #widget-trigger {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            pointer-events: auto;
+            border: 3px solid rgba(255,255,255,0.3);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+            touch-action: none; /* Necessary for dragging */
+        }
+
+        #widget-trigger:hover { transform: scale(1.1) rotate(45deg); }
+        #widget-trigger:active { cursor: grabbing; }
+
+        .audio-settings-panel {
             background: var(--card-bg);
+            backdrop-filter: blur(15px);
             border: 1px solid var(--card-border);
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--shadow-hover);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 260px;
+            pointer-events: auto;
+            transform-origin: top right;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            transform: scale(0.5) translateY(-20px);
+            visibility: hidden;
+        }
+
+        .audio-settings-panel.open {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            visibility: visible;
         }
 
         .audio-row {
@@ -267,69 +310,75 @@
         .btn-audio-toggle {
             background: var(--accent-color);
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             color: white;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .btn-audio-toggle:active { transform: scale(0.9); }
         .btn-audio-toggle.muted { background: #64748b; }
 
         .speed-selector {
             display: flex;
             background: rgba(0,0,0,0.05);
             border-radius: 12px;
-            padding: 4px;
+            padding: 5px;
+            gap: 4px;
         }
 
         .speed-opt {
-            padding: 4px 8px;
-            font-size: 0.75rem;
+            padding: 6px 10px;
+            font-size: 0.8rem;
             font-weight: 800;
             border-radius: 8px;
             cursor: pointer;
-            color: var(--text-color);
-            transition: all 0.2s;
             border: none;
             background: transparent;
+            color: var(--text-color);
+            transition: 0.2s;
         }
 
         .speed-opt.active {
             background: var(--accent-color);
             color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        .label-sm { font-size: 0.7rem; font-weight: 700; opacity: 0.7; text-transform: uppercase; }
+        .label-sm { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
 
         @media (max-width: 600px) {
-            .audio-settings-panel { top: auto; bottom: 85px; right: 10px; padding: 8px; flex-direction: row; }
-            .audio-row { flex-direction: column; gap: 4px; }
+            #widget-control-hub { top: 15px; right: 15px; }
+            .audio-settings-panel { width: 220px; padding: 15px; gap: 10px; }
         }
     </style>
 
-    <div class="audio-settings-panel" id="global-audio-panel">
-        <div class="audio-row">
-            <span class="label-sm">Audio</span>
-            <button onclick="toggleGlobalAudio()" id="btn-mute" class="btn-audio-toggle" title="Activar/Desactivar Voz">🔊</button>
-        </div>
-        <div class="audio-row" style="border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
-            <span class="label-sm">Velocidad</span>
-            <div class="speed-selector">
-                <button onclick="setGlobalSpeed(1)" class="speed-opt" id="speed-1">x1</button>
-                <button onclick="setGlobalSpeed(1.5)" class="speed-opt" id="speed-1-5">x2</button>
-                <button onclick="setGlobalSpeed(2)" class="speed-opt" id="speed-2">x3</button>
-                <button onclick="setGlobalSpeed(3)" class="speed-opt" id="speed-3">x4</button>
+    <div id="widget-control-hub">
+        <div id="widget-trigger" title="Configuración (Arrastrame)">⚙️</div>
+        
+        <div class="audio-settings-panel" id="global-audio-panel">
+            <div class="audio-row">
+                <span class="label-sm">📢 Audio Guía</span>
+                <button onclick="toggleGlobalAudio()" id="btn-mute" class="btn-audio-toggle">🔊</button>
             </div>
-        </div>
-        <div class="audio-row" style="border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
-            <span class="label-sm">Tema</span>
-            <button onclick="toggleGlobalTheme()" id="globalThemeBtn" class="btn-audio-toggle" style="background: var(--card-bg); color: var(--text-color); border: 1px solid var(--card-border); font-size: 1rem; width: 34px; height: 34px;">🌙</button>
+            <div class="audio-row" style="border-top: 1px solid var(--card-border); padding-top: 10px;">
+                <span class="label-sm">⚡ Rapidez</span>
+                <div class="speed-selector">
+                    <button onclick="setGlobalSpeed(1)" class="speed-opt" id="speed-1">x1</button>
+                    <button onclick="setGlobalSpeed(1.5)" class="speed-opt" id="speed-1-5">x2</button>
+                    <button onclick="setGlobalSpeed(2)" class="speed-opt" id="speed-2">x3</button>
+                    <button onclick="setGlobalSpeed(3)" class="speed-opt" id="speed-3">x4</button>
+                </div>
+            </div>
+            <div class="audio-row" style="border-top: 1px solid var(--card-border); padding-top: 10px;">
+                <span class="label-sm">🎨 Modo</span>
+                <button onclick="toggleGlobalTheme()" id="globalThemeBtn" class="btn-audio-toggle" style="background: var(--bg-color); color: var(--text-color); border: 2px solid var(--card-border);">🌙</button>
+            </div>
         </div>
     </div>
 
@@ -425,7 +474,6 @@
                 document.documentElement.removeAttribute('data-theme');
                 if(btn) btn.textContent = '🌙';
             }
-            // Notify game-specific components
             window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
         }
 
@@ -435,6 +483,59 @@
             localStorage.setItem('game_theme', next);
             applyGlobalTheme();
         };
+
+        // --- DRAGGABLE WIDGET LOGIC ---
+        const hub = document.getElementById('widget-control-hub');
+        const trigger = document.getElementById('widget-trigger');
+        const panel = document.getElementById('global-audio-panel');
+        let isDragging = false;
+        let startX, startY, startTop, startRight;
+        let hasMoved = false;
+
+        trigger.addEventListener('mousedown', startDrag);
+        trigger.addEventListener('touchstart', startDrag, { passive: false });
+
+        function startDrag(e) {
+            isDragging = true;
+            hasMoved = false;
+            const event = e.type === 'touchstart' ? e.touches[0] : e;
+            startX = event.clientX;
+            startY = event.clientY;
+            startTop = hub.offsetTop;
+            const rect = hub.getBoundingClientRect();
+            startRight = window.innerWidth - rect.right;
+
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag, { passive: false });
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            const event = e.type === 'touchmove' ? e.touches[0] : e;
+            const deltaX = startX - event.clientX;
+            const deltaY = event.clientY - startY;
+
+            if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) hasMoved = true;
+
+            hub.style.top = (startTop + deltaY) + 'px';
+            hub.style.right = (startRight + deltaX) + 'px';
+            hub.style.bottom = 'auto'; // Prevent conflicts
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchend', stopDrag);
+            
+            // Si no se movió, es un click -> abrir panel
+            if (!hasMoved) {
+                panel.classList.toggle('open');
+            }
+        }
 
         // Proactive initialization
         applyGlobalTheme();
