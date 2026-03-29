@@ -517,11 +517,14 @@
             const deltaX = startX - event.clientX;
             const deltaY = event.clientY - startY;
 
-            if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) hasMoved = true;
+            // Mayor tolerancia para evitar que un mini-toque se detecte como arrastre
+            if (Math.abs(deltaX) > 15 || Math.abs(deltaY) > 15) hasMoved = true;
 
-            hub.style.top = (startTop + deltaY) + 'px';
-            hub.style.right = (startRight + deltaX) + 'px';
-            hub.style.bottom = 'auto'; // Prevent conflicts
+            if (hasMoved) {
+                hub.style.top = (startTop + deltaY) + 'px';
+                hub.style.right = (startRight + deltaX) + 'px';
+                hub.style.bottom = 'auto'; // Prevent conflicts
+            }
         }
 
         function stopDrag() {
