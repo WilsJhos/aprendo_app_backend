@@ -465,7 +465,7 @@
 
         // --- THEME LOGIC ---
         function applyGlobalTheme() {
-            const theme = localStorage.getItem('game_theme') || 'light';
+            const theme = localStorage.getItem('app_theme') || 'light';
             const btn = document.getElementById('globalThemeBtn');
             if (theme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
@@ -478,9 +478,9 @@
         }
 
         window.toggleGlobalTheme = function() {
-            const current = localStorage.getItem('game_theme') || 'light';
+            const current = localStorage.getItem('app_theme') || 'light';
             const next = current === 'light' ? 'dark' : 'light';
-            localStorage.setItem('game_theme', next);
+            localStorage.setItem('app_theme', next);
             applyGlobalTheme();
         };
 
