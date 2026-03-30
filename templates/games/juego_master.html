@@ -11,19 +11,48 @@
     #game-wrapper {
         position: relative;
         width: 100%;
-        height: 75vh;
-        max-height: 700px;
-        min-height: 400px;
-        max-width: 1200px;
+        height: 80vh;
+        max-height: 650px;
+        min-height: 350px;
+        max-width: 1100px;
         margin: 0 auto;
         background: #000;
         overflow: hidden;
-        border-radius: 24px;
+        border-radius: 20px;
         border: 2px solid #1e293b;
-        box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        box-shadow: 0 0 40px rgba(0,0,0,0.6);
     }
 
-    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+    /* --- ADAPTACIÓN RESPONSIVA TOTAL --- */
+    @media (max-width: 768px) {
+        #game-wrapper {
+            height: 85vh; /* Más alto en vertical para móviles */
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+        #ui-layer { padding: 12px; }
+        .lives-container { font-size: 1.4rem; }
+        .score-val { font-size: 1.8rem; }
+    }
+
+    /* Optimización para modo HORIZONTAL en celulares */
+    @media (orientation: landscape) and (max-height: 550px) {
+        #game-wrapper {
+            height: 98vh; 
+            width: 100vw;
+            max-width: 100vw;
+            max-height: 100vh;
+            border-radius: 0;
+            margin: 0;
+            border: none;
+        }
+        #ui-layer { padding: 8px 15px; }
+        .lives-container { font-size: 1.2rem; }
+        .score-val { font-size: 1.5rem; }
+        #top-bar { align-items: flex-start; }
+    }
+
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; background: #000; }
 
     #ui-layer {
         position: absolute;
