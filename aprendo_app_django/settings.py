@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_2g1x(aucl_b8*_ramood_^hdq($by$$b95kn%fs&fe$ra7c$#'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-_2g1x(aucl_b8*_ramood_^hdq($by$$b95kn%fs&fe$ra7c$#')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'RENDER' not in os.environ
@@ -81,9 +81,14 @@ WSGI_APPLICATION = 'aprendo_app_django.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         default='postgresql://postgres:12345@localhost:5432/aprendo_db',
-        conn_max_age=600
+        conn_max_age=600,
+        conn_health_checks=True,
     )
 }
+
+# Configuración de SSL para PostgreSQL en Render
+if not DEBUG:
+    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 
 
 # Password validation
@@ -127,7 +132,10 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 if not DEBUG:
+    # WhiteNoise para servir archivos estáticos en producción
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # Evita que la app falle si falta un archivo estático en el manifiesto
+    WHITENOISE_MANIFEST_STRICT = False
 
 # Auth Redirects
 LOGIN_REDIRECT_URL = 'index'
